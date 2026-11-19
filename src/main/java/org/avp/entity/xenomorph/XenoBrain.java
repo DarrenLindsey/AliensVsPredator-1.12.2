@@ -157,6 +157,7 @@ public final class XenoBrain
                 if (heard)
                 {
                     xeno.investigate(player.position()); // something's there... go and look
+                    xeno.sharePackInvestigation(player.position());
                 }
             }
             return false;
@@ -206,7 +207,9 @@ public final class XenoBrain
         public void start()
         {
             super.start();
-            patience = 60 + xeno.getRandom().nextInt(80);
+            int pack = xeno.packmates().size() + 1;
+            // alone it's patient; in a pack of 3+ it loses patience fast and rushes in
+            patience = pack >= 3 ? 15 + xeno.getRandom().nextInt(25) : 60 + xeno.getRandom().nextInt(80);
             flank = null;
         }
 
@@ -608,6 +611,176 @@ public final class XenoBrain
                     melt(level, door, 3.0F, donor);
                 }
             }
+        }
+    }
+
+    // ------------------------------------------------------------------ packs
+
+    /** Idle pack members keep near their leader. */
+    public static class FollowLeaderGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        private XenomorphEntity leader;
+
+        public FollowLeaderGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (xeno.getTarget() != null || xeno.investigatePos() != null || xeno.isPackLeader() || xeno.tickCount % 20 != 0)
+            {
+                return false;
+            }
+            leader = xeno.level() instanceof net.minecraft.server.level.ServerLevel server
+                    && server.getEntity(xeno.packId()) instanceof XenomorphEntity l && l.isAlive() ? l : null;
+            return leader != null && xeno.distanceToSqr(leader) > 10 * 10;
+        }
+
+        @Override
+        public void start()
+        {
+            xeno.setState("FOLLOWING LEADER");
+            xeno.getNavigation().moveTo(leader, 1.0);
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return leader != null && leader.isAlive() && xeno.getTarget() == null && xeno.distanceToSqr(leader) > 5 * 5
+                    && !xeno.getNavigation().isDone();
+        }
+
+        @Override
+        public void stop()
+        {
+            xeno.setState("LURKING");
+        }
+    }
+
+    // ------------------------------------------------------------------ digging
+
+    /**
+     * No way through? Tear through the blocks in the way (up to "Dig Max Hardness"; never
+     * avp:xeno_unbreakable; glass is smashed and iron doors are melted instead).
+     */
+    public static class DigThroughGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        private BlockPos block;
+        private float progress;
+        private int lastStage = -1;
+
+        public DigThroughGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        private static boolean canDig(XenomorphEntity xeno, BlockPos pos)
+        {
+            BlockState state = xeno.level().getBlockState(pos);
+            if (state.isAir() || state.is(org.avp.registry.ModTags.XENO_UNBREAKABLE) || state.is(org.avp.registry.ModTags.ACID_MELTABLE)
+                    || state.is(org.avp.registry.ModTags.XENO_BREAKABLE) || !state.getFluidState().isEmpty()
+                    || state.getCollisionShape(xeno.level(), pos).isEmpty())
+            {
+                return false;
+            }
+            float hardness = state.getDestroySpeed(xeno.level(), pos);
+            return hardness >= 0 && hardness <= AvpConfig.server(AvpConfig.SERVER.xenoDigMaxHardness);
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!AvpConfig.server(AvpConfig.SERVER.xenosDigThroughBlocks) || xeno.getRandom().nextInt(10) != 0
+                    || !net.neoforged.neoforge.event.EventHooks.canEntityGrief((net.minecraft.server.level.ServerLevel) xeno.level(), xeno))
+            {
+                return false;
+            }
+            Vec3 goal = xeno.getTarget() != null ? xeno.getTarget().position() : xeno.investigatePos();
+            if (goal == null || xeno.distanceToSqr(goal) < 2)
+            {
+                return false;
+            }
+            net.minecraft.world.level.pathfinder.Path path = xeno.getNavigation().createPath(BlockPos.containing(goal), 1);
+            if (path != null && path.canReach())
+            {
+                return false; // there's a way round
+            }
+            // the first diggable block straight ahead towards the goal (feet level, then head level)
+            Vec3 from = xeno.position().add(0, 0.2, 0);
+            Vec3 dir = goal.subtract(from).normalize();
+            int height = Math.max(1, Mth.ceil(xeno.getBbHeight()));
+            for (double d = 0.6; d <= 2.0; d += 0.35)
+            {
+                for (int up = 0; up < height; up++)
+                {
+                    BlockPos pos = BlockPos.containing(from.add(dir.scale(d)).add(0, up, 0));
+                    if (canDig(xeno, pos))
+                    {
+                        block = pos.immutable();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void start()
+        {
+            progress = 0;
+            lastStage = -1;
+            xeno.setState("DIGGING");
+            xeno.getNavigation().stop();
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return block != null && canDig(xeno, block) && xeno.distanceToSqr(Vec3.atCenterOf(block)) < 3.5 * 3.5;
+        }
+
+        @Override
+        public void tick()
+        {
+            xeno.getLookControl().setLookAt(Vec3.atCenterOf(block));
+            BlockState state = xeno.level().getBlockState(block);
+            float hardness = Math.max(0.2F, state.getDestroySpeed(xeno.level(), block));
+            // ~ a stone pickaxe: stone (1.5) takes about 1.5 seconds at speed 1.0
+            progress += (float) (AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed) / (hardness * 20F));
+            if (xeno.tickCount % 6 == 0)
+            {
+                xeno.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                xeno.level().playSound(null, block, state.getSoundType().getHitSound(), net.minecraft.sounds.SoundSource.HOSTILE, 0.6F, 0.8F);
+            }
+            int stage = Math.min(9, (int) (progress * 10));
+            if (stage != lastStage)
+            {
+                xeno.level().destroyBlockProgress(xeno.getId(), block, stage);
+                lastStage = stage;
+            }
+            if (progress >= 1F)
+            {
+                xeno.level().destroyBlockProgress(xeno.getId(), block, -1);
+                xeno.level().destroyBlock(block, true, xeno);
+                block = null;
+            }
+        }
+
+        @Override
+        public void stop()
+        {
+            if (block != null)
+            {
+                xeno.level().destroyBlockProgress(xeno.getId(), block, -1);
+            }
+            block = null;
+            xeno.setState("LURKING");
         }
     }
 

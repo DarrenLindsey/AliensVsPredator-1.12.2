@@ -349,3 +349,23 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("glass/crawl data written")
+
+# ================================================================ digging and packs
+lang = read_json(f"{NA}/lang/en_us.json", {})
+add_to_tag(f"{ND}/avp/tags/block/xeno_unbreakable.json", ["#minecraft:dragon_immune", "#minecraft:wither_immune",
+                                                          "minecraft:obsidian", "minecraft:crying_obsidian", "minecraft:reinforced_deepslate",
+                                                          "avp:blastdoor", "avp:blastdoor_sevastopol"])
+lang.update({
+    "avp.configuration.xenosDigThroughBlocks": "Tear Through Blocks",
+    "avp.configuration.xenosDigThroughBlocks.tooltip": "With no other way to their prey, they tear through the blocks in the way.",
+    "avp.configuration.xenoDigMaxHardness": "Hardest Block They Break",
+    "avp.configuration.xenoDigMaxHardness.tooltip": "Stone 1.5, iron block 5, obsidian 50. Blocks in avp:xeno_unbreakable are always safe.",
+    "avp.configuration.xenoDigSpeed": "Digging Speed",
+    "avp.configuration.xenoDigSpeed.tooltip": "1.0 = about a stone pickaxe on stone.",
+    "avp.configuration.xenoPacks": "Packs",
+    "avp.configuration.xenoPacks.tooltip": "Nearby Xenomorphs form packs: a leader, shared targets and knowledge, bolder in numbers.",
+    "avp.configuration.xenoPackRange": "Pack Range (blocks)",
+    "avp.configuration.xenoPackRange.tooltip": "How close they must be to join or alert a pack.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("digging/pack data written")

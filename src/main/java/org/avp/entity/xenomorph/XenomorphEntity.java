@@ -49,6 +49,12 @@ public abstract class XenomorphEntity extends Monster
     private int standTicks;
     /** Ticks before it may switch between crawling and standing again (stops it bobbing). */
     private int poseHold;
+    /** Its pack leader (itself if it leads, or has no pack). Saved. */
+    @Nullable
+    private java.util.UUID packLeader;
+    /** Set while a pack member hands it a target, so it isn't passed straight back. */
+    private boolean fromPack;
+
     /** What it's doing (for the debug label). */
     private String state = "LURKING";
     private boolean debugNamed;
@@ -93,6 +99,103 @@ public abstract class XenomorphEntity extends Monster
     public void setState(String state)
     {
         this.state = state;
+    }
+
+    // ---- packs
+
+    /** Which pack it's in: the leader's UUID (its own if it leads or is alone). */
+    public java.util.UUID packId()
+    {
+        return packLeader == null ? getUUID() : packLeader;
+    }
+
+    public boolean isPackLeader()
+    {
+        return packId().equals(getUUID());
+    }
+
+    /** Its packmates nearby (not counting itself). Eggs don't count. */
+    public java.util.List<XenomorphEntity> packmates()
+    {
+        if (!org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPacks))
+        {
+            return java.util.List.of();
+        }
+        int range = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPackRange);
+        java.util.UUID id = packId();
+        return level().getEntitiesOfClass(XenomorphEntity.class, getBoundingBox().inflate(range),
+                x -> x != this && x.isAlive() && !(x instanceof OvamorphEntity) && x.packId().equals(id));
+    }
+
+    /** Pack strength, for choosing a leader: the toughest, then the oldest. */
+    private double strength()
+    {
+        return getMaxHealth() * 1000 + Math.min(age, 999);
+    }
+
+    /**
+     * Every 2 seconds: find (or form) a pack. It joins the strongest leader nearby, or leads
+     * itself. If its leader is gone or too far away, it looks again.
+     */
+    private void updatePack()
+    {
+        if (this instanceof OvamorphEntity || !org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPacks))
+        {
+            packLeader = null;
+            return;
+        }
+        int range = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPackRange);
+        XenomorphEntity leader = null;
+        if (packLeader != null && !packLeader.equals(getUUID()) && level() instanceof ServerLevel server
+                && server.getEntity(packLeader) instanceof XenomorphEntity current && current.isAlive()
+                && current.isPackLeader() && current.distanceToSqr(this) < range * range * 4)
+        {
+            leader = current;
+        }
+        // a stronger leader nearby? (or none yet) - follow the strongest
+        for (XenomorphEntity other : level().getEntitiesOfClass(XenomorphEntity.class, getBoundingBox().inflate(range),
+                x -> x != this && x.isAlive() && !(x instanceof OvamorphEntity) && x.isPackLeader()))
+        {
+            if (other.strength() > strength() && (leader == null || other.strength() > leader.strength()))
+            {
+                leader = other;
+            }
+        }
+        packLeader = leader == null ? getUUID() : leader.getUUID();
+    }
+
+    /** Spotted prey (or got hurt): the rest of the pack joins in. */
+    @Override
+    public void setTarget(@Nullable net.minecraft.world.entity.LivingEntity target)
+    {
+        net.minecraft.world.entity.LivingEntity before = getTarget();
+        super.setTarget(target);
+        if (target == null || target == before || fromPack || level().isClientSide)
+        {
+            return;
+        }
+        for (XenomorphEntity mate : packmates())
+        {
+            if (mate.getTarget() == null && (mate.wantsToHunt(target) || target == getLastHurtByMob()))
+            {
+                mate.fromPack = true;
+                mate.setTarget(target);
+                mate.fromPack = false;
+                mate.setState("JOINING PACK HUNT");
+            }
+        }
+    }
+
+    /** Shares a noise to investigate with the pack. */
+    public void sharePackInvestigation(net.minecraft.world.phys.Vec3 at)
+    {
+        for (XenomorphEntity mate : packmates())
+        {
+            if (mate.getTarget() == null && mate.investigatePos() == null)
+            {
+                mate.investigate(at);
+            }
+        }
     }
 
     /** Adults can drop to a crawl to fit through 1-block gaps. */
@@ -245,8 +348,10 @@ public abstract class XenomorphEntity extends Monster
             if (!hasCustomName() || debugNamed)
             {
                 String now = getTarget() != null && "LURKING".equals(state) ? "HUNTING" : state;
+                int pack = packmates().size() + 1;
                 setCustomName(net.minecraft.network.chat.Component.literal(now + (isCrawling() ? " (crawling)" : "")
-                        + " | hunger " + hunger + (isHungry() ? " HUNGRY" : "")));
+                        + " | hunger " + hunger + (isHungry() ? " HUNGRY" : "")
+                        + (pack > 1 ? " | pack " + pack + (isPackLeader() ? " LEADER" : "") : "")));
                 setCustomNameVisible(true);
                 debugNamed = true;
             }
@@ -390,6 +495,10 @@ public abstract class XenomorphEntity extends Monster
         {
             knownTurret = null;
         }
+        if (tickCount % 40 == Math.floorMod(getId(), 40))
+        {
+            updatePack();
+        }
         if (tickCount % 10 == 0 && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.smartXenomorphs))
         {
             updateCrawling();
@@ -515,6 +624,8 @@ public abstract class XenomorphEntity extends Monster
             goalSelector.addGoal(4, new XenoBrain.InvestigateGoal(this));
             goalSelector.addGoal(2, new XenoBrain.AcidBreachGoal(this));
             goalSelector.addGoal(5, new XenoBrain.BreakLightsGoal(this));
+            goalSelector.addGoal(2, new XenoBrain.DigThroughGoal(this));
+            goalSelector.addGoal(6, new XenoBrain.FollowLeaderGoal(this));
             goalSelector.addGoal(6, new XenoBrain.LurkGoal(this, speed * 0.8));
         }
         else
@@ -615,6 +726,10 @@ public abstract class XenomorphEntity extends Monster
         tag.putInt("Jelly", jelly);
         tag.putInt("XenoAge", age);
         tag.putInt("Hunger", hunger);
+        if (packLeader != null)
+        {
+            tag.putUUID("PackLeader", packLeader);
+        }
     }
 
     @Override
@@ -627,6 +742,7 @@ public abstract class XenomorphEntity extends Monster
         {
             hunger = tag.getInt("Hunger");
         }
+        packLeader = tag.hasUUID("PackLeader") ? tag.getUUID("PackLeader") : null;
     }
 
     /** Walks to royal jelly it can see nearby (when not busy fighting). */

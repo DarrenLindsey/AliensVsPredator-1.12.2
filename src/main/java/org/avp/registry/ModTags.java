@@ -38,6 +38,10 @@ public final class ModTags
     public static final TagKey<net.minecraft.world.level.block.Block> XENO_BREAKABLE = TagKey.create(Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "xeno_breakable"));
 
+    /** Blocks Xenomorphs never tear through. */
+    public static final TagKey<net.minecraft.world.level.block.Block> XENO_UNBREAKABLE = TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "xeno_unbreakable"));
+
     private ModTags()
     {
     }

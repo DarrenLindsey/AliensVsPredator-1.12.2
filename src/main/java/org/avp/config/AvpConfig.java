@@ -191,6 +191,11 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue xenosBreakGlass;
         public final ModConfigSpec.BooleanValue xenosCrawl;
         public final ModConfigSpec.BooleanValue xenoDebugLabels;
+        public final ModConfigSpec.BooleanValue xenosDigThroughBlocks;
+        public final ModConfigSpec.DoubleValue xenoDigMaxHardness;
+        public final ModConfigSpec.DoubleValue xenoDigSpeed;
+        public final ModConfigSpec.BooleanValue xenoPacks;
+        public final ModConfigSpec.IntValue xenoPackRange;
         public final ModConfigSpec.IntValue acidMeltAmount;
         public final ModConfigSpec.IntValue acidBreachInterval;
 
@@ -422,6 +427,21 @@ public final class AvpConfig
             xenoDebugLabels = b
                     .comment("Show what each Xenomorph is doing above its head (STALKING, INVESTIGATING, ...). For testing.")
                     .define("xenoDebugLabels", false);
+            xenosDigThroughBlocks = b
+                    .comment("When there's no other way to their prey, Xenomorphs tear through the blocks in the way.")
+                    .define("xenosDigThroughBlocks", true);
+            xenoDigMaxHardness = b
+                    .comment("Hardest block they can tear through (stone 1.5, iron block 5, obsidian 50). Blocks in avp:xeno_unbreakable are always safe.")
+                    .defineInRange("xenoDigMaxHardness", 5.0, 0.0, 100.0);
+            xenoDigSpeed = b
+                    .comment("How fast they tear through blocks (1.0 = about as fast as a player with a stone pickaxe on stone).")
+                    .defineInRange("xenoDigSpeed", 1.0, 0.05, 20.0);
+            xenoPacks = b
+                    .comment("Xenomorphs near each other form packs: a leader, shared targets and knowledge, following the leader, bolder in numbers.")
+                    .define("xenoPacks", true);
+            xenoPackRange = b
+                    .comment("How close (blocks) Xenomorphs must be to join or alert a pack.")
+                    .defineInRange("xenoPackRange", 24, 4, 64);
             acidMeltAmount = b
                     .comment("How much acid (damage dealt to bleeding Xenomorphs next to it) melts through a door.")
                     .defineInRange("acidMeltAmount", 12, 1, 1000);

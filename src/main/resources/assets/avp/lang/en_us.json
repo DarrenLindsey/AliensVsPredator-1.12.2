@@ -620,5 +620,15 @@
   "avp.configuration.xenosCrawl": "Crawl Through Gaps",
   "avp.configuration.xenosCrawl.tooltip": "They drop to a crawl to squeeze through vents and 1-block-high gaps.",
   "avp.configuration.xenoDebugLabels": "Debug Labels",
-  "avp.configuration.xenoDebugLabels.tooltip": "Show what each Xenomorph is doing above its head (for testing)."
+  "avp.configuration.xenoDebugLabels.tooltip": "Show what each Xenomorph is doing above its head (for testing).",
+  "avp.configuration.xenosDigThroughBlocks": "Tear Through Blocks",
+  "avp.configuration.xenosDigThroughBlocks.tooltip": "With no other way to their prey, they tear through the blocks in the way.",
+  "avp.configuration.xenoDigMaxHardness": "Hardest Block They Break",
+  "avp.configuration.xenoDigMaxHardness.tooltip": "Stone 1.5, iron block 5, obsidian 50. Blocks in avp:xeno_unbreakable are always safe.",
+  "avp.configuration.xenoDigSpeed": "Digging Speed",
+  "avp.configuration.xenoDigSpeed.tooltip": "1.0 = about a stone pickaxe on stone.",
+  "avp.configuration.xenoPacks": "Packs",
+  "avp.configuration.xenoPacks.tooltip": "Nearby Xenomorphs form packs: a leader, shared targets and knowledge, bolder in numbers.",
+  "avp.configuration.xenoPackRange": "Pack Range (blocks)",
+  "avp.configuration.xenoPackRange.tooltip": "How close they must be to join or alert a pack."
 }

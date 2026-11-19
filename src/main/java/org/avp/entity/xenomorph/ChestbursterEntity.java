@@ -47,6 +47,7 @@ public class ChestbursterEntity extends XenomorphEntity
     {
         super(type, level);
         this.xpReward = 16;
+        setHunger(20); // newborns come out starving
     }
 
     public static AttributeSupplier.Builder createAttributes()
@@ -79,7 +80,7 @@ public class ChestbursterEntity extends XenomorphEntity
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         // newborns feed on small animals
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Animal.class, 20, true, false,
-                e -> e.getBbHeight() < 1.0F));
+                e -> e.getBbHeight() < 1.0F && wantsToHunt(e)));
     }
 
     @Override

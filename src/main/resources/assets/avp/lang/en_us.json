@@ -581,5 +581,13 @@
   "avp.configuration.droneMatureTicks.tooltip": "How long a Drone takes to become a Warrior (once the Warrior is ported).",
   "avp.configuration.spawn_drone": "Drones",
   "avp.configuration.spawn_drone.tooltip": "Drones spawn in jungles, swamps and dark forests (in the dark).",
-  "tooltip.avp.drone_spawn_egg": "Xenomorph XX121, adult drone.\n\"I admire its purity.\""
+  "tooltip.avp.drone_spawn_egg": "Xenomorph XX121, adult drone.\n\"I admire its purity.\"",
+  "avp.configuration.xenoHungerDrainTicks": "Hunger Drain (ticks per point)",
+  "avp.configuration.xenoHungerDrainTicks.tooltip": "Xenomorphs have a hidden hunger meter (0-100) that drops by 1 this often.",
+  "avp.configuration.xenoHungryBelow": "Hungry Below",
+  "avp.configuration.xenoHungryBelow.tooltip": "Below this they hunt animals and creatures for food; above it they leave them alone unless attacked.",
+  "avp.configuration.xenosAlwaysHuntPlayers": "Always Hunt Players",
+  "avp.configuration.xenosAlwaysHuntPlayers.tooltip": "Hunt players even when full (people are hosts and threats, not food). Off: only when hungry or attacked.",
+  "avp.configuration.xenosStarve": "Xenomorphs Can Starve",
+  "avp.configuration.xenosStarve.tooltip": "With an empty hunger meter they slowly lose health."
 }

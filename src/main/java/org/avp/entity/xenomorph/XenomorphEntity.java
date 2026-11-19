@@ -37,6 +37,9 @@ public abstract class XenomorphEntity extends Monster
 
     private int jelly;
     private int age;
+    /** Hidden hunger meter, 0 (starving) .. MAX_HUNGER (full). */
+    private int hunger = 60 + new java.util.Random().nextInt(41);
+    public static final int MAX_HUNGER = 100;
 
     protected XenomorphEntity(EntityType<? extends XenomorphEntity> type, Level level)
     {
@@ -67,6 +70,48 @@ public abstract class XenomorphEntity extends Monster
         return jelly;
     }
 
+    public int hunger()
+    {
+        return hunger;
+    }
+
+    protected void setHunger(int hunger)
+    {
+        this.hunger = Math.max(0, Math.min(MAX_HUNGER, hunger));
+    }
+
+    public void feed(int amount)
+    {
+        hunger = Math.min(MAX_HUNGER, hunger + amount);
+    }
+
+    public boolean isHungry()
+    {
+        return hunger < org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungryBelow);
+    }
+
+    /** Would it go after this creature right now? (Players: see "Xenos Always Hunt Players".) */
+    public boolean wantsToHunt(net.minecraft.world.entity.LivingEntity target)
+    {
+        if (!isPrey(target))
+        {
+            return false;
+        }
+        if (target instanceof net.minecraft.world.entity.player.Player)
+        {
+            return isHungry() || org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosAlwaysHuntPlayers);
+        }
+        return isHungry();
+    }
+
+    /** Eating what it killed: bigger prey fills it up more. */
+    @Override
+    public boolean killedEntity(ServerLevel level, net.minecraft.world.entity.LivingEntity victim)
+    {
+        feed(Math.max(5, (int) (victim.getMaxHealth() * 2)));
+        return super.killedEntity(level, victim);
+    }
+
     @Override
     protected void registerGoals()
     {
@@ -89,9 +134,23 @@ public abstract class XenomorphEntity extends Monster
                     e -> e.getItem().is(ModItems.ROYALJELLY.get())))
             {
                 jelly += item.getItem().getCount() * JELLY_PER_ITEM;
+                feed(10 * item.getItem().getCount());
                 playSound(net.minecraft.sounds.SoundEvents.GENERIC_EAT, 0.6F, 1.4F);
                 item.discard();
             }
+        }
+        // hunger: drains slowly; a full Xenomorph stops chasing animals (but still fights back)
+        if (age % org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungerDrainTicks) == 0 && hunger > 0)
+        {
+            hunger--;
+        }
+        if (hunger <= 0 && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosStarve) && tickCount % 200 == 0)
+        {
+            hurt(damageSources().starve(), 1.0F);
+        }
+        if (tickCount % 20 == 0 && getTarget() != null && getTarget() != getLastHurtByMob() && !wantsToHunt(getTarget()))
+        {
+            setTarget(null);
         }
         if (tickCount % 20 == 0 && matureInto() != null && (age >= maturityTime() || jelly >= maturityJelly()))
         {
@@ -116,6 +175,10 @@ public abstract class XenomorphEntity extends Monster
         if (next instanceof XenomorphEntity xeno && jelly >= maturityJelly())
         {
             xeno.jelly = jelly - maturityJelly(); // leftover jelly carries over
+        }
+        if (next instanceof XenomorphEntity xeno)
+        {
+            xeno.hunger = hunger;
         }
         if (next instanceof Mob mob && hasCustomName())
         {
@@ -151,10 +214,12 @@ public abstract class XenomorphEntity extends Monster
         goalSelector.addGoal(7, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));
         targetSelector.addGoal(0, new net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal(this, XenomorphEntity.class).setAlertOthers());
         targetSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this,
-                net.minecraft.world.entity.player.Player.class, 10, true, false, XenomorphEntity::isPrey));
+                net.minecraft.world.entity.player.Player.class, 10, true, false, this::wantsToHunt));
+        // food: only when hungry (see the hunger meter)
         targetSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this,
                 net.minecraft.world.entity.LivingEntity.class, 20, true, false,
-                e -> isPrey(e) && !(e instanceof net.minecraft.world.entity.monster.Creeper)));
+                e -> !(e instanceof net.minecraft.world.entity.player.Player) && wantsToHunt(e)
+                        && !(e instanceof net.minecraft.world.entity.monster.Creeper)));
     }
 
     /** Size in the films compared with the classic 1.12.2 size (1 = same). */
@@ -221,6 +286,7 @@ public abstract class XenomorphEntity extends Monster
         super.addAdditionalSaveData(tag);
         tag.putInt("Jelly", jelly);
         tag.putInt("XenoAge", age);
+        tag.putInt("Hunger", hunger);
     }
 
     @Override
@@ -229,6 +295,10 @@ public abstract class XenomorphEntity extends Monster
         super.readAdditionalSaveData(tag);
         jelly = tag.getInt("Jelly");
         age = tag.getInt("XenoAge");
+        if (tag.contains("Hunger"))
+        {
+            hunger = tag.getInt("Hunger");
+        }
     }
 
     /** Walks to royal jelly it can see nearby (when not busy fighting). */

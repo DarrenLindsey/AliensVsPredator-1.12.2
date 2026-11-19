@@ -279,3 +279,18 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("creature data written: drone")
+
+# ================================================================ Xenomorph hunger
+lang = read_json(f"{NA}/lang/en_us.json", {})
+lang.update({
+    "avp.configuration.xenoHungerDrainTicks": "Hunger Drain (ticks per point)",
+    "avp.configuration.xenoHungerDrainTicks.tooltip": "Xenomorphs have a hidden hunger meter (0-100) that drops by 1 this often.",
+    "avp.configuration.xenoHungryBelow": "Hungry Below",
+    "avp.configuration.xenoHungryBelow.tooltip": "Below this they hunt animals and creatures for food; above it they leave them alone unless attacked.",
+    "avp.configuration.xenosAlwaysHuntPlayers": "Always Hunt Players",
+    "avp.configuration.xenosAlwaysHuntPlayers.tooltip": "Hunt players even when full (people are hosts and threats, not food). Off: only when hungry or attacked.",
+    "avp.configuration.xenosStarve": "Xenomorphs Can Starve",
+    "avp.configuration.xenosStarve.tooltip": "With an empty hunger meter they slowly lose health.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("xenomorph hunger lang written")

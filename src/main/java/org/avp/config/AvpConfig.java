@@ -175,6 +175,10 @@ public final class AvpConfig
         public final ModConfigSpec.DoubleValue xenoAcidSplashDamage;
         public final ModConfigSpec.IntValue xenoAcidWeaponDamage;
         public final ModConfigSpec.IntValue droneMatureTicks;
+        public final ModConfigSpec.IntValue xenoHungerDrainTicks;
+        public final ModConfigSpec.IntValue xenoHungryBelow;
+        public final ModConfigSpec.BooleanValue xenosAlwaysHuntPlayers;
+        public final ModConfigSpec.BooleanValue xenosStarve;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -353,6 +357,18 @@ public final class AvpConfig
             droneMatureTicks = b
                     .comment("How long a Drone takes to mature into a Warrior (once the Warrior is ported).")
                     .defineInRange("droneMatureTicks", 72_000, 200, 1_728_000);
+            xenoHungerDrainTicks = b
+                    .comment("Xenomorphs have a hidden hunger meter (0-100). It drops by 1 this often (ticks; 600 = 30 seconds).")
+                    .defineInRange("xenoHungerDrainTicks", 600, 20, 72_000);
+            xenoHungryBelow = b
+                    .comment("Below this hunger they hunt animals and other creatures for food. Above it they leave them alone unless attacked.")
+                    .defineInRange("xenoHungryBelow", 60, 0, 100);
+            xenosAlwaysHuntPlayers = b
+                    .comment("Xenomorphs go after players whether hungry or not (in the films people are hosts and threats, not food). Off: only when hungry or attacked.")
+                    .define("xenosAlwaysHuntPlayers", true);
+            xenosStarve = b
+                    .comment("Xenomorphs with an empty hunger meter slowly lose health.")
+                    .define("xenosStarve", false);
             b.pop();
 
             b.push("crafting");

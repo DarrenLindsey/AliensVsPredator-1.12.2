@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "avp:spawn_enabled",
+      "creature": "drone"
+    }
+  ],
+  "type": "neoforge:add_spawns",
+  "biomes": "#avp:spawns/drone",
+  "spawners": [
+    {
+      "type": "avp:drone",
+      "weight": 8,
+      "minCount": 1,
+      "maxCount": 2
+    }
+  ]
+}

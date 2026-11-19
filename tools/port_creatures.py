@@ -240,3 +240,42 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("specimen capture data written")
+
+# ================================================================ Drone
+lang = read_json(f"{NA}/lang/en_us.json", {})
+copy(f"{LA}/textures/mob/drone_advanced.png", f"{NA}/textures/entity/drone.png")
+sounds_for("alien", {"living": ["living0", "living1", "living2", "living3"], "hurt": ["hurt0", "hurt1"],
+                     "death": ["death0", "death1"], "attack": ["attack0", "attack1", "attack2", "attack3"]})
+write_json(f"{NA}/models/item/drone_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+write_json(f"{ND}/avp/loot_table/entities/drone.json", {"type": "minecraft:entity", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:royaljelly",
+                             "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}},
+                                           {"function": "minecraft:enchanted_count_increase", "enchantment": "minecraft:looting",
+                                            "count": {"type": "minecraft:uniform", "min": 0, "max": 1}}]}],
+    "conditions": [{"condition": "minecraft:killed_by_player"}]}]})
+spawns("drone", ["#minecraft:is_jungle", "minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:dark_forest"], 8, (1, 2))
+add_to_tag(f"{ND}/avp/tags/entity_type/xenomorphs.json", ["avp:drone"])
+lang.update({
+    "entity.avp.drone": "Drone",
+    "item.avp.drone_spawn_egg": "Drone Spawn Egg",
+    "subtitles.avp.alien.living": "Xenomorph hisses",
+    "subtitles.avp.alien.hurt": "Xenomorph shrieks",
+    "subtitles.avp.alien.death": "Xenomorph dies",
+    "subtitles.avp.alien.attack": "Xenomorph strikes",
+    "avp.configuration.creatures": "Creatures",
+    "avp.configuration.creatures.button": "Creatures...",
+    "avp.configuration.creatures.tooltip": "Size, acid blood and growing up",
+    "avp.configuration.filmAccurateSizes": "Film-Accurate Sizes",
+    "avp.configuration.filmAccurateSizes.tooltip": "New creatures spawn at their film size (bigger adult Xenomorphs) instead of the classic size.",
+    "avp.configuration.xenoAcidSplashDamage": "Acid Blood Splash Damage",
+    "avp.configuration.xenoAcidSplashDamage.tooltip": "Damage to whoever hits a Xenomorph up close (0 = off).",
+    "avp.configuration.xenoAcidWeaponDamage": "Acid Blood Weapon Damage",
+    "avp.configuration.xenoAcidWeaponDamage.tooltip": "Durability acid blood eats off the weapon that hit a Xenomorph (0 = off).",
+    "avp.configuration.droneMatureTicks": "Drone Maturing Time (ticks)",
+    "avp.configuration.droneMatureTicks.tooltip": "How long a Drone takes to become a Warrior (once the Warrior is ported).",
+    "avp.configuration.spawn_drone": "Drones",
+    "avp.configuration.spawn_drone.tooltip": "Drones spawn in jungles, swamps and dark forests (in the dark).",
+    "tooltip.avp.drone_spawn_egg": "Xenomorph XX121, adult drone.\n\"I admire its purity.\"",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("creature data written: drone")

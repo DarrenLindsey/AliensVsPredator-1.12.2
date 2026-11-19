@@ -74,6 +74,10 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Step 3 (part 2) - Chestburster (bursts from the embryo, flees, eats jelly, will mature into the Drone)
       and Ovamorph (egg: opens near hosts, releases a facehugger). XenomorphEntity base class (jelly, maturing).
       Facehugger attaches with a synced "host" id instead of vanilla riding (riding didn't reach the client).
+- [x] Drone: adult Xenomorph AI (hunts players/animals, spares embryo hosts, calls others when hit),
+      wall climbing, acid blood (splash + weapon damage), 1.12.2 animation, natural spawning,
+      "Film-Accurate Sizes" option (SCALE attribute), matures into the Warrior once ported.
+- [ ] Next: Warrior, Praetorian, Queen + hive resin / hive building (Drones build resin)
 - [ ] Step 4 - Other creatures, guns, armour, tile entities
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation
 

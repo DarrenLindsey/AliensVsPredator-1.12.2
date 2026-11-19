@@ -126,6 +126,89 @@ public abstract class XenomorphEntity extends Monster
         discard();
     }
 
+    // ---------------------------------------------------------------- shared adult behaviour
+
+    /** Who a Xenomorph hunts: anything living that isn't one of them - but never a host carrying an embryo. */
+    public static boolean isPrey(net.minecraft.world.entity.LivingEntity target)
+    {
+        if (!target.isAlive() || target.getType().is(org.avp.registry.ModTags.XENOMORPHS)
+                || target instanceof net.minecraft.world.entity.decoration.ArmorStand
+                || target.hasData(org.avp.registry.ModAttachments.EMBRYO))
+        {
+            return false;
+        }
+        return !(target instanceof net.minecraft.world.entity.player.Player player) || !player.isCreative() && !player.isSpectator();
+    }
+
+    /** The standard adult Xenomorph AI (1.12.2 SpeciesXenomorph.addStandardXenomorphAISet). */
+    protected void addHunterGoals(double speed)
+    {
+        goalSelector.addGoal(0, new net.minecraft.world.entity.ai.goal.FloatGoal(this));
+        goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.LeapAtTargetGoal(this, 0.5F));
+        goalSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.MeleeAttackGoal(this, speed * 1.15, false));
+        goalSelector.addGoal(5, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, speed * 0.8));
+        goalSelector.addGoal(6, new net.minecraft.world.entity.ai.goal.LookAtPlayerGoal(this, net.minecraft.world.entity.player.Player.class, 16F));
+        goalSelector.addGoal(7, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));
+        targetSelector.addGoal(0, new net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal(this, XenomorphEntity.class).setAlertOthers());
+        targetSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this,
+                net.minecraft.world.entity.player.Player.class, 10, true, false, XenomorphEntity::isPrey));
+        targetSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this,
+                net.minecraft.world.entity.LivingEntity.class, 20, true, false,
+                e -> isPrey(e) && !(e instanceof net.minecraft.world.entity.monster.Creeper)));
+    }
+
+    /** Size in the films compared with the classic 1.12.2 size (1 = same). */
+    protected float filmScale()
+    {
+        return 1F;
+    }
+
+    /** "Film-Accurate Sizes": newly spawned creatures get their film size (scales the hitbox too). */
+    @Override
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
+            net.minecraft.world.DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable net.minecraft.world.entity.SpawnGroupData data)
+    {
+        if (org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.filmAccurateSizes) && filmScale() != 1F)
+        {
+            var scale = getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+            if (scale != null)
+            {
+                scale.setBaseValue(filmScale());
+            }
+        }
+        return super.finalizeSpawn(level, difficulty, spawnType, data);
+    }
+
+    /** Acid blood: hitting a Xenomorph up close splashes the attacker and eats into their weapon. */
+    @Override
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount)
+    {
+        boolean hurt = super.hurt(source, amount);
+        if (hurt && !level().isClientSide && source.getDirectEntity() instanceof net.minecraft.world.entity.LivingEntity attacker
+                && attacker.distanceToSqr(this) < 9 && !attacker.getType().is(org.avp.registry.ModTags.XENOMORPHS))
+        {
+            double acid = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoAcidSplashDamage);
+            if (acid > 0)
+            {
+                attacker.hurt(org.avp.registry.ModDamageTypes.of(level(), org.avp.registry.ModDamageTypes.ACID), (float) acid);
+            }
+            int eat = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoAcidWeaponDamage);
+            net.minecraft.world.item.ItemStack weapon = attacker.getMainHandItem();
+            if (eat > 0 && weapon.isDamageableItem())
+            {
+                weapon.hurtAndBreak(eat, attacker, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+            }
+            ((ServerLevel) level()).sendParticles(ParticleTypes.ITEM_SLIME, getX(), getY() + getBbHeight() * 0.6, getZ(), 6, 0.2, 0.2, 0.2, 0.05);
+        }
+        return hurt;
+    }
+
+    @Override
+    public boolean causeFallDamage(float distance, float multiplier, net.minecraft.world.damagesource.DamageSource source)
+    {
+        return false; // 1.12.2: Xenomorphs take no fall damage
+    }
+
     @Override
     public boolean canBeAffected(MobEffectInstance effect)
     {

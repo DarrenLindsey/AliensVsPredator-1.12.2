@@ -32,6 +32,10 @@ public final class ModSounds
     public static final DeferredHolder<SoundEvent, SoundEvent> CHESTBURSTER_GROW = sound("mobs.chestburster.grow");
     public static final DeferredHolder<SoundEvent, SoundEvent> OVAMORPH_LIVING = sound("mobs.ovamorph.living");
     public static final DeferredHolder<SoundEvent, SoundEvent> OVAMORPH_OPEN = sound("mobs.ovamorph.open");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ALIEN_LIVING = sound("mobs.alien.living");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ALIEN_HURT = sound("mobs.alien.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ALIEN_DEATH = sound("mobs.alien.death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ALIEN_ATTACK = sound("mobs.alien.attack");
     public static final DeferredHolder<SoundEvent, SoundEvent> TURRET_FIRE = sound("blocks.turret.fire");
 
     private static DeferredHolder<SoundEvent, SoundEvent> sound(String name)

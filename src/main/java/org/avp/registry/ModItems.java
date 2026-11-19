@@ -106,8 +106,11 @@ public final class ModItems
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.CHESTBURSTER, 0xD8C8A8, 0x8C2A2A, new Item.Properties()));
     public static final DeferredItem<Item> OVAMORPH_SPAWN_EGG = ITEMS.register("ovamorph_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.OVAMORPH, 0x5A4E3C, 0x2B2620, new Item.Properties()));
+    public static final DeferredItem<Item> DRONE_SPAWN_EGG = ITEMS.register("drone_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.DRONE, 0x1A1C20, 0x3B4048, new Item.Properties()));
     static
     {
+        Tab.MAIN.add(DRONE_SPAWN_EGG);
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);
         Tab.MAIN.add(CHESTBURSTER_SPAWN_EGG);
         Tab.MAIN.add(OVAMORPH_SPAWN_EGG);

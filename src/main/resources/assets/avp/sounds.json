@@ -114,5 +114,37 @@
     "sounds": [
       "avp:mobs/ovamorph/open"
     ]
+  },
+  "mobs.alien.living": {
+    "subtitle": "subtitles.avp.alien.living",
+    "sounds": [
+      "avp:mobs/alien/living0",
+      "avp:mobs/alien/living1",
+      "avp:mobs/alien/living2",
+      "avp:mobs/alien/living3"
+    ]
+  },
+  "mobs.alien.hurt": {
+    "subtitle": "subtitles.avp.alien.hurt",
+    "sounds": [
+      "avp:mobs/alien/hurt0",
+      "avp:mobs/alien/hurt1"
+    ]
+  },
+  "mobs.alien.death": {
+    "subtitle": "subtitles.avp.alien.death",
+    "sounds": [
+      "avp:mobs/alien/death0",
+      "avp:mobs/alien/death1"
+    ]
+  },
+  "mobs.alien.attack": {
+    "subtitle": "subtitles.avp.alien.attack",
+    "sounds": [
+      "avp:mobs/alien/attack0",
+      "avp:mobs/alien/attack1",
+      "avp:mobs/alien/attack2",
+      "avp:mobs/alien/attack3"
+    ]
   }
 }

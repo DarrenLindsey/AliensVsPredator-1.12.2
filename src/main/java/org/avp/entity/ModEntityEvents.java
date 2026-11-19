@@ -20,6 +20,7 @@ public final class ModEntityEvents
     public static void attributes(EntityAttributeCreationEvent event)
     {
         event.put(ModEntities.FACEHUGGER.get(), FacehuggerEntity.createAttributes().build());
+        event.put(ModEntities.DRONE.get(), org.avp.entity.xenomorph.DroneEntity.createAttributes().build());
         event.put(ModEntities.OVAMORPH.get(), org.avp.entity.xenomorph.OvamorphEntity.createAttributes().build());
         event.put(ModEntities.CHESTBURSTER.get(), org.avp.entity.xenomorph.ChestbursterEntity.createAttributes().build());
     }
@@ -29,6 +30,8 @@ public final class ModEntityEvents
     public static void spawnPlacements(RegisterSpawnPlacementsEvent event)
     {
         event.register(ModEntities.FACEHUGGER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(ModEntities.DRONE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Monster::checkMonsterSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 

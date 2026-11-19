@@ -73,7 +73,8 @@ public final class AvpConfig
             naturalSpawns = b
                     .comment("AvP creatures spawn naturally in the world. Needs a restart. (Biomes and weights: data/avp/neoforge/biome_modifier/spawn_*.json.)")
                     .define("naturalSpawns", true);
-            String[][] creatures = { { "facehugger", "Facehuggers in jungles, swamps and dark forests (at night / in the dark)." } };
+            String[][] creatures = { { "facehugger", "Facehuggers in jungles, swamps and dark forests (at night / in the dark)." },
+                    { "drone", "Drones (adult Xenomorphs) in jungles, swamps and dark forests (in the dark)." } };
             for (String[] creature : creatures)
             {
                 spawns.put(creature[0], b.comment(creature[1]).define("spawn_" + creature[0], true));
@@ -170,6 +171,10 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue emptyOvamorphLifetime;
         public final ModConfigSpec.IntValue cryotubeHarvestTicks;
         public final ModConfigSpec.IntValue cryotubeThawTicks;
+        public final ModConfigSpec.BooleanValue filmAccurateSizes;
+        public final ModConfigSpec.DoubleValue xenoAcidSplashDamage;
+        public final ModConfigSpec.IntValue xenoAcidWeaponDamage;
+        public final ModConfigSpec.IntValue droneMatureTicks;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -333,6 +338,21 @@ public final class AvpConfig
             cryotubeThawTicks = b
                     .comment("How long a cryostasis tube can be without power before the specimen thaws and breaks out (ticks).")
                     .defineInRange("cryotubeThawTicks", 600, 20, 72_000);
+            b.pop();
+
+            b.push("creatures");
+            filmAccurateSizes = b
+                    .comment("Creatures spawn at their size in the films (bigger adult Xenomorphs) instead of the classic 1.12.2 size. Affects newly spawned creatures.")
+                    .define("filmAccurateSizes", false);
+            xenoAcidSplashDamage = b
+                    .comment("Damage acid blood does to whoever hits a Xenomorph up close. 0 = off.")
+                    .defineInRange("xenoAcidSplashDamage", 2.0, 0.0, 1000.0);
+            xenoAcidWeaponDamage = b
+                    .comment("Durability acid blood eats off the weapon that hit a Xenomorph. 0 = off.")
+                    .defineInRange("xenoAcidWeaponDamage", 3, 0, 10_000);
+            droneMatureTicks = b
+                    .comment("How long a Drone takes to mature into a Warrior (once the Warrior is ported).")
+                    .defineInRange("droneMatureTicks", 72_000, 200, 1_728_000);
             b.pop();
 
             b.push("crafting");

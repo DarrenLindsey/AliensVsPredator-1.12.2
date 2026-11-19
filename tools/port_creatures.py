@@ -142,3 +142,29 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("creature data written: facehugger")
+
+# ================================================================ Chestburster
+lang = read_json(f"{NA}/lang/en_us.json", {})
+copy(f"{LA}/textures/mob/chestburster.png", f"{NA}/textures/entity/chestburster.png")
+sounds_for("chestburster", {"burst": ["burst"], "hurt": ["hurt"], "death": ["death"], "attack": ["attack"], "grow": ["grow"]})
+write_json(f"{NA}/models/item/chestburster_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+write_json(f"{ND}/avp/loot_table/entities/chestburster.json", {"type": "minecraft:entity", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:royaljelly",
+                             "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 0, "max": 2}},
+                                           {"function": "minecraft:enchanted_count_increase", "enchantment": "minecraft:looting",
+                                            "count": {"type": "minecraft:uniform", "min": 0, "max": 1}}]}],
+    "conditions": [{"condition": "minecraft:killed_by_player"}]}]})
+add_to_tag(f"{ND}/avp/tags/entity_type/xenomorphs.json", ["avp:chestburster"])
+lang.update({
+    "entity.avp.chestburster": "Chestburster",
+    "item.avp.chestburster_spawn_egg": "Chestburster Spawn Egg",
+    "subtitles.avp.chestburster.hurt": "Chestburster shrieks",
+    "subtitles.avp.chestburster.death": "Chestburster dies",
+    "subtitles.avp.chestburster.attack": "Chestburster bites",
+    "subtitles.avp.chestburster.grow": "Chestburster grows",
+    "avp.configuration.chestbursterMatureTicks": "Chestburster Growing Time (ticks)",
+    "avp.configuration.chestbursterMatureTicks.tooltip": "How long a chestburster takes to grow into a Drone (64 royal jelly does it at once).",
+    "tooltip.avp.chestburster_spawn_egg": "Xenomorph, second stage.\nGrows into a Drone (when the Drone is ported).",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("creature data written: chestburster")

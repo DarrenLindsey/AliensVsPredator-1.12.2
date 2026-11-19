@@ -528,5 +528,14 @@
   "avp.configuration.naturalSpawns.tooltip": "AvP creatures spawn naturally. Restart needed.",
   "avp.configuration.spawn_facehugger": "Facehuggers",
   "avp.configuration.spawn_facehugger.tooltip": "Facehuggers spawn in jungles, swamps and dark forests (in the dark).",
-  "tooltip.avp.facehugger_spawn_egg": "Xenomorph parasitoid, first stage.\n\"It's got a wonderful defence mechanism.\""
+  "tooltip.avp.facehugger_spawn_egg": "Xenomorph parasitoid, first stage.\n\"It's got a wonderful defence mechanism.\"",
+  "entity.avp.chestburster": "Chestburster",
+  "item.avp.chestburster_spawn_egg": "Chestburster Spawn Egg",
+  "subtitles.avp.chestburster.hurt": "Chestburster shrieks",
+  "subtitles.avp.chestburster.death": "Chestburster dies",
+  "subtitles.avp.chestburster.attack": "Chestburster bites",
+  "subtitles.avp.chestburster.grow": "Chestburster grows",
+  "avp.configuration.chestbursterMatureTicks": "Chestburster Growing Time (ticks)",
+  "avp.configuration.chestbursterMatureTicks.tooltip": "How long a chestburster takes to grow into a Drone (64 royal jelly does it at once).",
+  "tooltip.avp.chestburster_spawn_egg": "Xenomorph, second stage.\nGrows into a Drone (when the Drone is ported)."
 }

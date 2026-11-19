@@ -77,5 +77,29 @@
       "avp:mobs/facehugger/implant1",
       "avp:mobs/facehugger/implant2"
     ]
+  },
+  "mobs.chestburster.hurt": {
+    "subtitle": "subtitles.avp.chestburster.hurt",
+    "sounds": [
+      "avp:mobs/chestburster/hurt"
+    ]
+  },
+  "mobs.chestburster.death": {
+    "subtitle": "subtitles.avp.chestburster.death",
+    "sounds": [
+      "avp:mobs/chestburster/death"
+    ]
+  },
+  "mobs.chestburster.attack": {
+    "subtitle": "subtitles.avp.chestburster.attack",
+    "sounds": [
+      "avp:mobs/chestburster/attack"
+    ]
+  },
+  "mobs.chestburster.grow": {
+    "subtitle": "subtitles.avp.chestburster.grow",
+    "sounds": [
+      "avp:mobs/chestburster/grow"
+    ]
   }
 }

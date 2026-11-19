@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "avp:facehugger"
+    "avp:facehugger",
+    "avp:chestburster"
   ]
 }

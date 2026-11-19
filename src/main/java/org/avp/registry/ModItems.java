@@ -91,9 +91,12 @@ public final class ModItems
     // ---- Spawn eggs ----
     public static final DeferredItem<Item> FACEHUGGER_SPAWN_EGG = ITEMS.register("facehugger_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.FACEHUGGER, 0xC9B79C, 0x7A6248, new Item.Properties()));
+    public static final DeferredItem<Item> CHESTBURSTER_SPAWN_EGG = ITEMS.register("chestburster_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.CHESTBURSTER, 0xD8C8A8, 0x8C2A2A, new Item.Properties()));
     static
     {
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);
+        Tab.MAIN.add(CHESTBURSTER_SPAWN_EGG);
     }
 
     /** A plain item with no special behaviour (crafting parts, ingots, ...). */

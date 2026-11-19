@@ -20,6 +20,7 @@ public final class ModEntityEvents
     public static void attributes(EntityAttributeCreationEvent event)
     {
         event.put(ModEntities.FACEHUGGER.get(), FacehuggerEntity.createAttributes().build());
+        event.put(ModEntities.CHESTBURSTER.get(), org.avp.entity.xenomorph.ChestbursterEntity.createAttributes().build());
     }
 
     /** Which biomes and how often: data/avp/neoforge/biome_modifier/spawn_*.json. This only says "on the ground, in the dark". */

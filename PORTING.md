@@ -88,6 +88,16 @@ Decided for the creatures phase (1 block = 1 metre, player = 1.8 blocks):
 - Config: FE per harvest, time between harvests, mob allow/deny lists (e.g. no bosses),
   whether hostile creatures can break out.
 
+## Planned: Engineer ampule (black goo)
+
+Currently decorative (as in 1.12.2). Planned, with the black goo fluid (batch E) and creatures:
+
+- **Black goo source:** right-click with an empty phial to fill it; a few uses before it's empty.
+- **Leaking:** breaking or cracking it spills black goo as a fluid.
+- **Mutation:** black goo that touches creatures/plants mutates them, Prometheus-style
+  (e.g. worms -> Hammerpedes, people -> goo mutants; both creatures exist in 1.12.2).
+- **Config:** leak chance, mutation rules, or switch it back to decorative only.
+
 ## Planned: AI ideas
 
 - **Fear system**: players (and maybe NPC marines) get a fear level from darkness, nearby

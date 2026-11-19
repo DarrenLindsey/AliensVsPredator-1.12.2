@@ -54,6 +54,20 @@ Worlds from 1.12.2 can't be loaded in 1.21.1 anyway, so this doesn't break anyth
 or you just want the newest fixes, change it to the latest `21.1.x` listed at
 https://projects.neoforged.net/neoforged/neoforge
 
+## Planned: creature sizes
+
+Decided for the creatures phase (1 block = 1 metre, player = 1.8 blocks):
+
+- **Creature Size** setting with two modes:
+  - *Classic* - the 1.12.2 hitboxes (e.g. Drone 1.8 tall, so it fits through 2-block doors).
+  - *Film-accurate* - sizes from the films (Drone/Warrior 2.1-2.4 tall and 4.3-4.9 long with tail,
+    Queen ~4.3-4.5, Facehugger ~1.05-1.2 long, Chestburster ~0.25 tall / ~1 long,
+    Runner ~1.2-1.4 crouched, Neomorph 2.4-2.7, Predator 2.2-2.4, Engineer ~2.4).
+  - Plus a per-creature fine-tune slider.
+- Tall xenomorphs can **crouch** to get through 2-block gaps (as in the films), so film-accurate
+  sizes don't break chasing indoors.
+- Skull/trophy sizes get revisited together with the creatures so they match each other.
+
 ## Planned: Create and Applied Energistics 2 integration
 
 Both support NeoForge 1.21.1. Two levels:

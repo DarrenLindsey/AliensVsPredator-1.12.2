@@ -28,6 +28,8 @@ public class BlastDoorScreen extends Screen
 
     private final OpenBlastDoorScreenPayload door;
     private boolean autolock;
+    private boolean autoOpen;
+    private boolean threatDetection;
     private EditBox passwordBox;
 
     public BlastDoorScreen(OpenBlastDoorScreenPayload door)
@@ -35,6 +37,8 @@ public class BlastDoorScreen extends Screen
         super(Component.translatable("screen.avp.blastdoor.title", door.identifier()));
         this.door = door;
         this.autolock = door.autolock();
+        this.autoOpen = door.autoOpen();
+        this.threatDetection = door.threatDetection();
     }
 
     private int left()
@@ -70,9 +74,27 @@ public class BlastDoorScreen extends Screen
                 autolock = !autolock;
                 b.setMessage(autolockLabel());
             }).bounds(left(), top() + 40, WIDTH, 20).build());
+            addRenderableWidget(Button.builder(sensorLabel("auto_open", autoOpen), b ->
+            {
+                send(BlastDoorActionPayload.TOGGLE_AUTO_OPEN, "");
+                autoOpen = !autoOpen;
+                b.setMessage(sensorLabel("auto_open", autoOpen));
+            }).bounds(left(), top() + 62, WIDTH / 2 - 1, 20).build());
+            addRenderableWidget(Button.builder(sensorLabel("threat", threatDetection), b ->
+            {
+                send(BlastDoorActionPayload.TOGGLE_THREAT_DETECTION, "");
+                threatDetection = !threatDetection;
+                b.setMessage(sensorLabel("threat", threatDetection));
+            }).bounds(left() + WIDTH / 2 + 1, top() + 62, WIDTH / 2 - 1, 20).build());
             addRenderableWidget(Button.builder(Component.translatable("screen.avp.blastdoor.bind"),
-                    b -> send(BlastDoorActionPayload.BIND_TUNER, "")).bounds(left(), top() + 62, WIDTH, 20).build());
+                    b -> send(BlastDoorActionPayload.BIND_TUNER, "")).bounds(left(), top() + 84, WIDTH, 20).build());
         }
+    }
+
+    /** e.g. "Auto-Open: ON" */
+    private static Component sensorLabel(String sensor, boolean on)
+    {
+        return Component.translatable("screen.avp.blastdoor." + sensor, Component.translatable(on ? "options.on" : "options.off"));
     }
 
     private Component autolockLabel()
@@ -109,7 +131,7 @@ public class BlastDoorScreen extends Screen
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
-        int height = door.admin() ? 100 : 40;
+        int height = door.admin() ? 122 : 40;
         graphics.fill(left() - 4, top() - 4, left() + WIDTH + 4, top() - 4 + height, 0xCC000000);
     }
 
@@ -123,7 +145,7 @@ public class BlastDoorScreen extends Screen
         graphics.drawString(font, status, left() + WIDTH - font.width(status), top(), door.admin() ? GREEN : 0xFFFF5555);
         if (door.admin())
         {
-            graphics.drawString(font, Component.translatable("screen.avp.blastdoor.admin_help"), left(), top() + 86, 0xFFAAAAAA);
+            graphics.drawString(font, Component.translatable("screen.avp.blastdoor.admin_help"), left(), top() + 108, 0xFFAAAAAA);
         }
     }
 

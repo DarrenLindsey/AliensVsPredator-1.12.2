@@ -36,6 +36,8 @@ public final class ModNetwork
                 case BlastDoorActionPayload.SET_PASSWORD -> door.setPassword(player, payload.text());
                 case BlastDoorActionPayload.TOGGLE_AUTOLOCK -> door.toggleAutolock(player);
                 case BlastDoorActionPayload.BIND_TUNER -> door.bindTuner(player);
+                case BlastDoorActionPayload.TOGGLE_AUTO_OPEN -> door.toggleAutoOpen(player);
+                case BlastDoorActionPayload.TOGGLE_THREAT_DETECTION -> door.toggleThreatDetection(player);
                 default ->
                 {
                 }

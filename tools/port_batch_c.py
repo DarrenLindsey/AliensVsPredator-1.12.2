@@ -221,6 +221,19 @@ lang.update({
     "avp.configuration.blastDoorAutolockTicks.tooltip": "With Auto-Lock on, an unlocked door closes and locks again after this many ticks (20 = 1 second).",
     "avp.configuration.blastDoorsCanBePried": "Doors Can Be Pried Open",
     "avp.configuration.blastDoorsCanBePried.tooltip": "Unpowered blast doors can be forced partly open with a Maintenance Jack.",
+    "avp.configuration.doorSensorRange": "Door Sensor Range",
+    "avp.configuration.doorSensorRange.tooltip": "How far (in blocks) a door's sensors reach: Auto-Open and Threat Detection.",
+    "avp.configuration.doorAutoCloseTicks": "Auto-Close Delay (ticks)",
+    "avp.configuration.doorAutoCloseTicks.tooltip": "Auto-Open closes the door this many ticks after the last player left (20 = 1 second).",
+    "screen.avp.blastdoor.auto_open": "Auto-Open: %s",
+    "screen.avp.blastdoor.threat": "Threat Detection: %s",
+    "message.avp.blastdoor.lockdown": "LOCKDOWN - threat detected.",
+    "message.avp.blastdoor.autoopen_on": "Auto-Open enabled.",
+    "message.avp.blastdoor.autoopen_off": "Auto-Open disabled.",
+    "message.avp.blastdoor.threat_on": "Threat Detection enabled.",
+    "message.avp.blastdoor.threat_off": "Threat Detection disabled.",
 })
+# creatures that trip Threat Detection besides vanilla hostile mobs (AvP creatures get added here)
+add_to_tag(f"{ND}/avp/tags/entity_type/door_threats.json", [])
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch C2b (blast doors) data written")

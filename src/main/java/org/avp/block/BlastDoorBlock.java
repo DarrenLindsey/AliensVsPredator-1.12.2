@@ -62,6 +62,8 @@ public class BlastDoorBlock extends BaseEntityBlock
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty PART = IntegerProperty.create("part", 0, 11);
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+    /** Threat detected: the door is in lockdown and gives out a redstone signal. */
+    public static final BooleanProperty ALARM = BooleanProperty.create("alarm");
 
     private final List<Vec3i> layout;
     private final float speed;
@@ -78,7 +80,7 @@ public class BlastDoorBlock extends BaseEntityBlock
         this.layout = layout;
         this.speed = speed;
         this.sevastopol = sevastopol;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, 0).setValue(OPEN, false));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, 0).setValue(OPEN, false).setValue(ALARM, false));
     }
 
     private static List<Vec3i> layout(int width, int height)
@@ -113,7 +115,7 @@ public class BlastDoorBlock extends BaseEntityBlock
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
-        builder.add(FACING, PART, OPEN);
+        builder.add(FACING, PART, OPEN, ALARM);
     }
 
     // ---- where the pieces are ----
@@ -236,6 +238,20 @@ public class BlastDoorBlock extends BaseEntityBlock
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    // ---- redstone output while a threat is detected ----
+
+    @Override
+    protected boolean isSignalSource(BlockState state)
+    {
+        return true;
+    }
+
+    @Override
+    protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
+    {
+        return state.getValue(ALARM) ? 15 : 0;
     }
 
     // ---- shape and rendering ----

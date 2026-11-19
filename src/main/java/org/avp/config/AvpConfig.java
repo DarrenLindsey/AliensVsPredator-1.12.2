@@ -67,6 +67,8 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue blastDoorEnergyPerTick;
         public final ModConfigSpec.IntValue blastDoorAutolockTicks;
         public final ModConfigSpec.BooleanValue blastDoorsCanBePried;
+        public final ModConfigSpec.IntValue doorSensorRange;
+        public final ModConfigSpec.IntValue doorAutoCloseTicks;
         public final ModConfigSpec.IntValue medpodHealInterval;
         public final ModConfigSpec.IntValue medpodHealAmount;
         public final ModConfigSpec.BooleanValue medpodCuresEffects;
@@ -119,6 +121,12 @@ public final class AvpConfig
             blastDoorsCanBePried = b
                     .comment("Unpowered blast doors can be forced partly open with a Maintenance Jack.")
                     .define("blastDoorsCanBePried", true);
+            doorSensorRange = b
+                    .comment("How far (in blocks) a door's sensors reach: Auto-Open and Threat Detection.")
+                    .defineInRange("doorSensorRange", 4, 1, 16);
+            doorAutoCloseTicks = b
+                    .comment("Auto-Open closes the door this many ticks after the last player left (20 = 1 second).")
+                    .defineInRange("doorAutoCloseTicks", 60, 10, 1200);
             b.pop();
 
             b.push("medpod");

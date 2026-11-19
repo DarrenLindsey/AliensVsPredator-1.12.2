@@ -44,6 +44,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * - Maintenance Jack: when the door has NO power, keep right-clicking to pry it about
  *   40% open - enough to squeeze through. Uses up the jack.
  *
+ * - Sensors (set on the admin screen): Auto-Open opens the door for nearby players and
+ *   closes it after they leave; Threat Detection slams it shut and locks it down while a
+ *   hostile creature is near, with an alarm and a redstone signal from every piece.
+ *
  * The password stays on the server: it's saved with the world but never sent to clients.
  */
 public class BlastDoorBlockEntity extends BlockEntity
@@ -62,6 +66,16 @@ public class BlastDoorBlockEntity extends BlockEntity
     private boolean pried;
     private float pryProgress;
     private int lockTimer;
+    /** Sensor: opens for nearby players, closes when they've gone. */
+    private boolean autoOpen;
+    /** Sensor: closes and locks down when a threat is near. */
+    private boolean threatDetection;
+    /** Currently in lockdown because a threat is near. */
+    private boolean lockdown;
+    /** Ticks since a player was last seen by the Auto-Open sensor. */
+    private int noPlayerTicks;
+    /** True if the door was opened by the Auto-Open sensor (so it may close it again). */
+    private boolean openedBySensor;
     /** Client only: whether the door has a password (the password itself is never sent). */
     private boolean clientHasPassword;
     /** Client only: animation 0 = closed, 1 = fully open. */
@@ -105,6 +119,21 @@ public class BlastDoorBlockEntity extends BlockEntity
         return autolock;
     }
 
+    public boolean isAutoOpen()
+    {
+        return autoOpen;
+    }
+
+    public boolean isThreatDetection()
+    {
+        return threatDetection;
+    }
+
+    public boolean isLockdown()
+    {
+        return lockdown;
+    }
+
     /** Animation value between the last two ticks, for smooth drawing. */
     public float progress(float partialTick)
     {
@@ -142,6 +171,10 @@ public class BlastDoorBlockEntity extends BlockEntity
                 }
             }
         }
+        if (level.getGameTime() % 10 == 0)
+        {
+            door.runSensors(level, pos);
+        }
         // Auto-Lock: close and lock again a while after being unlocked
         if (door.autolock && door.hasPassword() && door.unlocked && --door.lockTimer <= 0)
         {
@@ -161,6 +194,90 @@ public class BlastDoorBlockEntity extends BlockEntity
         else if (target < door.progress)
         {
             door.progress = Math.max(target, door.progress - speed);
+        }
+    }
+
+    // ---- sensors ----
+
+    /** Creatures that trigger Threat Detection: hostile mobs, plus anything in the avp:door_threats tag. */
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> THREATS = net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.ENTITY_TYPE,
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(org.avp.AliensVsPredator.MOD_ID, "door_threats"));
+
+    private static boolean isThreat(net.minecraft.world.entity.LivingEntity entity)
+    {
+        return entity.isAlive() && (entity instanceof net.minecraft.world.entity.monster.Enemy || entity.getType().is(THREATS));
+    }
+
+    /** Runs every half second while powered. */
+    private void runSensors(Level level, BlockPos pos)
+    {
+        int range = AvpConfig.server(AvpConfig.SERVER.doorSensorRange);
+        AABB area = new AABB(pos).inflate(range + 2, 3, range + 2);
+
+        if (threatDetection)
+        {
+            boolean threat = !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area, BlastDoorBlockEntity::isThreat).isEmpty();
+            if (threat != lockdown)
+            {
+                lockdown = threat;
+                setAlarm(threat);
+                if (threat && open)
+                {
+                    setOpen(false); // slam shut
+                }
+                sync();
+            }
+            if (lockdown)
+            {
+                if (level.getGameTime() % 40 == 0)
+                {
+                    playSound(ModSounds.BLASTDOOR_PASS_DENY.get()); // alarm
+                }
+                return; // nothing else happens during lockdown
+            }
+        }
+        else if (lockdown)
+        {
+            lockdown = false;
+            setAlarm(false);
+            sync();
+        }
+
+        if (autoOpen && !isLocked())
+        {
+            boolean playerNear = !level.getEntitiesOfClass(Player.class, area, p -> !p.isSpectator() && p.isAlive()).isEmpty();
+            if (playerNear)
+            {
+                noPlayerTicks = 0;
+                if (!open)
+                {
+                    setOpen(true);
+                    openedBySensor = true;
+                }
+            }
+            else if (open && openedBySensor && (noPlayerTicks += 10) >= AvpConfig.server(AvpConfig.SERVER.doorAutoCloseTicks))
+            {
+                setOpen(false);
+            }
+        }
+    }
+
+    /** Sets the ALARM state on every piece (each one then gives out a redstone signal). */
+    private void setAlarm(boolean alarm)
+    {
+        if (level == null)
+        {
+            return;
+        }
+        BlockState state = getBlockState();
+        for (BlockPos p : block().partPositions(worldPosition, state.getValue(BlastDoorBlock.FACING)))
+        {
+            BlockState piece = level.getBlockState(p);
+            if (piece.is(state.getBlock()) && piece.getValue(BlastDoorBlock.ALARM) != alarm)
+            {
+                level.setBlock(p, piece.setValue(BlastDoorBlock.ALARM, alarm), Block.UPDATE_ALL);
+            }
         }
     }
 
@@ -196,12 +313,19 @@ public class BlastDoorBlockEntity extends BlockEntity
             }
             return;
         }
+        if (lockdown)
+        {
+            playSound(ModSounds.BLASTDOOR_PASS_DENY.get());
+            message(player, "message.avp.blastdoor.lockdown");
+            return;
+        }
         if (isLocked())
         {
             openScreen(player, false);
             return;
         }
         setOpen(!open);
+        openedBySensor = false;
         message(player, open ? "message.avp.blastdoor.opened" : "message.avp.blastdoor.closed");
     }
 
@@ -236,7 +360,8 @@ public class BlastDoorBlockEntity extends BlockEntity
     {
         if (player instanceof ServerPlayer serverPlayer)
         {
-            PacketDistributor.sendToPlayer(serverPlayer, new OpenBlastDoorScreenPayload(worldPosition, admin, identifier, autolock, hasPassword()));
+            PacketDistributor.sendToPlayer(serverPlayer, new OpenBlastDoorScreenPayload(worldPosition, admin, identifier, autolock,
+                    hasPassword(), autoOpen, threatDetection));
         }
     }
 
@@ -284,6 +409,28 @@ public class BlastDoorBlockEntity extends BlockEntity
         sync();
     }
 
+    public void toggleAutoOpen(Player player)
+    {
+        if (!powered || !tunerMatches(player.getMainHandItem()))
+        {
+            return;
+        }
+        autoOpen = !autoOpen;
+        message(player, autoOpen ? "message.avp.blastdoor.autoopen_on" : "message.avp.blastdoor.autoopen_off");
+        sync();
+    }
+
+    public void toggleThreatDetection(Player player)
+    {
+        if (!powered || !tunerMatches(player.getMainHandItem()))
+        {
+            return;
+        }
+        threatDetection = !threatDetection;
+        message(player, threatDetection ? "message.avp.blastdoor.threat_on" : "message.avp.blastdoor.threat_off");
+        sync();
+    }
+
     /** Binds the held tuner to this door: only bound tuners can manage or auto-unlock it from now on. */
     public void bindTuner(Player player)
     {
@@ -324,6 +471,10 @@ public class BlastDoorBlockEntity extends BlockEntity
 
     private void unlock(Player player)
     {
+        if (lockdown)
+        {
+            return;
+        }
         unlocked = true;
         lockTimer = AvpConfig.server(AvpConfig.SERVER.blastDoorAutolockTicks);
         playSound(ModSounds.BLASTDOOR_UNLOCK.get());
@@ -408,6 +559,10 @@ public class BlastDoorBlockEntity extends BlockEntity
         tag.putBoolean("Pried", pried);
         tag.putFloat("PryProgress", pryProgress);
         tag.putInt("LockTimer", lockTimer);
+        tag.putBoolean("AutoOpen", autoOpen);
+        tag.putBoolean("ThreatDetection", threatDetection);
+        tag.putBoolean("Lockdown", lockdown);
+        tag.putBoolean("OpenedBySensor", openedBySensor);
     }
 
     @Override
@@ -432,6 +587,10 @@ public class BlastDoorBlockEntity extends BlockEntity
         pried = tag.getBoolean("Pried");
         pryProgress = tag.getFloat("PryProgress");
         lockTimer = tag.getInt("LockTimer");
+        autoOpen = tag.getBoolean("AutoOpen");
+        threatDetection = tag.getBoolean("ThreatDetection");
+        lockdown = tag.getBoolean("Lockdown");
+        openedBySensor = tag.getBoolean("OpenedBySensor");
     }
 
     /** What clients get: everything except the password and the bind key. */

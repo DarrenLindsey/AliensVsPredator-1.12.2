@@ -89,7 +89,7 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
             {
                 // the glowing panels: power on, plus a locked (red) or unlocked (green) light
                 drawSevastopol(poseStack, buffers.getBuffer(RenderType.entityTranslucent(SEVASTOPOL_ON)), LightTexture.FULL_BRIGHT, overlay);
-                ResourceLocation lock = door.isLocked() ? SEVASTOPOL_LOCKED : SEVASTOPOL_UNLOCKED;
+                ResourceLocation lock = door.isLocked() || door.isLockdown() ? SEVASTOPOL_LOCKED : SEVASTOPOL_UNLOCKED;
                 drawSevastopol(poseStack, buffers.getBuffer(RenderType.entityTranslucent(lock)), LightTexture.FULL_BRIGHT, overlay);
             }
             else

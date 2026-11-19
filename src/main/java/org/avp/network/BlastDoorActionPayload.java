@@ -19,6 +19,8 @@ public record BlastDoorActionPayload(BlockPos pos, int action, String text) impl
     public static final int SET_PASSWORD = 1;
     public static final int TOGGLE_AUTOLOCK = 2;
     public static final int BIND_TUNER = 3;
+    public static final int TOGGLE_AUTO_OPEN = 4;
+    public static final int TOGGLE_THREAT_DETECTION = 5;
     public static final int MAX_PASSWORD_LENGTH = 32;
 
     public static final Type<BlastDoorActionPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "blast_door_action"));

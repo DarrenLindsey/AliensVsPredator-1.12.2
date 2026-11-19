@@ -320,3 +320,17 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("xenomorph behaviour lang written")
+
+# ================================================================ acid breach
+lang = read_json(f"{NA}/lang/en_us.json", {})
+add_to_tag(f"{ND}/avp/tags/block/acid_meltable.json", ["minecraft:iron_door", "minecraft:iron_trapdoor", "minecraft:iron_bars"])
+lang.update({
+    "avp.configuration.xenosAcidBreach": "Acid Breach",
+    "avp.configuration.xenosAcidBreach.tooltip": "Stuck behind an iron door, they wound a packmate so its acid blood melts through (Alien Resurrection).",
+    "avp.configuration.acidMeltAmount": "Acid Needed to Melt a Door",
+    "avp.configuration.acidMeltAmount.tooltip": "Damage dealt to bleeding Xenomorphs next to a door before it melts.",
+    "avp.configuration.acidBreachInterval": "Time Between Wounds (ticks)",
+    "avp.configuration.acidBreachInterval.tooltip": "How often a Xenomorph wounds its packmate while melting a door.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("acid breach data written")

@@ -187,6 +187,9 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue xenosBreakLights;
         public final ModConfigSpec.BooleanValue xenosBreakDoors;
         public final ModConfigSpec.BooleanValue xenosLearnTurrets;
+        public final ModConfigSpec.BooleanValue xenosAcidBreach;
+        public final ModConfigSpec.IntValue acidMeltAmount;
+        public final ModConfigSpec.IntValue acidBreachInterval;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -403,6 +406,16 @@ public final class AvpConfig
             xenosLearnTurrets = b
                     .comment("A Xenomorph shot by a sentry turret remembers it, warns the others nearby, and they keep out of its range for a while.")
                     .define("xenosLearnTurrets", true);
+            xenosAcidBreach = b
+                    .comment("Xenomorphs stuck behind an iron door wound a packmate so its acid blood melts through (Alien Resurrection).",
+                            "Any Xenomorph bleeding next to such a door eats into it too. Which blocks: the avp:acid_meltable block tag.")
+                    .define("xenosAcidBreach", true);
+            acidMeltAmount = b
+                    .comment("How much acid (damage dealt to bleeding Xenomorphs next to it) melts through a door.")
+                    .defineInRange("acidMeltAmount", 12, 1, 1000);
+            acidBreachInterval = b
+                    .comment("Ticks between the wounds a Xenomorph inflicts on a packmate to melt a door (20 = 1 second).")
+                    .defineInRange("acidBreachInterval", 40, 5, 1200);
             b.pop();
             b.pop();
 

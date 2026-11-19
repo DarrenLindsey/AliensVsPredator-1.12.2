@@ -608,5 +608,11 @@
   "avp.configuration.xenosBreakDoors": "Smash Wooden Doors",
   "avp.configuration.xenosBreakDoors.tooltip": "They can smash through wooden doors (iron and blast doors stop them).",
   "avp.configuration.xenosLearnTurrets": "Learn Turret Positions",
-  "avp.configuration.xenosLearnTurrets.tooltip": "Shot by a sentry turret, they remember it, warn the others and keep out of its range."
+  "avp.configuration.xenosLearnTurrets.tooltip": "Shot by a sentry turret, they remember it, warn the others and keep out of its range.",
+  "avp.configuration.xenosAcidBreach": "Acid Breach",
+  "avp.configuration.xenosAcidBreach.tooltip": "Stuck behind an iron door, they wound a packmate so its acid blood melts through (Alien Resurrection).",
+  "avp.configuration.acidMeltAmount": "Acid Needed to Melt a Door",
+  "avp.configuration.acidMeltAmount.tooltip": "Damage dealt to bleeding Xenomorphs next to a door before it melts.",
+  "avp.configuration.acidBreachInterval": "Time Between Wounds (ticks)",
+  "avp.configuration.acidBreachInterval.tooltip": "How often a Xenomorph wounds its packmate while melting a door."
 }

@@ -30,6 +30,10 @@ public final class ModTags
     public static final TagKey<net.minecraft.world.item.Item> FACEHUGGER_PROOF = TagKey.create(Registries.ITEM,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "facehugger_proof"));
 
+    /** Blocks Xenomorph acid blood melts through (iron doors, trapdoors, bars...). */
+    public static final TagKey<net.minecraft.world.level.block.Block> ACID_MELTABLE = TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "acid_meltable"));
+
     private ModTags()
     {
     }

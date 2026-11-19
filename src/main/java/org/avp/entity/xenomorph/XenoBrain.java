@@ -437,6 +437,162 @@ public final class XenoBrain
         }
     }
 
+    // ------------------------------------------------------------------ acid breach (Alien Resurrection)
+
+    private static final java.util.Map<Level, java.util.Map<BlockPos, Float>> MELT = new java.util.WeakHashMap<>();
+
+    /** Acid blood dripping on the meltable blocks around a bleeding Xenomorph. */
+    public static void bleedOnto(XenomorphEntity xeno, float damage)
+    {
+        if (!AvpConfig.server(AvpConfig.SERVER.xenosAcidBreach) || !(xeno.level() instanceof net.minecraft.server.level.ServerLevel level))
+        {
+            return;
+        }
+        BlockPos origin = xeno.blockPosition();
+        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-1, 0, -1), origin.offset(1, 1, 1)))
+        {
+            if (level.getBlockState(pos).is(org.avp.registry.ModTags.ACID_MELTABLE))
+            {
+                melt(level, pos.immutable(), damage, xeno);
+            }
+        }
+    }
+
+    private static void melt(net.minecraft.server.level.ServerLevel level, BlockPos pos, float amount, XenomorphEntity source)
+    {
+        java.util.Map<BlockPos, Float> progress = MELT.computeIfAbsent(level, l -> new java.util.HashMap<>());
+        float total = progress.getOrDefault(pos, 0F) + amount;
+        float needed = AvpConfig.server(AvpConfig.SERVER.acidMeltAmount);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8, 0.3, 0.4, 0.3, 0.01);
+        level.playSound(null, pos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.HOSTILE, 0.8F, 0.6F);
+        if (total >= needed)
+        {
+            progress.remove(pos);
+            level.destroyBlockProgress(pos.hashCode(), pos, -1);
+            level.destroyBlock(pos, false, source);
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 20, 0.3, 0.5, 0.3, 0.02);
+            level.playSound(null, pos, net.minecraft.sounds.SoundEvents.LAVA_EXTINGUISH, net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, 0.8F);
+        }
+        else
+        {
+            progress.put(pos, total);
+            // the cracks you see when mining, growing as it melts
+            level.destroyBlockProgress(pos.hashCode(), pos, Math.min(9, (int) (total / needed * 10)));
+        }
+    }
+
+    /**
+     * Stuck behind a meltable door on the way to its target, with a packmate close by:
+     * it wounds the packmate every few seconds so its acid blood eats through the door.
+     */
+    public static class AcidBreachGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        private BlockPos door;
+        private XenomorphEntity donor;
+        private int timer;
+
+        public AcidBreachGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!AvpConfig.server(AvpConfig.SERVER.xenosAcidBreach) || xeno.getRandom().nextInt(10) != 0)
+            {
+                return false;
+            }
+            Vec3 goal = xeno.getTarget() != null ? xeno.getTarget().position() : xeno.investigatePos();
+            if (goal == null)
+            {
+                return false;
+            }
+            net.minecraft.world.level.pathfinder.Path path = xeno.getNavigation().createPath(BlockPos.containing(goal), 1);
+            if (path != null && path.canReach())
+            {
+                return false; // there's a way round
+            }
+            door = meltableTowards(goal);
+            donor = door == null ? null : packmate();
+            return door != null && donor != null;
+        }
+
+        /** The first meltable block between it and where it wants to go (within 3 blocks). */
+        @Nullable
+        private BlockPos meltableTowards(Vec3 goal)
+        {
+            Vec3 from = xeno.position().add(0, 0.5, 0);
+            Vec3 dir = goal.subtract(from).normalize();
+            for (double d = 0.5; d <= 3; d += 0.5)
+            {
+                for (double up = 0; up <= 1; up++)
+                {
+                    BlockPos pos = BlockPos.containing(from.add(dir.scale(d)).add(0, up, 0));
+                    if (xeno.level().getBlockState(pos).is(org.avp.registry.ModTags.ACID_MELTABLE))
+                    {
+                        return pos;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /** Another Xenomorph close by with blood to spare (only the one with the lowest id does the wounding). */
+        @Nullable
+        private XenomorphEntity packmate()
+        {
+            List<XenomorphEntity> near = xeno.level().getEntitiesOfClass(XenomorphEntity.class, xeno.getBoundingBox().inflate(4),
+                    x -> x != xeno && x.isAlive() && x.getHealth() > 6 && !(x instanceof OvamorphEntity));
+            if (near.isEmpty() || near.stream().anyMatch(x -> x.getId() < xeno.getId() && x.getTarget() == xeno.getTarget()))
+            {
+                return null;
+            }
+            near.sort(Comparator.comparingDouble(xeno::distanceToSqr));
+            return near.get(0);
+        }
+
+        @Override
+        public void start()
+        {
+            timer = 0;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return door != null && donor != null && donor.isAlive() && donor.getHealth() > 4
+                    && xeno.level().getBlockState(door).is(org.avp.registry.ModTags.ACID_MELTABLE);
+        }
+
+        @Override
+        public void tick()
+        {
+            // bring the packmate to the door, and wound it there
+            xeno.getLookControl().setLookAt(donor);
+            donor.getNavigation().moveTo(door.getX() + 0.5, door.getY(), door.getZ() + 0.5, 1.0);
+            if (xeno.distanceToSqr(donor) > 4)
+            {
+                xeno.getNavigation().moveTo(donor, 1.0);
+                return;
+            }
+            xeno.getNavigation().stop();
+            if (++timer >= AvpConfig.server(AvpConfig.SERVER.acidBreachInterval))
+            {
+                timer = 0;
+                xeno.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                // a plain wound (no attacker), so the donor doesn't turn on it
+                donor.hurt(xeno.damageSources().generic(), 3.0F);
+                if (xeno.level() instanceof net.minecraft.server.level.ServerLevel level && donor.distanceToSqr(Vec3.atCenterOf(door)) < 6)
+                {
+                    melt(level, door, 3.0F, donor);
+                }
+            }
+        }
+    }
+
     // ------------------------------------------------------------------ darkness
 
     /** Wanders, but prefers dark places. */

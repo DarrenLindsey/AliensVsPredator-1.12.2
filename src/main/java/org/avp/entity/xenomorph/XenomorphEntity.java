@@ -299,6 +299,7 @@ public abstract class XenomorphEntity extends Monster
         if (smart)
         {
             goalSelector.addGoal(4, new XenoBrain.InvestigateGoal(this));
+            goalSelector.addGoal(2, new XenoBrain.AcidBreachGoal(this));
             goalSelector.addGoal(5, new XenoBrain.BreakLightsGoal(this));
             goalSelector.addGoal(6, new XenoBrain.LurkGoal(this, speed * 0.8));
         }
@@ -353,6 +354,10 @@ public abstract class XenomorphEntity extends Monster
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount)
     {
         boolean hurt = super.hurt(source, amount);
+        if (hurt && !level().isClientSide)
+        {
+            XenoBrain.bleedOnto(this, amount); // acid blood eats into iron doors next to it
+        }
         if (hurt && !level().isClientSide && (source.is(org.avp.registry.ModDamageTypes.SENTRY) || source.is(org.avp.registry.ModDamageTypes.SENTRY_AP))
                 && knownTurretTicks < 1100)
         {

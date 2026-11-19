@@ -56,7 +56,7 @@ public class TurretMenu extends AbstractContainerMenu
                 @Override
                 public boolean mayPlace(ItemStack stack)
                 {
-                    return stack.is(ModItems.AMMO_SENTRY.get());
+                    return TurretBlockEntity.isAmmo(stack);
                 }
             });
         }
@@ -114,7 +114,7 @@ public class TurretMenu extends AbstractContainerMenu
                 return ItemStack.EMPTY;
             }
         }
-        else if (stack.is(ModItems.AMMO_SENTRY.get()))
+        else if (TurretBlockEntity.isAmmo(stack))
         {
             if (!moveItemStackTo(stack, 0, TurretBlockEntity.AMMO_SLOTS, false))
             {

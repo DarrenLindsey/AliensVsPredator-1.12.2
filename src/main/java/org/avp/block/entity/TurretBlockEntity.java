@@ -75,13 +75,60 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
     /** Barrel length from the pivot to the muzzle, in blocks. */
     public static final double BARREL = 1.0;
 
+    /**
+     * 10x28mm caseless rounds (the UA 571-C's calibre):
+     *  - standard: the baseline,
+     *  - armour-piercing (AP): a dense cobalt core, ignores armour - made for Xenomorph chitin,
+     *  - incendiary: sets targets alight, a little less punch.
+     */
+    public enum AmmoType
+    {
+        STANDARD(1.0F, 0, 0xFFFFD966),
+        ARMOR_PIERCING(1.25F, 0, 0xFFB0E0FF),
+        INCENDIARY(0.9F, 4, 0xFFFF7A1A);
+
+        public final float damage;
+        public final int fireSeconds;
+        public final int tracerColor;
+
+        AmmoType(float damage, int fireSeconds, int tracerColor)
+        {
+            this.damage = damage;
+            this.fireSeconds = fireSeconds;
+            this.tracerColor = tracerColor;
+        }
+
+        public static AmmoType of(ItemStack stack)
+        {
+            if (stack.is(ModItems.AMMO_SENTRY_AP.get()))
+            {
+                return ARMOR_PIERCING;
+            }
+            if (stack.is(ModItems.AMMO_SENTRY_INCENDIARY.get()))
+            {
+                return INCENDIARY;
+            }
+            return STANDARD;
+        }
+
+        public String key()
+        {
+            return name().toLowerCase(java.util.Locale.ROOT);
+        }
+    }
+
+    public static boolean isAmmo(ItemStack stack)
+    {
+        return stack.is(ModItems.AMMO_SENTRY.get()) || stack.is(ModItems.AMMO_SENTRY_AP.get()) || stack.is(ModItems.AMMO_SENTRY_INCENDIARY.get());
+    }
+
     private final MachineEnergy energy = new MachineEnergy(20_000);
     private final ItemStackHandler ammo = new ItemStackHandler(AMMO_SLOTS)
     {
         @Override
         public boolean isItemValid(int slot, ItemStack stack)
         {
-            return stack.is(ModItems.AMMO_SENTRY.get());
+            return isAmmo(stack);
         }
 
         @Override
@@ -111,6 +158,7 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
     private UUID owner;
     private String ownerName = "";
     private int rounds;
+    private AmmoType loaded = AmmoType.STANDARD;
     private int cooldown;
     private int targetId = -1;
     private int syncedRounds = -1;
@@ -207,6 +255,16 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
     public int rounds()
     {
         return rounds;
+    }
+
+    public AmmoType loaded()
+    {
+        return loaded;
+    }
+
+    public boolean hanging()
+    {
+        return getBlockState().getValue(TurretBlock.HANGING);
     }
 
     public int boxes()
@@ -311,7 +369,7 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
 
     public Vec3 pivot()
     {
-        return Vec3.atBottomCenterOf(worldPosition).add(0, PIVOT_HEIGHT, 0);
+        return Vec3.atBottomCenterOf(worldPosition).add(0, hanging() ? 1 - PIVOT_HEIGHT : PIVOT_HEIGHT, 0);
     }
 
     public float yaw(float partialTick)
@@ -355,14 +413,18 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
         }
         else if (state.getValue(TurretBlock.LIT))
         {
-            wantYaw = facing + 40F * Mth.sin(level.getGameTime() * 0.03F);
-            wantPitch = 0;
+            // scanning: sweep side to side and nod up and down
+            float t = level.getGameTime();
+            wantYaw = facing + 40F * Mth.sin(t * 0.03F);
+            wantPitch = (state.getValue(TurretBlock.HANGING) ? 20F : -5F) + 12F * Mth.sin(t * 0.071F);
         }
         else
         {
             wantYaw = yaw;
-            wantPitch = 25F; // powered down: the barrel droops
+            wantPitch = state.getValue(TurretBlock.HANGING) ? 70F : 25F; // powered down: the barrel droops
         }
+        // how far it can tilt: a floor turret can aim high, a ceiling turret can aim low
+        wantPitch = state.getValue(TurretBlock.HANGING) ? Mth.clamp(wantPitch, -45F, 85F) : Mth.clamp(wantPitch, -85F, 45F);
         float speed = turnSpeed();
         yaw += Mth.clamp(Mth.wrapDegrees(wantYaw - yaw), -speed, speed);
         pitch += Mth.clamp(wantPitch - pitch, -speed, speed);
@@ -519,9 +581,12 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
     {
         for (int i = 0; i < AMMO_SLOTS; i++)
         {
-            if (!ammo.extractItem(i, 1, false).isEmpty())
+            ItemStack box = ammo.extractItem(i, 1, false);
+            if (!box.isEmpty())
             {
+                loaded = AmmoType.of(box);
                 rounds += AvpConfig.server(AvpConfig.SERVER.turretRoundsPerBox);
+                sync();
                 level.playSound(null, worldPosition, net.minecraft.sounds.SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 0.5F, 1.8F);
                 return;
             }
@@ -536,7 +601,12 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
         {
             target.invulnerableTime = 0;
         }
-        target.hurt(ModDamageTypes.sentry(level), (float) AvpConfig.server(AvpConfig.SERVER.turretDamage));
+        float damage = (float) AvpConfig.server(AvpConfig.SERVER.turretDamage) * loaded.damage;
+        target.hurt(loaded == AmmoType.ARMOR_PIERCING ? ModDamageTypes.sentryArmorPiercing(level) : ModDamageTypes.sentry(level), damage);
+        if (loaded.fireSeconds > 0)
+        {
+            target.igniteForSeconds(loaded.fireSeconds);
+        }
         level.playSound(null, pos, ModSounds.TURRET_FIRE.get(), SoundSource.BLOCKS, 0.8F, 0.9F + level.random.nextFloat() * 0.2F);
         level.blockEvent(pos, getBlockState().getBlock(), 2, target.getId());
     }
@@ -573,7 +643,7 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
             Vec3 to = target != null ? aimPoint(target) : muzzle.add(Vec3.directionFromRotation(pitch, yaw).scale(range()));
             shots.add(new Shot(to.add(level.random.nextGaussian() * 0.1, level.random.nextGaussian() * 0.1, level.random.nextGaussian() * 0.1),
                     level.getGameTime() + 1));
-            level.addParticle(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 0, 0.02, 0);
+            level.addParticle(loaded == AmmoType.INCENDIARY ? ParticleTypes.FLAME : ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 0, 0.02, 0);
             if (target != null)
             {
                 Vec3 hit = aimPoint(target);
@@ -616,6 +686,7 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
     private void writeShared(CompoundTag tag)
     {
         tag.putInt("Rounds", rounds);
+        tag.putString("Loaded", loaded.name());
         tag.putInt("Energy", energy.getEnergyStored());
         for (int i = 0; i < targets.length; i++)
         {
@@ -627,6 +698,14 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
     private void readShared(CompoundTag tag)
     {
         rounds = tag.getInt("Rounds");
+        try
+        {
+            loaded = AmmoType.valueOf(tag.getString("Loaded"));
+        }
+        catch (IllegalArgumentException e)
+        {
+            loaded = AmmoType.STANDARD;
+        }
         energy.setStored(tag.getInt("Energy"));
         for (int i = 0; i < targets.length; i++)
         {

@@ -568,3 +568,52 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("assembler automation data written")
+
+
+# ================================================================ sentry ammo types, ceiling turrets
+lang = read_json(f"{NA}/lang/en_us.json", {})
+
+
+def ammo_box(path, band, mark):
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([2, 5, 13, 13], fill=(88, 96, 52, 255), outline=(48, 54, 26, 255))
+    d.rectangle([3, 6, 12, 7], fill=(112, 122, 68, 255))
+    d.rectangle([2, 9, 13, 10], fill=band)
+    d.rectangle([6, 3, 9, 4], fill=(60, 62, 66, 255))
+    for p in mark:
+        d.point(p, fill=(25, 25, 25, 255))
+    img.save(path)
+
+
+ammo_box(f"{NA}/textures/item/ammo_sentry_ap.png", (205, 40, 35, 255), [(5, 9), (6, 10), (9, 9), (10, 10)])
+ammo_box(f"{NA}/textures/item/ammo_sentry_incendiary.png", (255, 120, 20, 255), [(7, 9), (8, 10)])
+for i in ("ammo_sentry_ap", "ammo_sentry_incendiary"):
+    item_model(i)
+
+write_json(f"{ND}/avp/damage_type/sentry_ap.json",
+           {"message_id": "avp.sentry", "exhaustion": 0.1, "scaling": "when_caused_by_living_non_player"})
+add_to_tag(f"{ND}/minecraft/tags/damage_type/bypasses_armor.json", ["avp:sentry_ap"])
+
+write_json(f"{ND}/avp/recipe/assembly/ammo_sentry_ap.json", {"type": "avp:assembly", "ingredients": [
+    ingredient_json("#c:ingots/aluminum", 2), ingredient_json("avp:cobalt", 1), ingredient_json("minecraft:gunpowder", 2)],
+    "result": {"id": "avp:ammo_sentry_ap", "count": 1}})
+write_json(f"{ND}/avp/recipe/assembly/ammo_sentry_incendiary.json", {"type": "avp:assembly", "ingredients": [
+    ingredient_json("#c:ingots/aluminum", 2), ingredient_json("#c:ingots/copper", 1), ingredient_json("minecraft:gunpowder", 1),
+    ingredient_json("minecraft:blaze_powder", 1)], "result": {"id": "avp:ammo_sentry_incendiary", "count": 1}})
+
+lang.update({
+    "item.avp.ammo_sentry": "Sentry Ammo Box (10x28mm)",
+    "item.avp.ammo_sentry_ap": "Sentry Ammo Box (10x28mm AP)",
+    "item.avp.ammo_sentry_incendiary": "Sentry Ammo Box (10x28mm Incendiary)",
+    "tooltip.avp.ammo_sentry": "Standard 10x28mm caseless rounds for UA 571 sentry guns.",
+    "tooltip.avp.ammo_sentry_ap": "Cobalt-cored armour-piercing rounds: ignore armour.\nIssued for engagements with hardened xenomorph chitin.",
+    "tooltip.avp.ammo_sentry_incendiary": "Incendiary rounds: set targets on fire.",
+    "tooltip.avp.turret": "UA 571-C automated sentry gun.\nIFF: never fires on its owner or the owner's team.\nPlace under a ceiling to hang it upside down.",
+    "screen.avp.turret.loaded": "Loaded: %s",
+    "screen.avp.turret.ammo_type.standard": "Standard",
+    "screen.avp.turret.ammo_type.armor_piercing": "Armour-piercing",
+    "screen.avp.turret.ammo_type.incendiary": "Incendiary",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("sentry ammo types written")

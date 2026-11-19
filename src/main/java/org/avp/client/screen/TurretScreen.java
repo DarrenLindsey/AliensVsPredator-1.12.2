@@ -100,6 +100,8 @@ public class TurretScreen extends AbstractContainerScreen<TurretMenu>
                 x, y, powered ? 0xFF55FF55 : 0xFFFF5555, false);
         g.drawString(font, Component.translatable("screen.avp.turret.rounds", turret.rounds(), turret.totalRounds()), x, y + 10, 0xFFB8FFB8, false);
         g.drawString(font, Component.translatable("screen.avp.turret.range", turret.range()), x, y + 20, 0xFFB8FFB8, false);
+        g.drawString(font, Component.translatable("screen.avp.turret.loaded",
+                Component.translatable("screen.avp.turret.ammo_type." + turret.loaded().key())), x, y + 40, turret.loaded().tracerColor, false);
         Entity target = turret.targetId() >= 0 && minecraft != null && minecraft.level != null ? minecraft.level.getEntity(turret.targetId()) : null;
         g.drawString(font, target == null ? Component.translatable("screen.avp.turret.scanning")
                 : Component.translatable("screen.avp.turret.tracking", target.getDisplayName()), x, y + 30, target == null ? 0xFF6FBF6F : 0xFFFF7755, false);

@@ -71,13 +71,22 @@ public class TurretRenderer implements BlockEntityRenderer<TurretBlockEntity>
         float yaw = be.getLevel() == null ? be.getBlockState().getValue(TurretBlock.FACING).toYRot() : be.yaw(partialTick);
         float pitch = be.getLevel() == null ? 0 : be.pitch(partialTick);
 
+        boolean hanging = be.getBlockState().getValue(TurretBlock.HANGING);
         poseStack.pushPose();
-        poseStack.translate(0.5F, floor, 0.5F);
-        poseStack.scale(1F, -1F, 1F);
+        if (hanging)
+        {
+            // upside down under the ceiling: the model's own "y points down" is already right
+            poseStack.translate(0.5F, 1F - floor, 0.5F);
+        }
+        else
+        {
+            poseStack.translate(0.5F, floor, 0.5F);
+            poseStack.scale(1F, -1F, 1F);
+        }
         for (ModelPart part : head)
         {
             part.yRot = -yaw * Mth.DEG_TO_RAD;
-            part.xRot = -pitch * Mth.DEG_TO_RAD;
+            part.xRot = (hanging ? pitch : -pitch) * Mth.DEG_TO_RAD;
         }
         model.root().render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), light, overlay);
         for (ModelPart part : head)
@@ -104,9 +113,11 @@ public class TurretRenderer implements BlockEntityRenderer<TurretBlockEntity>
         line(matrix, glow, muzzle.subtract(base), end.subtract(base), 0.006F, 1F, 0.1F, 0.1F, 0.6F);
 
         // tracers
+        int c = be.loaded().tracerColor;
         for (TurretBlockEntity.Shot shot : be.shots())
         {
-            line(matrix, glow, muzzle.subtract(base), shot.to().subtract(base), 0.02F, 1F, 0.85F, 0.4F, 0.9F);
+            line(matrix, glow, muzzle.subtract(base), shot.to().subtract(base), 0.02F,
+                    (c >> 16 & 255) / 255F, (c >> 8 & 255) / 255F, (c & 255) / 255F, 0.9F);
         }
 
         if (be.hasDisplay())
@@ -121,7 +132,7 @@ public class TurretRenderer implements BlockEntityRenderer<TurretBlockEntity>
         int total = be.totalRounds();
         String text = total > 9999 ? "9999" : String.format("%04d", total);
         poseStack.pushPose();
-        poseStack.translate(0.5F, 1.2F, 0.5F);
+        poseStack.translate(0.5F, be.getBlockState().getValue(TurretBlock.HANGING) ? -0.35F : 1.2F, 0.5F);
         poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
         poseStack.scale(-0.02F, -0.02F, 0.02F);
         float x = -font.width(text) / 2F;

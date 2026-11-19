@@ -42,12 +42,15 @@ public class TurretBlock extends BaseEntityBlock
     public static final MapCodec<TurretBlock> CODEC = simpleCodec(TurretBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
+    /** Mounted upside down under a ceiling. */
+    public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
     private static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 15, 13);
+    private static final VoxelShape HANGING_SHAPE = Block.box(3, 1, 3, 13, 16, 13);
 
     public TurretBlock(Properties properties)
     {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LIT, false));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LIT, false).setValue(HANGING, false));
     }
 
     @Override
@@ -59,15 +62,19 @@ public class TurretBlock extends BaseEntityBlock
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
-        builder.add(FACING, LIT);
+        builder.add(FACING, LIT, HANGING);
     }
 
-    /** It watches the way the player was facing when it was put down. */
+    /**
+     * It watches the way the player was facing when it was put down.
+     * Placed against the underside of a block, it hangs from the ceiling.
+     */
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection())
+                .setValue(HANGING, context.getClickedFace() == Direction.DOWN);
     }
 
     @Override
@@ -83,7 +90,7 @@ public class TurretBlock extends BaseEntityBlock
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
     {
-        return SHAPE;
+        return state.getValue(HANGING) ? HANGING_SHAPE : SHAPE;
     }
 
     @Override

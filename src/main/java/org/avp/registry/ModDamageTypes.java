@@ -28,6 +28,15 @@ public final class ModDamageTypes
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SENTRY));
     }
 
+    /** Armour-piercing sentry rounds (in the minecraft:bypasses_armor damage type tag). */
+    public static final ResourceKey<DamageType> SENTRY_AP = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "sentry_ap"));
+
+    public static DamageSource sentryArmorPiercing(Level level)
+    {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SENTRY_AP));
+    }
+
     public static DamageSource electricity(Level level)
     {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(ELECTRICITY));

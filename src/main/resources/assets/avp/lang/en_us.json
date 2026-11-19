@@ -405,9 +405,9 @@
   "tooltip.avp.cryostasistube": "Hypersleep chamber.",
   "tooltip.avp.blastdoor": "Pressure-rated blast door. Program it with a Security Tuner.",
   "block.avp.turret": "Sentry Turret",
-  "item.avp.ammo_sentry": "Sentry Ammo Box",
-  "tooltip.avp.turret": "UA 571-C automated sentry gun.\nIFF: never fires on its owner or the owner's team.",
-  "tooltip.avp.ammo_sentry": "10x28mm caseless rounds for sentry guns.",
+  "item.avp.ammo_sentry": "Sentry Ammo Box (10x28mm)",
+  "tooltip.avp.turret": "UA 571-C automated sentry gun.\nIFF: never fires on its owner or the owner's team.\nPlace under a ceiling to hang it upside down.",
+  "tooltip.avp.ammo_sentry": "Standard 10x28mm caseless rounds for UA 571 sentry guns.",
   "subtitles.avp.turret.fire": "Sentry gun fires",
   "death.attack.avp.sentry": "%1$s was cut down by a sentry gun",
   "death.attack.avp.sentry.player": "%1$s was cut down by a sentry gun while fighting %2$s",
@@ -480,5 +480,13 @@
   "avp.configuration.ore_lithium": "Lithium Ore",
   "avp.configuration.ore_lithium.tooltip": "Generate lithium ore in new chunks.",
   "avp.configuration.ore_cobalt": "Cobalt Ore",
-  "avp.configuration.ore_cobalt.tooltip": "Generate cobalt ore in new chunks."
+  "avp.configuration.ore_cobalt.tooltip": "Generate cobalt ore in new chunks.",
+  "item.avp.ammo_sentry_ap": "Sentry Ammo Box (10x28mm AP)",
+  "item.avp.ammo_sentry_incendiary": "Sentry Ammo Box (10x28mm Incendiary)",
+  "tooltip.avp.ammo_sentry_ap": "Cobalt-cored armour-piercing rounds: ignore armour.\nIssued for engagements with hardened xenomorph chitin.",
+  "tooltip.avp.ammo_sentry_incendiary": "Incendiary rounds: set targets on fire.",
+  "screen.avp.turret.loaded": "Loaded: %s",
+  "screen.avp.turret.ammo_type.standard": "Standard",
+  "screen.avp.turret.ammo_type.armor_piercing": "Armour-piercing",
+  "screen.avp.turret.ammo_type.incendiary": "Incendiary"
 }

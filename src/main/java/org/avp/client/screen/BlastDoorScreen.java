@@ -25,6 +25,7 @@ public class BlastDoorScreen extends Screen
 {
     private static final int WIDTH = 200;
     private static final int GREEN = 0xFF00AA00;
+    private static final int BUTTON_WIDTH = 50;
 
     private final OpenBlastDoorScreenPayload door;
     private boolean autolock;
@@ -54,7 +55,7 @@ public class BlastDoorScreen extends Screen
     @Override
     protected void init()
     {
-        passwordBox = new EditBox(font, left(), top() + 16, WIDTH, 18, Component.translatable("screen.avp.blastdoor.password"));
+        passwordBox = new EditBox(font, left(), top() + 16, WIDTH - BUTTON_WIDTH - 2, 18, Component.translatable("screen.avp.blastdoor.password"));
         passwordBox.setMaxLength(BlastDoorActionPayload.MAX_PASSWORD_LENGTH);
         passwordBox.setTextColor(GREEN);
         if (!door.admin())
@@ -65,6 +66,9 @@ public class BlastDoorScreen extends Screen
         passwordBox.setHint(Component.translatable(door.admin() ? "screen.avp.blastdoor.new_password_hint" : "screen.avp.blastdoor.password_hint"));
         addRenderableWidget(passwordBox);
         setInitialFocus(passwordBox);
+        // the same as pressing Enter: "Enter" to unlock, "Set" on the admin screen
+        addRenderableWidget(Button.builder(Component.translatable(door.admin() ? "screen.avp.blastdoor.set" : "screen.avp.blastdoor.enter"),
+                b -> submit()).bounds(left() + WIDTH - BUTTON_WIDTH, top() + 15, BUTTON_WIDTH, 20).build());
 
         if (door.admin())
         {
@@ -97,6 +101,20 @@ public class BlastDoorScreen extends Screen
         return Component.translatable("screen.avp.blastdoor." + sensor, Component.translatable(on ? "options.on" : "options.off"));
     }
 
+    /** Enter key or the Enter/Set button: send the password and close the screen. */
+    private void submit()
+    {
+        if (door.admin())
+        {
+            send(BlastDoorActionPayload.SET_PASSWORD, passwordBox.getValue());
+        }
+        else if (!passwordBox.getValue().isEmpty())
+        {
+            send(BlastDoorActionPayload.TRY_PASSWORD, passwordBox.getValue());
+        }
+        onClose();
+    }
+
     private Component autolockLabel()
     {
         return Component.translatable(autolock ? "screen.avp.blastdoor.autolock_disable" : "screen.avp.blastdoor.autolock_enable");
@@ -112,15 +130,7 @@ public class BlastDoorScreen extends Screen
     {
         if (keyCode == InputConstants.KEY_RETURN || keyCode == InputConstants.KEY_NUMPADENTER)
         {
-            if (door.admin())
-            {
-                send(BlastDoorActionPayload.SET_PASSWORD, passwordBox.getValue());
-            }
-            else if (!passwordBox.getValue().isEmpty())
-            {
-                send(BlastDoorActionPayload.TRY_PASSWORD, passwordBox.getValue());
-            }
-            onClose();
+            submit();
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

@@ -248,8 +248,8 @@
   "message.avp.blastdoor.bound": "Tuner bound to %s.",
   "screen.avp.blastdoor.title": "Blast Door %s",
   "screen.avp.blastdoor.password": "Password",
-  "screen.avp.blastdoor.password_hint": "Enter password, then press Enter",
-  "screen.avp.blastdoor.new_password_hint": "New password (empty = none), Enter to set",
+  "screen.avp.blastdoor.password_hint": "Password",
+  "screen.avp.blastdoor.new_password_hint": "New password (empty = none)",
   "screen.avp.blastdoor.locked": "LOCKED",
   "screen.avp.blastdoor.unlocked": "UNLOCKED",
   "screen.avp.blastdoor.admin": "ADMIN",
@@ -279,5 +279,7 @@
   "message.avp.blastdoor.autoopen_on": "Auto-Open enabled.",
   "message.avp.blastdoor.autoopen_off": "Auto-Open disabled.",
   "message.avp.blastdoor.threat_on": "Threat Detection enabled.",
-  "message.avp.blastdoor.threat_off": "Threat Detection disabled."
+  "message.avp.blastdoor.threat_off": "Threat Detection disabled.",
+  "screen.avp.blastdoor.enter": "Enter",
+  "screen.avp.blastdoor.set": "Set"
 }

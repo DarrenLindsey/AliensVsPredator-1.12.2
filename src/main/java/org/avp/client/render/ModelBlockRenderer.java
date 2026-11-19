@@ -2,6 +2,7 @@ package org.avp.client.render;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.avp.block.TrophyBlock;
 import org.avp.block.entity.ModelBlockEntity;
@@ -69,6 +70,10 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
         GeneratedModel model = ModelBlockRenderInfo.model(info, models);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(info.texture()));
         poseStack.pushPose();
+        if (!info.plant() && pos != null)
+        {
+            placeOnFloor(info, state, models, poseStack);
+        }
         int color = transform(info, state, pos, poseStack);
         for (ModelPart part : partsToDraw(info, model))
         {
@@ -109,6 +114,35 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
             });
         }
         return b[0] == Float.MAX_VALUE ? null : b;
+    }
+
+    /** Measured size of each trophy block state (they don't change, so measure once). */
+    private static final Map<BlockState, float[]> TROPHY_BOUNDS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Scales a placed trophy to its chosen size (Info.size x the "Trophy Size" setting),
+     * centres it in the block and stands it on the block's floor. The old 1.12.2
+     * per-skull offsets left many of them tiny, floating or sunk into the ground.
+     */
+    private static void placeOnFloor(ModelBlockRenderInfo.Info info, BlockState state, EntityModelSet models, PoseStack poseStack)
+    {
+        float[] b = TROPHY_BOUNDS.computeIfAbsent(state, s -> {
+            float[] measured = bounds(s, models);
+            return measured != null ? measured : new float[0];
+        });
+        if (b.length == 0)
+        {
+            return;
+        }
+        float longest = Math.max(b[3] - b[0], Math.max(b[4] - b[1], b[5] - b[2]));
+        if (longest <= 0)
+        {
+            return;
+        }
+        float scale = info.size() * AvpConfig.CLIENT.trophySize.get().floatValue() / longest;
+        poseStack.translate(0.5F, 0, 0.5F);
+        poseStack.scale(scale, scale, scale);
+        poseStack.translate(-(b[0] + b[3]) / 2F, -b[1], -(b[2] + b[5]) / 2F);
     }
 
     private static List<ModelPart> partsToDraw(ModelBlockRenderInfo.Info info, GeneratedModel model)

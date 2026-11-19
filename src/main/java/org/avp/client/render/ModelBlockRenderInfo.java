@@ -48,9 +48,11 @@ public final class ModelBlockRenderInfo
      * @param x,y,z   old preRenderTransforms translate
      * @param turnY   extra turn around the vertical axis, in degrees
      * @param plant   true for ferns (random size/colour, different base transform)
+     * @param size    trophies only: how big the placed trophy is, in blocks (its longest side).
+     *                The renderer scales it to this size and stands it on the floor of the block.
      */
     public record Info(ModelLayerLocation layer, Function<ModelPart, GeneratedModel> factory, ResourceLocation texture,
-                       List<String> parts, float scale, float x, float y, float z, float turnY, boolean plant)
+                       List<String> parts, float scale, float x, float y, float z, float turnY, boolean plant, float size)
     {
     }
 
@@ -69,9 +71,9 @@ public final class ModelBlockRenderInfo
     }
 
     private static Info trophy(ModelLayerLocation layer, Function<ModelPart, GeneratedModel> factory, String texture, List<String> parts,
-                               float scale, float x, float y, float z, float turnY)
+                               float scale, float x, float y, float z, float turnY, float size)
     {
-        return new Info(layer, factory, tex(texture), parts, scale, x, y, z, turnY, false);
+        return new Info(layer, factory, tex(texture), parts, scale, x, y, z, turnY, false, size);
     }
 
     /** Called once on the client after blocks are registered. */
@@ -81,23 +83,23 @@ public final class ModelBlockRenderInfo
         List<String> xenoParts = List.of("headBase", "headSpine1", "headSpine2", "headTop", "lHead", "rHead", "jaw", "jaw2");
 
         // the 1.12.2 BlockSkull default transform was scale 3.0, translate (0, 0.05, 0)
-        add(ModBlocks.SKULL_ENGINEER, trophy(EngineerModel.LAYER, EngineerModel::new, "mob/engineer_bio.png", engineerParts, 3.0F, 0, 0.05F, 0, 0));
-        add(ModBlocks.SKULL_SPACEJOCKEY, trophy(EngineerModel.LAYER, EngineerModel::new, "mob/engineer.png", engineerParts, 3.0F, 0, 0.05F, 0, 0));
-        add(ModBlocks.SKULL_XENOMORPH, trophy(WarriorModel.LAYER, WarriorModel::new, "mob/xenomorphskullgiger.png", xenoParts, 1.5F, 0, 0.115F, 0, 0));
-        add(ModBlocks.SKULL_XENOMORPH_WARRIOR, trophy(WarriorModel.LAYER, WarriorModel::new, "mob/xenomorphskullwarrior.png", xenoParts, 1.5F, 0, 0.115F, 0, 0));
-        add(ModBlocks.SKULL_YAUTJA, trophy(YautjaModel.LAYER, YautjaModel::new, "mob/yautjaskull.png", List.of("face"), 1.9F, 0, 0.25F, 0, 0));
-        add(ModBlocks.SKULL_MATRIARCH, trophy(QueenSkullModel.LAYER, QueenSkullModel::new, "tile/skulls/queenskull.png", List.of("head0"), 1.9F, 0, -1.35F, -0.25F, 0));
-        add(ModBlocks.SKULL_PROTOMORPH, trophy(ProtomorphSkullModel.LAYER, ProtomorphSkullModel::new, "tile/skulls/protomorph_skull.png", List.of("head1"), 1.9F, 0, -1.5F, 0, 0));
-        add(ModBlocks.SKULL_NEOMORPH, trophy(NeomorphSkullModel.LAYER, NeomorphSkullModel::new, "tile/skulls/neomorph_skull.png", List.of("head"), 1.9F, 0, -1.5F, 0, 0));
-        add(ModBlocks.BIOMASK_CLASSIC, trophy(BiomaskClassicModel.LAYER, BiomaskClassicModel::new, "mob/yautja/yautja.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0));
-        add(ModBlocks.BIOMASK_BERSERKER, trophy(BiomaskBerserkerModel.LAYER, BiomaskBerserkerModel::new, "mob/yautja/yautja_berserker.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0));
-        add(ModBlocks.BIOMASK_FALCONER, trophy(BiomaskFalconerModel.LAYER, BiomaskFalconerModel::new, "mob/yautja/yautja_falconer.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0));
-        add(ModBlocks.BIOMASK_TRACKER, trophy(BiomaskTrackerModel.LAYER, BiomaskTrackerModel::new, "mob/yautja/yautja_tracker.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0));
-        add(ModBlocks.HEAD_AETHON, trophy(AethonHeadModel.LAYER, AethonHeadModel::new, "mob/aethon/aethon.png", List.of("head"), 1.9F, 0, -1.5F, 0, 0));
-        add(ModBlocks.HEAD_GIGERALIEN, trophy(GigerAlienHeadModel.LAYER, GigerAlienHeadModel::new, "mob/gigeralien.png", List.of("head"), 1.0F, 0, -1.25F, -0.25F, 90));
+        add(ModBlocks.SKULL_ENGINEER, trophy(EngineerModel.LAYER, EngineerModel::new, "mob/engineer_bio.png", engineerParts, 3.0F, 0, 0.05F, 0, 0, 0.8F));
+        add(ModBlocks.SKULL_SPACEJOCKEY, trophy(EngineerModel.LAYER, EngineerModel::new, "mob/engineer.png", engineerParts, 3.0F, 0, 0.05F, 0, 0, 0.9F));
+        add(ModBlocks.SKULL_XENOMORPH, trophy(WarriorModel.LAYER, WarriorModel::new, "mob/xenomorphskullgiger.png", xenoParts, 1.5F, 0, 0.115F, 0, 0, 0.95F));
+        add(ModBlocks.SKULL_XENOMORPH_WARRIOR, trophy(WarriorModel.LAYER, WarriorModel::new, "mob/xenomorphskullwarrior.png", xenoParts, 1.5F, 0, 0.115F, 0, 0, 0.95F));
+        add(ModBlocks.SKULL_YAUTJA, trophy(YautjaModel.LAYER, YautjaModel::new, "mob/yautjaskull.png", List.of("face"), 1.9F, 0, 0.25F, 0, 0, 0.6F));
+        add(ModBlocks.SKULL_MATRIARCH, trophy(QueenSkullModel.LAYER, QueenSkullModel::new, "tile/skulls/queenskull.png", List.of("head0"), 1.9F, 0, -1.35F, -0.25F, 0, 1.3F));
+        add(ModBlocks.SKULL_PROTOMORPH, trophy(ProtomorphSkullModel.LAYER, ProtomorphSkullModel::new, "tile/skulls/protomorph_skull.png", List.of("head1"), 1.9F, 0, -1.5F, 0, 0, 0.8F));
+        add(ModBlocks.SKULL_NEOMORPH, trophy(NeomorphSkullModel.LAYER, NeomorphSkullModel::new, "tile/skulls/neomorph_skull.png", List.of("head"), 1.9F, 0, -1.5F, 0, 0, 0.8F));
+        add(ModBlocks.BIOMASK_CLASSIC, trophy(BiomaskClassicModel.LAYER, BiomaskClassicModel::new, "mob/yautja/yautja.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0, 0.6F));
+        add(ModBlocks.BIOMASK_BERSERKER, trophy(BiomaskBerserkerModel.LAYER, BiomaskBerserkerModel::new, "mob/yautja/yautja_berserker.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0, 0.6F));
+        add(ModBlocks.BIOMASK_FALCONER, trophy(BiomaskFalconerModel.LAYER, BiomaskFalconerModel::new, "mob/yautja/yautja_falconer.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0, 0.6F));
+        add(ModBlocks.BIOMASK_TRACKER, trophy(BiomaskTrackerModel.LAYER, BiomaskTrackerModel::new, "mob/yautja/yautja_tracker.png", List.of("biomaskMouth"), 1.9F, 0, -1.3F, 0, 0, 0.6F));
+        add(ModBlocks.HEAD_AETHON, trophy(AethonHeadModel.LAYER, AethonHeadModel::new, "mob/aethon/aethon.png", List.of("head"), 1.9F, 0, -1.5F, 0, 0, 0.8F));
+        add(ModBlocks.HEAD_GIGERALIEN, trophy(GigerAlienHeadModel.LAYER, GigerAlienHeadModel::new, "mob/gigeralien.png", List.of("head"), 1.0F, 0, -1.25F, -0.25F, 90, 0.9F));
 
-        add(ModBlocks.PARADISIAN_GROUND_FERN, new Info(GroundFernModel.LAYER, GroundFernModel::new, tex("tile/plants/paradisiangroundfern.png"), List.of(), 1, 0, 1.455F, 0, 0, true));
-        add(ModBlocks.PARADISIAN_TREE_FERN, new Info(TreeFernModel.LAYER, TreeFernModel::new, tex("tile/plants/paradisiantreefern.png"), List.of(), 1, 0, 1.455F, 0, 0, true));
+        add(ModBlocks.PARADISIAN_GROUND_FERN, new Info(GroundFernModel.LAYER, GroundFernModel::new, tex("tile/plants/paradisiangroundfern.png"), List.of(), 1, 0, 1.455F, 0, 0, true, 1));
+        add(ModBlocks.PARADISIAN_TREE_FERN, new Info(TreeFernModel.LAYER, TreeFernModel::new, tex("tile/plants/paradisiantreefern.png"), List.of(), 1, 0, 1.455F, 0, 0, true, 1));
     }
 
     @Nullable

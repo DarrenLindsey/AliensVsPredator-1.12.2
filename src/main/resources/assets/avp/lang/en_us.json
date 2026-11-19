@@ -178,5 +178,7 @@
   "avp.configuration.shapesCanCopyBlocks": "Shapes Can Copy Blocks",
   "avp.configuration.shapesCanCopyBlocks.tooltip": "Players can right-click slopes, corners, ridges and pyramids with a block to copy its look.",
   "avp.configuration.trophiesCanBeTipped": "Trophies Can Be Tipped",
-  "avp.configuration.trophiesCanBeTipped.tooltip": "Players can right-click the Giger alien head to lay it flat or tilt it."
+  "avp.configuration.trophiesCanBeTipped.tooltip": "Players can right-click the Giger alien head to lay it flat or tilt it.",
+  "avp.configuration.trophySize": "Trophy Size",
+  "avp.configuration.trophySize.tooltip": "Size of placed skulls, biomasks and heads. 1.0 = normal; 2.0 = twice as big."
 }

@@ -35,6 +35,7 @@ public final class AvpConfig
     {
         public final ModConfigSpec.DoubleValue fernBrightness;
         public final ModConfigSpec.BooleanValue showCopiedTextures;
+        public final ModConfigSpec.DoubleValue trophySize;
 
         Client(ModConfigSpec.Builder b)
         {
@@ -45,6 +46,9 @@ public final class AvpConfig
             showCopiedTextures = b
                     .comment("Show the copied block texture on slopes, corners, ridges and pyramids. Turn off to always see the plain texture.")
                     .define("showCopiedTextures", true);
+            trophySize = b
+                    .comment("Size of placed skulls, biomasks and heads. 1.0 = normal; 2.0 = twice as big.")
+                    .defineInRange("trophySize", 1.0, 0.25, 3.0);
             b.pop();
         }
     }

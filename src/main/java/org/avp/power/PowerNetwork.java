@@ -54,9 +54,18 @@ public final class PowerNetwork
     {
     }
 
+    /**
+     * Solar panels touching each other. Panels with no wire of their own hand their power to
+     * the "outlets" - the panels of the array that touch a powerline or a machine.
+     */
+    public record SolarArray(List<BlockPos> panels, List<BlockPos> outlets, long builtAt)
+    {
+    }
+
     private static final class LevelCache
     {
         final Map<BlockPos, Network> byConductor = new HashMap<>();
+        final Map<BlockPos, SolarArray> solar = new HashMap<>();
     }
 
     private static final Map<Level, LevelCache> CACHE = new WeakHashMap<>();
@@ -138,6 +147,123 @@ public final class PowerNetwork
         return network;
     }
 
+    private static boolean isSolar(Level level, BlockPos pos)
+    {
+        return level.getBlockState(pos).getBlock() instanceof PowerMachineBlock block && block.kind() == PowerMachineBlock.Kind.SOLAR_PANEL;
+    }
+
+    /** True if something other than a solar panel next to pos takes FE (a powerline, a machine...). */
+    private static boolean hasOutput(Level level, BlockPos pos)
+    {
+        for (Direction dir : Direction.values())
+        {
+            BlockPos next = pos.relative(dir);
+            if (isSolar(level, next))
+            {
+                continue;
+            }
+            IEnergyStorage storage = level.getCapability(Capabilities.EnergyStorage.BLOCK, next, dir.getOpposite());
+            if (storage != null && storage.canReceive())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The array of touching solar panels that pos belongs to (rebuilt every 5 seconds or when blocks change). */
+    public static SolarArray solarArray(Level level, BlockPos start)
+    {
+        LevelCache cache;
+        synchronized (CACHE)
+        {
+            cache = CACHE.computeIfAbsent(level, l -> new LevelCache());
+        }
+        SolarArray known = cache.solar.get(start);
+        if (known != null && level.getGameTime() - known.builtAt() < 100)
+        {
+            return known;
+        }
+        List<BlockPos> panels = new ArrayList<>();
+        List<BlockPos> outlets = new ArrayList<>();
+        Set<BlockPos> seen = new HashSet<>();
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        queue.add(start.immutable());
+        seen.add(start.immutable());
+        while (!queue.isEmpty() && panels.size() < 1024)
+        {
+            BlockPos pos = queue.poll();
+            panels.add(pos);
+            if (hasOutput(level, pos))
+            {
+                outlets.add(pos);
+            }
+            for (Direction dir : Direction.values())
+            {
+                BlockPos next = pos.relative(dir);
+                if (!seen.contains(next) && level.isLoaded(next) && isSolar(level, next))
+                {
+                    seen.add(next);
+                    queue.add(next);
+                }
+            }
+        }
+        SolarArray array = new SolarArray(panels, outlets, level.getGameTime());
+        for (BlockPos pos : panels)
+        {
+            cache.solar.put(pos, array);
+        }
+        return array;
+    }
+
+    /**
+     * Power cells linked to this one: cells touching it (a "bank") and cells on any powerline
+     * network it is wired to. Linked cells even out their charge.
+     */
+    public static List<BlockPos> linkedCells(Level level, BlockPos cell)
+    {
+        Set<BlockPos> found = new HashSet<>();
+        // the bank: cells touching each other
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        queue.add(cell.immutable());
+        found.add(cell.immutable());
+        List<BlockPos> bank = new ArrayList<>();
+        while (!queue.isEmpty() && found.size() < 256)
+        {
+            BlockPos pos = queue.poll();
+            bank.add(pos);
+            for (Direction dir : Direction.values())
+            {
+                BlockPos next = pos.relative(dir);
+                if (!found.contains(next) && isPowercell(level, next))
+                {
+                    found.add(next);
+                    queue.add(next);
+                }
+            }
+        }
+        // anything wired to the bank
+        for (BlockPos pos : bank)
+        {
+            for (Direction dir : Direction.values())
+            {
+                BlockPos next = pos.relative(dir);
+                if (isConductor(level.getBlockState(next)))
+                {
+                    for (Target target : network(level, next).targets())
+                    {
+                        if (isPowercell(level, target.pos()))
+                        {
+                            found.add(target.pos());
+                        }
+                    }
+                }
+            }
+        }
+        found.remove(cell);
+        return new ArrayList<>(found);
+    }
+
     /**
      * Energy entering a powerline.
      *
@@ -178,7 +304,7 @@ public final class PowerNetwork
         return amount - remaining;
     }
 
-    private static boolean isPowercell(Level level, BlockPos pos)
+    public static boolean isPowercell(Level level, BlockPos pos)
     {
         return level.getBlockEntity(pos) instanceof PowerMachineBlockEntity machine && machine.kind() == PowerMachineBlock.Kind.POWERCELL;
     }

@@ -224,8 +224,22 @@ public class PowerMachineBlock extends BaseEntityBlock
     }
 
     @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving)
+    {
+        super.onPlace(state, level, pos, oldState, moving);
+        if (!state.is(oldState.getBlock()))
+        {
+            org.avp.power.PowerNetwork.invalidate(level);
+        }
+    }
+
+    @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving)
     {
+        if (!state.is(newState.getBlock()))
+        {
+            org.avp.power.PowerNetwork.invalidate(level);
+        }
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof PowerMachineBlockEntity machine)
         {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), machine.getFuel().getStackInSlot(0));

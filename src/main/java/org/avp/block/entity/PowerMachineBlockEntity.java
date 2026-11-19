@@ -92,6 +92,13 @@ public class PowerMachineBlockEntity extends BlockEntity
     private long netCapacity;
     private int netMaking;
 
+    /** Status-message details: solar array size, linked power cells. */
+    private int arrayPanels = 1;
+    private int arrayOutlets;
+    private int linkedCells;
+    private long bankStored;
+    private long bankCapacity;
+
     /** Client only. */
     private final List<Arc> arcs = new ArrayList<>();
     private float rotor;
@@ -194,7 +201,7 @@ public class PowerMachineBlockEntity extends BlockEntity
         int before = be.energy.getEnergyStored();
         boolean on = switch (be.kind())
         {
-            case SOLAR_PANEL -> be.generate(level, pos, solarOutput(level, pos));
+            case SOLAR_PANEL -> be.solarTick(level, pos);
             case GENERATOR -> be.burnFuel(level, pos);
             case REPULSION_GENERATOR -> be.generate(level, pos, be.magnets * AvpConfig.server(AvpConfig.SERVER.repulsionOutputPerMagnet)) || be.magnets > 0;
             case TRANSFORMER, STEPDOWN_TRANSFORMER ->
@@ -206,6 +213,7 @@ public class PowerMachineBlockEntity extends BlockEntity
             case POWERCELL ->
             {
                 be.lastFlow = PowerNetwork.pushOut(level, pos, be.energy, AvpConfig.server(AvpConfig.SERVER.powercellRate), null, true);
+                be.levelWithLinkedCells(level, pos);
                 yield be.energy.getEnergyStored() > 0;
             }
             case REDSTONE_EMITTER -> be.energy.consume(Math.max(1, AvpConfig.server(AvpConfig.SERVER.redstoneEmitterEnergyPerTick)));
@@ -241,6 +249,82 @@ public class PowerMachineBlockEntity extends BlockEntity
         lastFlow = made;
         PowerNetwork.pushOut(level, pos, energy, energy.getMaxEnergyStored(), null, false);
         return made > 0;
+    }
+
+    /**
+     * Solar panels that touch form an array. Panels wired to something push their power out;
+     * the others pass theirs to the wired ones, so one powerline can serve a whole field of panels.
+     */
+    private boolean solarTick(Level level, BlockPos pos)
+    {
+        int made = solarOutput(level, pos);
+        energy.fill(made);
+        lastFlow = made;
+        PowerNetwork.SolarArray array = PowerNetwork.solarArray(level, pos);
+        arrayPanels = array.panels().size();
+        arrayOutlets = array.outlets().size();
+        if (array.outlets().contains(pos))
+        {
+            PowerNetwork.pushOut(level, pos, energy, energy.getMaxEnergyStored(), null, false);
+        }
+        else
+        {
+            for (BlockPos outlet : array.outlets())
+            {
+                if (energy.getEnergyStored() <= 0)
+                {
+                    break;
+                }
+                if (level.getBlockEntity(outlet) instanceof PowerMachineBlockEntity panel)
+                {
+                    int moved = panel.energy.fill(energy.getEnergyStored());
+                    energy.drain(moved);
+                    if (moved > 0)
+                    {
+                        panel.setChanged();
+                    }
+                }
+            }
+        }
+        return made > 0;
+    }
+
+    /**
+     * Linked power cells (touching each other, or on the same powerlines) even out their charge,
+     * so a bank of cells fills and empties together. Each pair is levelled by the fuller cell,
+     * up to the cell output limit per tick.
+     */
+    private void levelWithLinkedCells(Level level, BlockPos pos)
+    {
+        if (level.getGameTime() % 5 != Math.floorMod(pos.asLong(), 5))
+        {
+            return; // every quarter second is plenty
+        }
+        List<BlockPos> linked = PowerNetwork.linkedCells(level, pos);
+        linkedCells = linked.size();
+        long bankStored = energy.getEnergyStored(), bankCapacity = energy.getMaxEnergyStored();
+        int limit = AvpConfig.server(AvpConfig.SERVER.powercellRate) * 5;
+        for (BlockPos other : linked)
+        {
+            if (!(level.getBlockEntity(other) instanceof PowerMachineBlockEntity cell))
+            {
+                continue;
+            }
+            bankStored += cell.energy.getEnergyStored();
+            bankCapacity += cell.energy.getMaxEnergyStored();
+            long mine = energy.getEnergyStored(), theirs = cell.energy.getEnergyStored();
+            long myCap = energy.getMaxEnergyStored(), theirCap = cell.energy.getMaxEnergyStored();
+            // amount that makes both cells equally full (as a fraction of their size)
+            long even = (mine * theirCap - theirs * myCap) / (myCap + theirCap);
+            int move = (int) Math.min(limit, even);
+            if (move > 0)
+            {
+                move = cell.energy.fill(energy.drain(move));
+                cell.setChanged();
+            }
+        }
+        this.bankStored = bankStored;
+        this.bankCapacity = bankCapacity;
     }
 
     /** Daylight on the panel, 0..1 of the full output (same sums as the daylight detector). */
@@ -512,13 +596,20 @@ public class PowerMachineBlockEntity extends BlockEntity
                 String.format("%,d", energy.getEnergyStored()), String.format("%,d", energy.getMaxEnergyStored()));
         Component extra = switch (kind)
         {
-            case SOLAR_PANEL -> Component.translatable("message.avp.power.making", lastFlow);
+            case SOLAR_PANEL -> arrayPanels > 1
+                    ? (arrayOutlets == 0
+                            ? Component.translatable("message.avp.power.array_unwired", lastFlow, arrayPanels)
+                            : Component.translatable("message.avp.power.array", lastFlow, arrayPanels, arrayOutlets))
+                    : Component.translatable("message.avp.power.making", lastFlow);
             case GENERATOR -> burnTime > 0
                     ? Component.translatable("message.avp.power.burning", lastFlow, (burnTime + 19) / 20)
                     : Component.translatable("message.avp.power.no_fuel");
             case REPULSION_GENERATOR -> Component.translatable("message.avp.power.magnets", magnets, PowerMachineBlock.MAX_MAGNETS, lastFlow);
             case TRANSFORMER, STEPDOWN_TRANSFORMER -> Component.translatable("message.avp.power.passing", lastFlow, energy.getMaxEnergyStored());
-            case POWERCELL -> Component.translatable("message.avp.power.giving", lastFlow);
+            case POWERCELL -> linkedCells > 0
+                    ? Component.translatable("message.avp.power.bank", lastFlow, linkedCells + 1,
+                            String.format("%,d", bankStored), String.format("%,d", bankCapacity))
+                    : Component.translatable("message.avp.power.giving", lastFlow);
             default -> getBlockState().getValue(PowerMachineBlock.LIT)
                     ? Component.translatable("message.avp.power.on")
                     : Component.translatable("message.avp.power.off");

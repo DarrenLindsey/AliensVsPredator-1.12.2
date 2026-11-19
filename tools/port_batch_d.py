@@ -424,3 +424,35 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch D2 data written")
+
+
+# ================================================================ D1 follow-up: solar arrays, power cell banks, W-Y lore
+lang = read_json(f"{NA}/lang/en_us.json", {})
+lang.update({
+    "message.avp.power.array": "making %s FE/t - array of %s panels, %s wired",
+    "message.avp.power.array_unwired": "making %s FE/t - array of %s panels, none wired (connect a powerline to any panel)",
+    "message.avp.power.bank": "giving %s FE/t - bank of %s cells: %s / %s FE",
+    # background lore (shown in item tooltips; \n starts a new line)
+    "tooltip.avp.solarpanel": "Weyland-Yutani SC-7 photovoltaic panel.\nTouching panels form an array: wire one and the whole array feeds it.",
+    "tooltip.avp.universalgenerator": "W-Y universal combustion generator.\nBurns almost anything. Standard issue on frontier colonies.",
+    "tooltip.avp.generator": "Magnetic repulsion generator.\nNeodymium magnets spin on frictionless bearings: no fuel, no exhaust.",
+    "tooltip.avp.transformer": "W-Y grid transformer. Power flows from back to front.\nSneak + right-click to turn it.",
+    "tooltip.avp.transformer_stepdown": "Step-down transformer: limits the flow to protect delicate equipment.",
+    "tooltip.avp.powercell": "W-Y lithium-matrix power cell.\nCells that touch, or share a powerline, balance their charge.",
+    "tooltip.avp.powerline": "Insulated W-Y power conduit.\nCarries power instantly to every connected device.",
+    "tooltip.avp.redstonesensor": "Grid isolation switch: passes power only while it gets a redstone signal.",
+    "tooltip.avp.redstoneemitter": "Grid signal relay: gives a redstone signal while powered.",
+    "tooltip.avp.satellitedish": "Long-range uplink dish for colony-to-orbit communications.",
+    "tooltip.avp.teslacoil": "Experimental W-Y perimeter defence.\nStrikes hostile organisms in range. Do not touch.",
+    "tooltip.avp.terminal": "MU/TH/UR 6000 terminal.\nShows the status of the power grid it is wired to.",
+    "tooltip.avp.assembler": "W-Y automated fabricator: builds parts and equipment from raw materials.\n\"Building Better Worlds.\"",
+    "tooltip.avp.cryo_coolant": "Hypersleep-grade cryogenic coolant.\nKeeps a sleeper's metabolism near zero.",
+    "tooltip.avp.part_sensor_array": "The sensor package from an M314 motion tracker.",
+    "tooltip.avp.part_servo": "Precision servo motor, as used in Seegson's Working Joes.",
+    "tooltip.avp.ingot_lithium": "Reacts violently with water. Keep dry.",
+    "tooltip.avp.medpod": "W-Y automated medical pod.",
+    "tooltip.avp.cryostasistube": "Hypersleep chamber.",
+    "tooltip.avp.blastdoor": "Pressure-rated blast door. Program it with a Security Tuner.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("power follow-up data written")

@@ -106,18 +106,33 @@ public class PowerlineBlock extends BaseEntityBlock
     @Override
     protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
     {
-        return state.setValue(CONNECTED.get(dir), connectsTo(level, pos, dir));
+        boolean connected = connectsTo(level, pos, dir);
+        if (connected != state.getValue(CONNECTED.get(dir)) || isConductorChange(neighbor))
+        {
+            // something joined or left the network (a lamp turning on next door doesn't count)
+            if (level instanceof Level real)
+            {
+                PowerNetwork.invalidate(real);
+            }
+        }
+        return state.setValue(CONNECTED.get(dir), connected);
+    }
+
+    /** Redstone sensors switching on/off change the network too. */
+    private static boolean isConductorChange(BlockState neighbor)
+    {
+        return neighbor.getBlock() instanceof RedstoneSensorBlock;
     }
 
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos neighborPos, boolean moving)
     {
         super.neighborChanged(state, level, pos, neighbor, neighborPos, moving);
-        PowerNetwork.invalidate(level);
         // a block entity next door may have just appeared (its FE capability shows up a moment later)
         BlockState updated = withConnections(level, pos, state);
         if (updated != state)
         {
+            PowerNetwork.invalidate(level);
             level.setBlock(pos, updated, Block.UPDATE_CLIENTS);
         }
     }

@@ -49,8 +49,8 @@ public class RedstoneSensorBlock extends Block
         if (powered != state.getValue(POWERED))
         {
             level.setBlock(pos, state.setValue(POWERED, powered), Block.UPDATE_ALL);
+            PowerNetwork.invalidate(level);
         }
-        PowerNetwork.invalidate(level);
     }
 
     @Override

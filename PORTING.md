@@ -150,6 +150,16 @@ character while staying FE-compatible at the edges:
 - **Breakers / fuses** and a **power monitor** (terminal screen showing each network's load).
 - **Grid events**: Xenomorphs cutting power, brownouts that flicker lights, emergency backup cells.
 - Tesla coil wirelessly powering CCFL tubes (as in 1.12.2).
+- Done already: solar panels that touch form an **array** (unwired panels feed the wired ones);
+  **power cells** that touch or share a powerline form a **bank** and balance their charge.
+- **Weyland-Yutani technology** to draw on (it's a far-future setting):
+  - *Atmosphere processor* (Aliens, Hadley's Hope): huge multiblock fusion plant, endgame power,
+    can go critical and explode if damaged or overloaded.
+  - *Compact fusion reactor* / *reactor core* from W-Y starships (Nostromo, Sulaco).
+  - *Synthetic "blood" / micro-cells* powering androids and Working Joes.
+  - Seegson (cheap, low tier, Alien: Isolation) vs Weyland-Yutani (expensive, high tier) parts.
+  - W-Y wireless power beacons, colony-wide grid status on MU/TH/UR terminals, "Special Order 937"
+    style corporate overrides (admins can lock a grid).
 
 ## Planned: Working Joe robots
 

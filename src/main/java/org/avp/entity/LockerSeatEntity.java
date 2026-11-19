@@ -137,11 +137,15 @@ public class LockerSeatEntity extends Entity
         return super.getDismountLocationForPassenger(passenger);
     }
 
-    /** The player stands upright with their feet on the locker floor. */
+    /**
+     * The player stands upright with their feet on the locker floor. Minecraft lowers every rider
+     * by their "vehicle attachment" (0.6 blocks for players - the seated height in a minecart),
+     * so we lift them by the same amount to cancel it out.
+     */
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale)
     {
-        return Vec3.ZERO;
+        return new Vec3(0, passenger.getVehicleAttachmentPoint(this).y, 0);
     }
 
     @Override

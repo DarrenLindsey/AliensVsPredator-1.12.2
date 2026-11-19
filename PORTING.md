@@ -77,6 +77,9 @@ Decided for the creatures phase (1 block = 1 metre, player = 1.8 blocks):
 
 ## Planned: AI ideas
 
+- **Fear system**: players (and maybe NPC marines) get a fear level from darkness, nearby
+  Xenomorphs, motion tracker pings, being hunted, etc., with effects like a heartbeat sound,
+  screen shake/vignette, shaky aim; hiding in a locker lowers it slowly. Configurable.
 - Players hiding in a locker (riding a `LockerSeatEntity`) can't be seen by Xenomorphs/Predators;
   maybe they can still be heard/smelled at close range, or found by Predator thermal vision.
 

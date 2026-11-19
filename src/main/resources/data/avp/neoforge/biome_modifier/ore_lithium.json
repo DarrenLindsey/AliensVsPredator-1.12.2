@@ -6,11 +6,7 @@
     }
   ],
   "type": "neoforge:add_features",
-  "biomes": [
-    "#minecraft:is_ocean",
-    "#minecraft:is_beach",
-    "#minecraft:is_river"
-  ],
+  "biomes": "#avp:has_ore/lithium",
   "features": "avp:ore_lithium",
   "step": "underground_ores"
 }

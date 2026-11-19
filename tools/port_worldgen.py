@@ -40,9 +40,13 @@ ORES = {
     "copper": ("orecopper", 7, 10, -16, 112, "#minecraft:is_overworld", "Copper Ore"),
     "silicon": ("oresilicon", 5, 4, -48, 64, "#minecraft:is_overworld", "Silicon Ore"),
     "monazite": ("oremonazite", 4, 3, -64, 32, "#minecraft:is_overworld", "Monazite Ore"),
-    "lithium": ("orelithium", 10, 2, -32, 48, ["#minecraft:is_ocean", "#minecraft:is_beach", "#minecraft:is_river"], "Lithium Ore"),
+    "lithium": ("orelithium", 10, 2, -32, 48, "#avp:has_ore/lithium", "Lithium Ore"),
     "cobalt": ("orecobalt", 6, 2, -48, 64, "#minecraft:is_jungle", "Cobalt Ore"),
 }
+
+# a biome list can't mix several tags, so lithium's biomes are gathered into one biome tag
+write_json(f"{ND}/avp/tags/worldgen/biome/has_ore/lithium.json",
+           {"replace": False, "values": ["#minecraft:is_ocean", "#minecraft:is_beach", "#minecraft:is_river"]})
 
 lang = read_json(f"{NA}/lang/en_us.json", {})
 tag_files = glob.glob(f"{ND}/minecraft/tags/block/**/*.json", recursive=True) + glob.glob(f"{ND}/c/tags/**/*.json", recursive=True)

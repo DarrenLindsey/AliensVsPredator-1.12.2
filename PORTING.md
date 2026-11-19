@@ -54,6 +54,19 @@ Worlds from 1.12.2 can't be loaded in 1.21.1 anyway, so this doesn't break anyth
 or you just want the newest fixes, change it to the latest `21.1.x` listed at
 https://projects.neoforged.net/neoforged/neoforge
 
+## Planned: Create and Applied Energistics 2 integration
+
+Both support NeoForge 1.21.1. Two levels:
+
+1. **Built in from the start (Batch D machines):** machines, lockers and generators use NeoForge's
+   standard item / fluid / energy (FE) capabilities instead of the old custom power system, so AE2
+   buses/interfaces and Create funnels/arms can move items and power in and out with no extra code.
+2. **Optional integration module** (only active when the other mod is installed, toggled in the config):
+   - Create: crushing/mixing/pressing recipes for AvP ores and materials, maybe a rotation-powered
+     machine, Ponder scenes.
+   - AE2: inscriber/charger recipes for AvP electronics (processors, RAM, circuit boards).
+   Both are declared as *optional* dependencies in `neoforge.mods.toml`.
+
 ## Settings (config)
 
 All settings are in `src/main/java/org/avp/config/AvpConfig.java` and can be changed in game:

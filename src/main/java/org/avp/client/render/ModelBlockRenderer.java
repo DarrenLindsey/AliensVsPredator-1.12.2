@@ -1,5 +1,8 @@
 package org.avp.client.render;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.avp.block.TrophyBlock;
 import org.avp.block.entity.ModelBlockEntity;
 import org.avp.client.model.GeneratedModel;
@@ -21,6 +24,8 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
+
+import org.joml.Vector3f;
 
 /**
  * Draws skulls, biomasks, heads and ferns using models converted from 1.12.2.
@@ -51,6 +56,7 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
     }
 
     /**
+     * Draws the model for a block.
      * @param pos the block position, or null when drawing the item
      */
     public static void draw(BlockState state, BlockPos pos, EntityModelSet models, PoseStack poseStack, MultiBufferSource buffers, int light, int overlay)
@@ -63,8 +69,70 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
         GeneratedModel model = ModelBlockRenderInfo.model(info, models);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(info.texture()));
         poseStack.pushPose();
-        int color = -1; // white = no tint
+        int color = transform(info, state, pos, poseStack);
+        for (ModelPart part : partsToDraw(info, model))
+        {
+            part.render(poseStack, vc, light, overlay, color);
+        }
+        poseStack.popPose();
+    }
 
+    /**
+     * Measures the model exactly as {@link #draw} would place it, in block units.
+     * @return {minX, minY, minZ, maxX, maxY, maxZ}, or null if the block has no model
+     */
+    public static float[] bounds(BlockState state, EntityModelSet models)
+    {
+        ModelBlockRenderInfo.Info info = ModelBlockRenderInfo.get(state.getBlock());
+        if (info == null)
+        {
+            return null;
+        }
+        GeneratedModel model = ModelBlockRenderInfo.model(info, models);
+        PoseStack poseStack = new PoseStack();
+        transform(info, state, null, poseStack);
+        float[] b = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE };
+        Vector3f corner = new Vector3f();
+        for (ModelPart part : partsToDraw(info, model))
+        {
+            part.visit(poseStack, (pose, path, index, cube) ->
+            {
+                // the 8 corners of each box (box sizes are in pixels, 16 per block)
+                for (int i = 0; i < 8; i++)
+                {
+                    corner.set((i & 1) == 0 ? cube.minX : cube.maxX, (i & 2) == 0 ? cube.minY : cube.maxY, (i & 4) == 0 ? cube.minZ : cube.maxZ)
+                            .div(16F);
+                    pose.pose().transformPosition(corner);
+                    b[0] = Math.min(b[0], corner.x); b[1] = Math.min(b[1], corner.y); b[2] = Math.min(b[2], corner.z);
+                    b[3] = Math.max(b[3], corner.x); b[4] = Math.max(b[4], corner.y); b[5] = Math.max(b[5], corner.z);
+                }
+            });
+        }
+        return b[0] == Float.MAX_VALUE ? null : b;
+    }
+
+    private static List<ModelPart> partsToDraw(ModelBlockRenderInfo.Info info, GeneratedModel model)
+    {
+        if (info.parts().isEmpty())
+        {
+            return List.of(model.root());
+        }
+        List<ModelPart> parts = new ArrayList<>();
+        for (String name : info.parts())
+        {
+            ModelPart part = model.parts().get(name);
+            if (part != null)
+            {
+                parts.add(part);
+            }
+        }
+        return parts;
+    }
+
+    /** Moves/turns/scales the pose like the 1.12.2 renderer did. Returns the tint colour. */
+    private static int transform(ModelBlockRenderInfo.Info info, BlockState state, BlockPos pos, PoseStack poseStack)
+    {
+        int color = -1; // white = no tint
         if (info.plant())
         {
             // size/colour/turn picked from the position, so every fern looks a bit different but never changes
@@ -83,55 +151,38 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
             poseStack.translate(offX, info.y(), offZ);
             poseStack.mulPose(Axis.XP.rotationDegrees(180F));
             poseStack.mulPose(Axis.YP.rotationDegrees(turn));
-        }
-        else
-        {
-            Direction facing = state.hasProperty(TrophyBlock.FACING) ? state.getValue(TrophyBlock.FACING) : Direction.SOUTH;
-            poseStack.translate(0.5F, 0, 0.5F);
-            poseStack.scale(0.64F, -0.64F, 0.64F);
-            poseStack.mulPose(Axis.YP.rotationDegrees(180F - facing.toYRot()));
-            poseStack.scale(info.scale(), info.scale(), info.scale());
-            if (info.turnY() != 0)
-            {
-                poseStack.mulPose(Axis.YP.rotationDegrees(info.turnY()));
-            }
-            poseStack.translate(info.x(), info.y(), info.z());
-            if (state.hasProperty(TrophyBlock.ORIENTATION))
-            {
-                switch (state.getValue(TrophyBlock.ORIENTATION))
-                {
-                    case FLAT ->
-                    {
-                        poseStack.translate(-0.4F, 0.71F, 0);
-                        poseStack.mulPose(Axis.ZP.rotationDegrees(-53.5F));
-                    }
-                    case WALL ->
-                    {
-                        poseStack.translate(-0.25F, -0.1F, 0);
-                        poseStack.mulPose(Axis.ZP.rotationDegrees(37.5F));
-                    }
-                    default ->
-                    {
-                    }
-                }
-            }
+            return color;
         }
 
-        if (info.parts().isEmpty())
+        Direction facing = state.hasProperty(TrophyBlock.FACING) ? state.getValue(TrophyBlock.FACING) : Direction.SOUTH;
+        poseStack.translate(0.5F, 0, 0.5F);
+        poseStack.scale(0.64F, -0.64F, 0.64F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180F - facing.toYRot()));
+        poseStack.scale(info.scale(), info.scale(), info.scale());
+        if (info.turnY() != 0)
         {
-            model.root().render(poseStack, vc, light, overlay, color);
+            poseStack.mulPose(Axis.YP.rotationDegrees(info.turnY()));
         }
-        else
+        poseStack.translate(info.x(), info.y(), info.z());
+        if (state.hasProperty(TrophyBlock.ORIENTATION))
         {
-            for (String name : info.parts())
+            switch (state.getValue(TrophyBlock.ORIENTATION))
             {
-                ModelPart part = model.parts().get(name);
-                if (part != null)
+                case FLAT ->
                 {
-                    part.render(poseStack, vc, light, overlay, color);
+                    poseStack.translate(-0.4F, 0.71F, 0);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(-53.5F));
+                }
+                case WALL ->
+                {
+                    poseStack.translate(-0.25F, -0.1F, 0);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(37.5F));
+                }
+                default ->
+                {
                 }
             }
         }
-        poseStack.popPose();
+        return color;
     }
 }

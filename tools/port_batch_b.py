@@ -75,17 +75,33 @@ TROPHIES = {
 }
 FERNS = {"paradisian_ground_fern": "Paradisian Ground Fern", "paradisian_tree_fern": "Paradisian Tree Fern"}
 
+BLOCK_DISPLAY = {  # same as minecraft:block/block, so the items look like normal blocks
+    "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.25, 0.25, 0.25]},
+    "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.5, 0.5, 0.5]},
+    "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375, 0.375, 0.375]},
+    "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [0.40, 0.40, 0.40]},
+    "firstperson_lefthand": {"rotation": [0, 225, 0], "translation": [0, 0, 0], "scale": [0.40, 0.40, 0.40]},
+}
+
+
+# Items: drawn by ModelBlockItemRenderer ("builtin/entity"), shrunk to fit a block and shown like a block.
+def model_item(i, particle):
+    write_json(f"{NA}/models/item/{i}.json", {"parent": "minecraft:builtin/entity", "display": BLOCK_DISPLAY,
+                                              "textures": {"particle": particle}})
+
+
 # The block model is never drawn (the renderer draws it); it only supplies the break-particle texture.
 write_json(f"{NA}/models/block/trophy.json", {"textures": {"particle": "minecraft:block/bone_block_side"}})
 write_json(f"{NA}/models/block/fern_plant.json", {"textures": {"particle": "avp:block/paradise_grass"}})
 for i, name in TROPHIES.items():
     write_json(f"{NA}/blockstates/{i}.json", {"variants": {"": {"model": "avp:block/trophy"}}})
-    write_json(f"{NA}/models/item/{i}.json", {"parent": "minecraft:item/template_skull"})
+    model_item(i, "minecraft:block/bone_block_side")
     drops_self(i)
     lang[f"block.avp.{i}"] = name
 for i, name in FERNS.items():
     write_json(f"{NA}/blockstates/{i}.json", {"variants": {"": {"model": "avp:block/fern_plant"}}})
-    write_json(f"{NA}/models/item/{i}.json", {"parent": "minecraft:item/template_skull"})
+    model_item(i, "avp:block/paradise_grass")
     drops_self(i)
     lang[f"block.avp.{i}"] = name
 add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", [f"avp:{i}" for i in TROPHIES])
@@ -100,14 +116,6 @@ shutil.copy(f"{LA}/textures/blocks/reflection.png", f"{NA}/textures/block/reflec
 mtl = open(f"{LA}/models/block/reflection.mtl").read().replace("avp:blocks/", "avp:block/")
 open(f"{NA}/models/block/reflection.mtl", "w").write(mtl.rstrip("\n") + "\n")
 
-BLOCK_DISPLAY = {  # same as minecraft:block/block, so the items look like normal blocks
-    "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]},
-    "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.25, 0.25, 0.25]},
-    "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.5, 0.5, 0.5]},
-    "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375, 0.375, 0.375]},
-    "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [0.40, 0.40, 0.40]},
-    "firstperson_lefthand": {"rotation": [0, 225, 0], "translation": [0, 0, 0], "scale": [0.40, 0.40, 0.40]},
-}
 Y = {"north": 0, "east": 90, "south": 180, "west": 270}
 OPPOSITE = {"north": "south", "south": "north", "east": "west", "west": "east"}
 X = {"bottom": 0, "top": 180, "side": 270}

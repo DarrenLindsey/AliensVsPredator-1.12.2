@@ -188,5 +188,20 @@
   "block.avp.supplychuteblock_seegson": "Supply Crate (Seegson)",
   "avp.configuration.lockersCanHide": "Lockers Can Hide Players",
   "avp.configuration.lockersCanHide.tooltip": "Sneak + right-click a locker with an empty hand to hide inside it; sneak to get out.",
-  "entity.avp.locker_seat": "Locker"
+  "entity.avp.locker_seat": "Locker",
+  "block.avp.lightpanel": "Light Panel",
+  "block.avp.ccfltube": "Fluorescent Light",
+  "block.avp.cryostasistube": "Cryostasis Tube",
+  "block.avp.engineership_ampule": "Engineer Ampule",
+  "avp.configuration.power": "Power",
+  "avp.configuration.power.button": "Power...",
+  "avp.configuration.power.tooltip": "How lights and machines get their power",
+  "avp.configuration.machinesNeedPower": "Machines Need Power",
+  "avp.configuration.machinesNeedPower.tooltip": "Lights and machines only work when powered. Turn off to have them always on.",
+  "avp.configuration.redstonePowersMachines": "Redstone Powers Machines",
+  "avp.configuration.redstonePowersMachines.tooltip": "A redstone signal also powers lights and machines (no FE needed).",
+  "avp.configuration.lightEnergyPerTick": "Light Energy Use (FE/tick)",
+  "avp.configuration.lightEnergyPerTick.tooltip": "FE a light panel or fluorescent light uses per tick while on.",
+  "avp.configuration.cryostasisTubeEnergyPerTick": "Cryostasis Tube Energy Use (FE/tick)",
+  "avp.configuration.cryostasisTubeEnergyPerTick.tooltip": "FE a cryostasis tube uses per tick to keep its contents frozen."
 }

@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 
 import org.avp.AliensVsPredator;
 import org.avp.block.ModelPlantBlock;
+import org.avp.block.PoweredBlock;
+import org.avp.config.AvpConfig;
 import org.avp.block.ModTreeGrowers;
 import org.avp.block.ShapeBlock;
 import org.avp.block.StalagmiteBlock;
@@ -249,6 +251,22 @@ public final class ModBlocks
     public static final DeferredBlock<StorageBlock> SUPPLYCRATE_MARINES = storage("supplychuteblock_marines", false, MapColor.COLOR_GREEN);
     public static final DeferredBlock<StorageBlock> SUPPLYCRATE_SEEGSON = storage("supplychuteblock_seegson", false, MapColor.COLOR_ORANGE);
 
+    // ---- Lights and powered blocks (batch C2a): FE or redstone, see PoweredBlockEntity ----
+    private static final List<DeferredBlock<? extends Block>> POWERED_BLOCKS = new ArrayList<>();
+    public static final DeferredBlock<PoweredBlock> LIGHTPANEL = powered("lightpanel", 15, false,
+            () -> AvpConfig.server(AvpConfig.SERVER.lightEnergyPerTick));
+    public static final DeferredBlock<PoweredBlock> CCFLTUBE = powered("ccfltube", 15, false,
+            () -> AvpConfig.server(AvpConfig.SERVER.lightEnergyPerTick));
+    public static final DeferredBlock<PoweredBlock> CRYOSTASISTUBE = powered("cryostasistube", 6, true,
+            () -> AvpConfig.server(AvpConfig.SERVER.cryostasisTubeEnergyPerTick));
+    /** Engineer ampule (black goo container): a decorative model block, drawn like the trophies. */
+    public static final DeferredBlock<TrophyBlock> ENGINEERSHIP_AMPULE = trophy("engineership_ampule", false);
+
+    public static Block[] poweredBlocks()
+    {
+        return POWERED_BLOCKS.stream().map(DeferredBlock::get).toArray(Block[]::new);
+    }
+
     /** Blocks that use the StorageBlockEntity. */
     public static Block[] storageBlocks()
     {
@@ -316,6 +334,19 @@ public final class ModBlocks
                 .mapColor(MapColor.PLANT).noCollission().instabreak().sound(SoundType.GRASS)
                 .pushReaction(PushReaction.DESTROY)));
         MODEL_BLOCKS.add(block);
+        return block;
+    }
+
+    /**
+     * @param light     light level while on
+     * @param seeThrough glass parts (cryostasis tube)
+     */
+    private static DeferredBlock<PoweredBlock> powered(String id, int light, boolean seeThrough, java.util.function.IntSupplier energy)
+    {
+        DeferredBlock<PoweredBlock> block = register(id, Tab.MAIN, () -> new PoweredBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL).sound(seeThrough ? SoundType.GLASS : SoundType.METAL).strength(2.0F, 6.0F)
+                .noOcclusion().lightLevel(state -> state.getValue(PoweredBlock.LIT) ? light : 0), energy));
+        POWERED_BLOCKS.add(block);
         return block;
     }
 

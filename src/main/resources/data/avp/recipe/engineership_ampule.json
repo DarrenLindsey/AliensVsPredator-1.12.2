@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "ABA",
+    "BCB",
+    "ABA"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:unistone"
+    },
+    "B": {
+      "item": "avp:phial_goo"
+    },
+    "C": {
+      "item": "avp:unitree_tendons"
+    }
+  },
+  "result": {
+    "id": "avp:engineership_ampule"
+  }
+}

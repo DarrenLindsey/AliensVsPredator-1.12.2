@@ -7,7 +7,6 @@ blastdoor_sevastopol: needs avp:blastdoor.sevastopol
 block_blastdoor: needs avp:blastdoor
 capacitor: needs ore:lithium
 chargepack: needs avp:chargepack
-engineership_ampule: needs avp:engineership.ampule
 grenade_incindiary: needs avp:grenade.incindiary
 grenade_m40: needs avp:grenade.m40
 gun_ak47: needs avp:gun.ak47

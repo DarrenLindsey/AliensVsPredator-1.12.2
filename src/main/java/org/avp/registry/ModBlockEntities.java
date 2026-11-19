@@ -2,6 +2,7 @@ package org.avp.registry;
 
 import org.avp.AliensVsPredator;
 import org.avp.block.entity.ModelBlockEntity;
+import org.avp.block.entity.PoweredBlockEntity;
 import org.avp.block.entity.ShapeBlockEntity;
 import org.avp.block.entity.StorageBlockEntity;
 
@@ -29,6 +30,11 @@ public final class ModBlockEntities
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",
             () -> BlockEntityType.Builder.of(StorageBlockEntity::new, ModBlocks.storageBlocks()).build(null));
+
+    /** Lights and powered blocks (FE energy buffer). */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredBlockEntity>> POWERED = BLOCK_ENTITIES.register("powered",
+            () -> BlockEntityType.Builder.of(PoweredBlockEntity::new, ModBlocks.poweredBlocks()).build(null));
 
     private ModBlockEntities()
     {

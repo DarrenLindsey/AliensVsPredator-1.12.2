@@ -59,6 +59,10 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue shapesCanCopyBlocks;
         public final ModConfigSpec.BooleanValue trophiesCanBeTipped;
         public final ModConfigSpec.BooleanValue lockersCanHide;
+        public final ModConfigSpec.BooleanValue machinesNeedPower;
+        public final ModConfigSpec.BooleanValue redstonePowersMachines;
+        public final ModConfigSpec.IntValue lightEnergyPerTick;
+        public final ModConfigSpec.IntValue cryostasisTubeEnergyPerTick;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -72,6 +76,21 @@ public final class AvpConfig
             lockersCanHide = b
                     .comment("Players can hide inside lockers: sneak + right-click with an empty hand to get in, sneak to get out.")
                     .define("lockersCanHide", true);
+            b.pop();
+
+            b.push("power");
+            machinesNeedPower = b
+                    .comment("Lights and machines only work when powered. Turn off to have them always on.")
+                    .define("machinesNeedPower", true);
+            redstonePowersMachines = b
+                    .comment("A redstone signal also powers lights and machines (no FE needed).")
+                    .define("redstonePowersMachines", true);
+            lightEnergyPerTick = b
+                    .comment("FE (Forge Energy) a light panel or fluorescent light uses per tick while on.")
+                    .defineInRange("lightEnergyPerTick", 2, 0, 10_000);
+            cryostasisTubeEnergyPerTick = b
+                    .comment("FE a cryostasis tube uses per tick to keep its contents frozen.")
+                    .defineInRange("cryostasisTubeEnergyPerTick", 10, 0, 10_000);
             b.pop();
         }
     }
@@ -94,6 +113,11 @@ public final class AvpConfig
     public static boolean client(ModConfigSpec.BooleanValue value)
     {
         return get(CLIENT_SPEC, value);
+    }
+
+    public static int server(ModConfigSpec.IntValue value)
+    {
+        return get(SERVER_SPEC, value);
     }
 
     public static double client(ModConfigSpec.DoubleValue value)

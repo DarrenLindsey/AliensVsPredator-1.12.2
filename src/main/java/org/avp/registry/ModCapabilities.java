@@ -32,6 +32,13 @@ public final class ModCapabilities
         }, ModBlocks.storageBlocks());
     }
 
+    /** Energy (FE): cables and generators from any mod can power lights and machines. */
+    @SubscribeEvent
+    public static void registerEnergy(RegisterCapabilitiesEvent event)
+    {
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.POWERED.get(), (be, side) -> be.getEnergy());
+    }
+
     private ModCapabilities()
     {
     }

@@ -61,3 +61,47 @@ lang["avp.configuration.lockersCanHide.tooltip"] = "Sneak + right-click a locker
 lang["entity.avp.locker_seat"] = "Locker"
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch C1 data written")
+
+
+# ---------------------------------------------------------------- batch C2a: lights, cryostasis tube, ampule
+POWERED = {
+    "lightpanel": "Light Panel",
+    "ccfltube": "Fluorescent Light",
+    "cryostasistube": "Cryostasis Tube",
+}
+write_json(f"{NA}/models/block/powered.json", {"textures": {"particle": "minecraft:block/iron_block"}})
+for i, name in POWERED.items():
+    write_json(f"{NA}/blockstates/{i}.json", {"variants": {"": {"model": "avp:block/powered"}}})
+    write_json(f"{NA}/models/item/{i}.json", {"parent": "minecraft:builtin/entity", "display": BLOCK_DISPLAY,
+                                              "textures": {"particle": "minecraft:block/iron_block"}})
+    write_json(f"{ND}/avp/loot_table/blocks/{i}.json", {"type": "minecraft:block", "pools": [{
+        "rolls": 1, "entries": [{"type": "minecraft:item", "name": f"avp:{i}"}],
+        "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
+    lang[f"block.avp.{i}"] = name
+add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", [f"avp:{i}" for i in POWERED])
+
+# the ampule is drawn like the trophies (ModelBlockRenderer)
+write_json(f"{NA}/blockstates/engineership_ampule.json", {"variants": {"": {"model": "avp:block/trophy"}}})
+write_json(f"{NA}/models/item/engineership_ampule.json", {"parent": "minecraft:builtin/entity", "display": BLOCK_DISPLAY,
+                                                          "textures": {"particle": "minecraft:block/bone_block_side"}})
+write_json(f"{ND}/avp/loot_table/blocks/engineership_ampule.json", {"type": "minecraft:block", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:engineership_ampule"}],
+    "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
+lang["block.avp.engineership_ampule"] = "Engineer Ampule"
+add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", ["avp:engineership_ampule"])
+
+lang.update({
+    "avp.configuration.power": "Power",
+    "avp.configuration.power.button": "Power...",
+    "avp.configuration.power.tooltip": "How lights and machines get their power",
+    "avp.configuration.machinesNeedPower": "Machines Need Power",
+    "avp.configuration.machinesNeedPower.tooltip": "Lights and machines only work when powered. Turn off to have them always on.",
+    "avp.configuration.redstonePowersMachines": "Redstone Powers Machines",
+    "avp.configuration.redstonePowersMachines.tooltip": "A redstone signal also powers lights and machines (no FE needed).",
+    "avp.configuration.lightEnergyPerTick": "Light Energy Use (FE/tick)",
+    "avp.configuration.lightEnergyPerTick.tooltip": "FE a light panel or fluorescent light uses per tick while on.",
+    "avp.configuration.cryostasisTubeEnergyPerTick": "Cryostasis Tube Energy Use (FE/tick)",
+    "avp.configuration.cryostasisTubeEnergyPerTick.tooltip": "FE a cryostasis tube uses per tick to keep its contents frozen.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("batch C2a data written")

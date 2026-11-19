@@ -43,7 +43,9 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Batch B - Decorative 3D blocks: skulls, biomasks, heads, ferns, slopes/corners/ridges/pyramids
       (+ `tools/convert_models.py`, which converts all 99 old box models)
 - [x] Batch C1 - Lockers, gun locker, supply crates (64-slot menus, hopper/AE2/Create item access)
-- [ ] Batch C2 - Medpod, blast doors, cryostasis tube, ampule, light panel, CCFL tube, temple spawner
+- [x] Batch C2a - Light panel, fluorescent light (CCFL), cryostasis tube, ampule; FE power + redstone
+- [ ] Batch C2b - Medpod, blast doors
+- [ ] Cryostasis tube contents (creature in stasis, cracking when unpowered), temple spawner (with creatures)
 - [ ] Batch D - Power system (FE) and machines
 - [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
 - [ ] Hive resin, supply crate parachute drop (with the creatures/entities)

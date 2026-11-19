@@ -5,7 +5,9 @@ import java.util.Arrays;
 import org.avp.AliensVsPredator;
 import org.avp.client.model.MimicBakedModel;
 import org.avp.client.model.geometry.AllModelLayers;
+import org.avp.client.render.BlockEntityItemRenderer;
 import org.avp.client.render.ModelBlockItemRenderer;
+import org.avp.client.render.PoweredBlockRenderer;
 import org.avp.client.render.ModelBlockRenderInfo;
 import org.avp.client.render.ModelBlockRenderer;
 import org.avp.registry.ModBlockEntities;
@@ -55,6 +57,7 @@ public final class ClientSetup
         event.registerBlockEntityRenderer(ModBlockEntities.MODEL_BLOCK.get(), ModelBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.STORAGE.get(), ModelBlockRenderer::new);
         event.registerEntityRenderer(ModEntities.LOCKER_SEAT.get(), NoopRenderer::new); // invisible
+        event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
     }
 
     /** Skull/biomask/head/fern items draw their 3D model too. */
@@ -77,6 +80,21 @@ public final class ClientSetup
         };
         event.registerItem(extensions, Arrays.stream(ModBlocks.modelBlocks()).map(Block::asItem).toArray(Item[]::new));
         event.registerItem(extensions, Arrays.stream(ModBlocks.storageBlocks()).map(Block::asItem).toArray(Item[]::new));
+        IClientItemExtensions beItems = new IClientItemExtensions()
+        {
+            private BlockEntityWithoutLevelRenderer renderer;
+
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer()
+            {
+                if (renderer == null)
+                {
+                    renderer = new BlockEntityItemRenderer();
+                }
+                return renderer;
+            }
+        };
+        event.registerItem(beItems, Arrays.stream(ModBlocks.poweredBlocks()).map(Block::asItem).toArray(Item[]::new));
     }
 
     @SubscribeEvent

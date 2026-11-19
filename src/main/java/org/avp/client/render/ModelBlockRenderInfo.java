@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.avp.AliensVsPredator;
 import org.avp.client.model.GeneratedModel;
 import org.avp.client.model.geometry.AethonHeadModel;
+import org.avp.client.model.geometry.AmpuleModel;
 import org.avp.client.model.geometry.BiomaskBerserkerModel;
 import org.avp.client.model.geometry.BiomaskClassicModel;
 import org.avp.client.model.geometry.BiomaskFalconerModel;
@@ -120,6 +121,9 @@ public final class ModelBlockRenderInfo
 
         add(ModBlocks.PARADISIAN_GROUND_FERN, new Info(GroundFernModel.LAYER, GroundFernModel::new, tex("tile/plants/paradisiangroundfern.png"), List.of(), 1, 0, 1.455F, 0, 0, Kind.PLANT, 1, null));
         add(ModBlocks.PARADISIAN_TREE_FERN, new Info(TreeFernModel.LAYER, TreeFernModel::new, tex("tile/plants/paradisiantreefern.png"), List.of(), 1, 0, 1.455F, 0, 0, Kind.PLANT, 1, null));
+
+        // ampule: 1.12.2 RenderAmpule (translate y 0.955, scale 0.64, flipped, faces the player)
+        add(ModBlocks.ENGINEERSHIP_AMPULE, new Info(AmpuleModel.LAYER, AmpuleModel::new, tex("tile/ampule.png"), List.of(), 0.64F, 0, 0.955F, 0, 0, Kind.PROP, 1, null));
 
         // lockers: 1.12.2 RenderLocker/RenderGunLocker (translate y 1.41, scale 0.95, door swings -1.5 rad when open)
         Poser lockerDoor = (model, state) -> model.parts().get("door").yRot =

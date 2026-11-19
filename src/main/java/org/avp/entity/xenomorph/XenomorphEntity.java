@@ -64,6 +64,28 @@ public abstract class XenomorphEntity extends Monster
         setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.LAVA, -1.0F);
     }
 
+    // ---- client: how far the tail is curled up (0 = straight out behind, 1 = fully curled)
+    private float tailCurl;
+
+    /**
+     * Client only: measures the room behind the creature (at tail height) and eases the tail curl
+     * towards what fits, so the tail never pokes through a wall.
+     *
+     * @param tailLength how far the straight tail reaches behind the creature, in blocks
+     */
+    public float updateTailCurl(float tailLength)
+    {
+        net.minecraft.world.phys.Vec3 back = net.minecraft.world.phys.Vec3.directionFromRotation(0, yBodyRot).scale(-1);
+        net.minecraft.world.phys.Vec3 from = position().add(0, Math.min(1.0, getBbHeight() * 0.5), 0);
+        net.minecraft.world.phys.Vec3 to = from.add(back.scale(tailLength));
+        var hit = level().clip(new net.minecraft.world.level.ClipContext(from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, this));
+        double room = hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? tailLength : hit.getLocation().distanceTo(from);
+        float wanted = (float) Math.max(0, Math.min(1, (tailLength - room) / tailLength + 0.1));
+        tailCurl += (wanted - tailCurl) * 0.15F;
+        return tailCurl;
+    }
+
     // ---- behaviour state used by XenoBrain
 
     public void setState(String state)

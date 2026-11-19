@@ -225,6 +225,14 @@ Seegson "Working Joe" androids you build and set up as a network:
 - Players hiding in a locker (riding a `LockerSeatEntity`) can't be seen by Xenomorphs/Predators;
   maybe they can still be heard/smelled at close range, or found by Predator thermal vision.
 
+## Planned: Xenomorph combat moves
+
+- **Tail stab**: a reach attack (2-3 blocks) through the target, short cooldown; pierces armour,
+  can pin/skewer smaller mobs (the Drone/Warrior tail animation already has the "stabber" part).
+- **Throw**: grab and hurl the target a few blocks (knockback + fall damage), like the Warrior
+  flinging marines in Aliens; maybe slam into walls.
+- Both as AI options (used when flanking/cornered) and tied into the fear system later.
+
 ## Planned: Create and Applied Energistics 2 integration
 
 Both support NeoForge 1.21.1. Two levels:

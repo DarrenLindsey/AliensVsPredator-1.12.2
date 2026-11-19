@@ -25,7 +25,9 @@ public class DroneEntityModel extends AvpEntityModel<DroneEntity, DroneModel>
             angle = Mth.cos(age * 0.07F);
             distMult = 0.95F;
         }
-        doTail(angle, distMult);
+        // curl the tail up over the back when there's a wall behind (it's ~4 blocks long)
+        float curl = drone.updateTailCurl(4.2F * drone.getScale());
+        doTail(angle * (1F - curl * 0.7F), distMult, curl);
 
         float head = (float) Math.toRadians(netHeadYaw) * 0.75F;
         for (ModelPart part : new ModelPart[] { m.head1, m.head2, m.head3, m.head4, m.head5, m.head6 })
@@ -52,32 +54,57 @@ public class DroneEntityModel extends AvpEntityModel<DroneEntity, DroneModel>
         }
     }
 
-    /** 1.12.2 ModelDrone.doTail: each tail segment hangs off the end of the one before it. */
-    private void doTail(float angle, float distMult)
+    /**
+     * 1.12.2 ModelDrone.doTail: each tail segment hangs off the end of the one before it.
+     * New: "curl" bends each segment a little further upwards (up to ~200 degrees in total),
+     * so the tail rolls up over the back when there's a wall behind. With curl 0 this is exactly
+     * the 1.12.2 tail.
+     */
+    private void doTail(float angle, float distMult, float curl)
     {
         DroneModel m = model;
+        ModelPart[] tail = { m.tail1, m.tail2, m.tail3, m.tail4, m.tail5, m.stabber };
+        ModelPart[] spikes = { m.tailSpikes1, m.tailSpikes2, m.tailSpikes3, m.tailSpikes4, m.tailSpikes5, null };
+        // the modelled drop between segments (read before anything moves)
+        float[] drop = new float[tail.length];
+        for (int k = 1; k < tail.length; k++)
+        {
+            drop[k] = tail[k].y - tail[k - 1].y;
+        }
+        float bend = curl * 0.6F; // extra upward bend per segment, radians
         float multiplier = 0.25F;
-        m.tail1.yRot = angle / 1.5F;
-        m.tailSpikes1.yRot = angle / 1.5F;
-        follow(m.tail2, m.tail1, angle * multiplier);
-        follow(m.tailSpikes2, m.tail1, angle * multiplier);
-        multiplier += distMult;
-        follow(m.tail3, m.tail2, angle * multiplier);
-        follow(m.tailSpikes3, m.tail2, angle * multiplier);
-        multiplier += distMult;
-        follow(m.tail4, m.tail3, angle * multiplier);
-        follow(m.tailSpikes4, m.tail3, angle * multiplier);
-        multiplier += distMult;
-        follow(m.tail5, m.tail4, angle * multiplier);
-        follow(m.tailSpikes5, m.tail4, angle * multiplier);
-        multiplier += distMult;
-        follow(m.stabber, m.tail5, angle * multiplier);
+        for (int k = 0; k < tail.length; k++)
+        {
+            if (k >= 2)
+            {
+                multiplier += distMult; // 1.12.2: 0.25, then + distMult for each segment after tail2
+            }
+            float yaw = k == 0 ? angle / 1.5F : angle * multiplier;
+            float up = bend * (k + 1);
+            tail[k].yRot = yaw;
+            tail[k].xRot += up;
+            if (k > 0)
+            {
+                place(tail[k], tail[k - 1], bend * k, drop[k]);
+            }
+            if (spikes[k] != null)
+            {
+                spikes[k].yRot = yaw;
+                spikes[k].xRot += up;
+                if (k > 0)
+                {
+                    place(spikes[k], tail[k - 1], bend * k, drop[k]);
+                }
+            }
+        }
     }
 
-    private static void follow(ModelPart part, ModelPart previous, float yaw)
+    /** Puts a segment at the far end of the previous one (10 pixels along it), raised by its curl. */
+    private static void place(ModelPart part, ModelPart previous, float previousUp, float drop)
     {
-        part.yRot = yaw;
-        part.z = previous.z + Mth.cos(previous.yRot) * 10.0F;
-        part.x = previous.x + Mth.sin(previous.yRot) * 10.0F;
+        float along = Mth.cos(previousUp) * 10.0F;
+        part.z = previous.z + Mth.cos(previous.yRot) * along;
+        part.x = previous.x + Mth.sin(previous.yRot) * along;
+        part.y = previous.y + drop * Mth.cos(previousUp) - Mth.sin(previousUp) * 10.0F; // model y points down
     }
 }

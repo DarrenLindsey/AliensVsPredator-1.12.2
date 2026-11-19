@@ -24,6 +24,7 @@ public final class AllModelLayers
         event.registerLayerDefinition(CrusherModel.LAYER, CrusherModel::createLayer);
         event.registerLayerDefinition(CrusherQuadModel.LAYER, CrusherQuadModel::createLayer);
         event.registerLayerDefinition(DeaconModel.LAYER, DeaconModel::createLayer);
+        event.registerLayerDefinition(DeaconAdultModel.LAYER, DeaconAdultModel::createLayer);
         event.registerLayerDefinition(DeaconSharkModel.LAYER, DeaconSharkModel::createLayer);
         event.registerLayerDefinition(DracoOvamorphModel.LAYER, DracoOvamorphModel::createLayer);
         event.registerLayerDefinition(DracobursterModel.LAYER, DracobursterModel::createLayer);
@@ -39,6 +40,7 @@ public final class AllModelLayers
         event.registerLayerDefinition(NauticomorphModel.LAYER, NauticomorphModel::createLayer);
         event.registerLayerDefinition(OctohuggerModel.LAYER, OctohuggerModel::createLayer);
         event.registerLayerDefinition(OvamorphModel.LAYER, OvamorphModel::createLayer);
+        event.registerLayerDefinition(OvamorphGigerModel.LAYER, OvamorphGigerModel::createLayer);
         event.registerLayerDefinition(PantheramorphModel.LAYER, PantheramorphModel::createLayer);
         event.registerLayerDefinition(PraetorianModel.LAYER, PraetorianModel::createLayer);
         event.registerLayerDefinition(PredalienModel.LAYER, PredalienModel::createLayer);
@@ -47,6 +49,7 @@ public final class AllModelLayers
         event.registerLayerDefinition(RunnerDroneModel.LAYER, RunnerDroneModel::createLayer);
         event.registerLayerDefinition(RunnerWarriorModel.LAYER, RunnerWarriorModel::createLayer);
         event.registerLayerDefinition(SpitterModel.LAYER, SpitterModel::createLayer);
+        event.registerLayerDefinition(TrilobiteModel.LAYER, TrilobiteModel::createLayer);
         event.registerLayerDefinition(UltramorphModel.LAYER, UltramorphModel::createLayer);
         event.registerLayerDefinition(UrsuidaeModel.LAYER, UrsuidaeModel::createLayer);
         event.registerLayerDefinition(VardaMonkeyModel.LAYER, VardaMonkeyModel::createLayer);

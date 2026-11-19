@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "avp:spawn_enabled",
+      "creature": "yautja_warrior"
+    }
+  ],
+  "type": "neoforge:add_spawns",
+  "biomes": "#avp:spawns/yautja_warrior",
+  "spawners": [
+    {
+      "type": "avp:yautja_warrior",
+      "weight": 1,
+      "minCount": 1,
+      "maxCount": 1
+    }
+  ]
+}

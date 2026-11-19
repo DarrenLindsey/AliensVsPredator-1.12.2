@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#avp:xenomorphs"
+    "#avp:xenomorphs",
+    "#avp:predators"
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "avp:spawn_enabled",
+      "creature": "trilobite"
+    }
+  ],
+  "type": "neoforge:add_spawns",
+  "biomes": "#avp:spawns/trilobite",
+  "spawners": [
+    {
+      "type": "avp:trilobite",
+      "weight": 2,
+      "minCount": 1,
+      "maxCount": 1
+    }
+  ]
+}

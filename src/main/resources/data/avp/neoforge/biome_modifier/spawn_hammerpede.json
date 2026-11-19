@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "avp:spawn_enabled",
+      "creature": "hammerpede"
+    }
+  ],
+  "type": "neoforge:add_spawns",
+  "biomes": "#avp:spawns/hammerpede",
+  "spawners": [
+    {
+      "type": "avp:hammerpede",
+      "weight": 4,
+      "minCount": 1,
+      "maxCount": 3
+    }
+  ]
+}

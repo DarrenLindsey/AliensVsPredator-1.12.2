@@ -248,7 +248,7 @@ def split_statements(body):
 
 
 def parse_statement(s, parts, order, cur_size, warnings, cls):
-    if m := re.fullmatch(r"(\w+)\s*=\s*new ModelRenderer\((.*)\)", s, re.S):
+    if m := re.fullmatch(r"(\w+)\s*=\s*new (?:ModelRenderer|Part)\((.*)\)", s, re.S):
         a = args(m.group(2))
         if a[0] != "this" or len(a) not in (1, 3):
             return False
@@ -315,7 +315,7 @@ def main():
     done, all_warnings = [], []
     for f in files:
         src = open(f, encoding="utf-8", errors="replace").read()
-        if "new ModelRenderer" not in src:
+        if "new ModelRenderer" not in src and "new Part(" not in src:
             continue
         result, warnings = convert(f)
         all_warnings += warnings

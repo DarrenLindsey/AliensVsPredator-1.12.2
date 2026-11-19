@@ -80,9 +80,27 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Xenomorph hunger meter and film-style behaviour (org.avp.entity.xenomorph.XenoBrain): senses
       (sight + hearing, sneaking, locker hiding), investigating, stalking/flanking, retreat + regeneration,
       learning turret positions, fire avoidance, lurking in the dark, smashing lights and wooden doors.
-- [ ] Next: Warrior, Praetorian, Queen + hive resin / hive building (Drones build resin)
+- [x] Every other creature, from a catalog (org.avp.entity.creature.Creatures: 1.12.2 stats/size/model/
+      texture/scale + abilities) with one class per family and a generic name-based animator/renderer:
+  - Xenomorphs: Warrior, Praetorian (guards the Queen), Queen/Matriarch (boss bar, lays eggs when fed,
+    calls the hive when hurt, one per hive), Crusher (charge), Spitter (acid spit), Boiler (swells and
+    bursts), Runner Drone/Warrior, Nauticomorph/Belugamorph (aquatic), Predalien (implanting bite),
+    Ultramorph, Bat Xenomorph/Dracomorph (flying), Pantheramorph, Myceliomorph, Deacon -> Adult Deacon.
+    Growth: Drone -> Warrior -> Praetorian -> (royal jelly) Queen; Runner Drone -> Runner Warrior -> Crusher.
+  - Chestburster variants (Queen, Predalien, Runner, Beluga, Draco); host DNA decides the embryo
+    (EmbryoKinds: creeper -> Boiler, llama/witch -> Spitter, cow/pig/... -> Runner, Yautja -> Predalien,
+    Engineer -> Ultramorph, bat, ocelot, squid, dolphin, mooshroom, Ender Dragon...).
+  - Royal Facehugger (Queen embryo), Octohugger, Trilobite (Deacon embryo); Draco and Giger eggs.
+  - Yautja Warrior (honour code, cloak, plasma caster, wrist blades, retreats to heal) and Berserker.
+  - Colonial Marine / Combat Synthetic (allied to players, pulse rifle bursts, fall in with players).
+  - Engineer / Space Jockey (neutral until struck, hunt Xenomorphs that come close).
+  - Wildlife: Goo Mutant, Babyhead, Aethon (flying boss), Scelemur, Ursuidae, Deacon Shark,
+    Hammerpede (venom), Mutant Yautja, Predator Hound (hunts Xenomorphs).
+- [ ] Next: hive resin / hive building (Drones build resin), Octohuggers hanging from ceilings,
+      Marines/Yautja holding their weapons (once the guns are ported), Yautja trophies.
 - [ ] Model continuity pass (at the very end): check every creature's hitbox vs. model size and
-      centre the model on its hitbox (the Drone needed this: its head stuck out 1.3 blocks).
+      centre the model on its hitbox (the Drone needed this: its head stuck out 1.3 blocks). The catalog
+      renderer auto-centres on the model bounds (tail excluded) as a first pass; animations are generic.
 - [ ] Step 4 - Other creatures, guns, armour, tile entities
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation
 

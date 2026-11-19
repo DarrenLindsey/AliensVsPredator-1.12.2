@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "avp:spawn_enabled",
+      "creature": "engineer"
+    }
+  ],
+  "type": "neoforge:add_spawns",
+  "biomes": "#avp:spawns/engineer",
+  "spawners": [
+    {
+      "type": "avp:engineer",
+      "weight": 1,
+      "minCount": 1,
+      "maxCount": 1
+    }
+  ]
+}

@@ -83,10 +83,42 @@ public class ChestbursterEntity extends XenomorphEntity
                 e -> e.getBbHeight() < 1.0F && wantsToHunt(e)));
     }
 
+    /** Set by the embryo when the host decides the adult form (a creeper host grows a Boiler...). */
+    @javax.annotation.Nullable
+    private ResourceLocation adult;
+
+    public void setAdult(@javax.annotation.Nullable ResourceLocation adult)
+    {
+        this.adult = adult;
+    }
+
+    /** What this kind of chestburster grows into when the host didn't decide. */
+    protected ResourceLocation defaultAdult()
+    {
+        return DRONE;
+    }
+
     @Override
     protected ResourceLocation matureInto()
     {
-        return DRONE;
+        return adult != null ? adult : defaultAdult();
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag)
+    {
+        super.addAdditionalSaveData(tag);
+        if (adult != null)
+        {
+            tag.putString("Adult", adult.toString());
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag)
+    {
+        super.readAdditionalSaveData(tag);
+        adult = tag.contains("Adult") ? ResourceLocation.tryParse(tag.getString("Adult")) : null;
     }
 
     @Override

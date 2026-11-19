@@ -63,6 +63,7 @@ public final class EmbryoEvents
     /** The end: it comes out of the host's chest. */
     public static void burst(LivingEntity host)
     {
+        String kind = host.hasData(ModAttachments.EMBRYO) ? host.getData(ModAttachments.EMBRYO).kind() : EmbryoKinds.STANDARD;
         host.removeData(ModAttachments.EMBRYO);
         if (!(host.level() instanceof ServerLevel level))
         {
@@ -72,14 +73,19 @@ public final class EmbryoEvents
         level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState()),
                 host.getX(), host.getY() + host.getBbHeight() * 0.6, host.getZ(), 60, 0.25, 0.25, 0.25, 0.2);
 
-        // the Chestburster arrives with the next creature; until then nothing climbs out
-        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getOptional(CHESTBURSTER).orElse(null);
+        // the host's DNA decides what climbs out (EmbryoKinds)
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getOptional(EmbryoKinds.burster(kind))
+                .or(() -> BuiltInRegistries.ENTITY_TYPE.getOptional(CHESTBURSTER)).orElse(null);
         if (type != null)
         {
             Entity burster = type.create(level, null, host.blockPosition(), MobSpawnType.BREEDING, false, false);
             if (burster != null)
             {
                 burster.moveTo(host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), host.getYRot(), 0);
+                if (burster instanceof org.avp.entity.xenomorph.ChestbursterEntity chestburster)
+                {
+                    chestburster.setAdult(EmbryoKinds.adult(kind));
+                }
                 level.addFreshEntity(burster);
             }
         }

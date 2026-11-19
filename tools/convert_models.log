@@ -15,6 +15,7 @@ OK   entities/living/ModelChestbursterRunner.java -> ChestbursterRunnerModel
 OK   entities/living/ModelCrusher.java -> CrusherModel
 OK   entities/living/ModelCrusherQuad.java -> CrusherQuadModel
 OK   entities/living/ModelDeacon.java -> DeaconModel
+OK   entities/living/ModelDeaconAdult.java -> DeaconAdultModel
 OK   entities/living/ModelDeaconShark.java -> DeaconSharkModel
 OK   entities/living/ModelDracoOvamorph.java -> DracoOvamorphModel
 OK   entities/living/ModelDracoburster.java -> DracobursterModel
@@ -30,6 +31,7 @@ OK   entities/living/ModelMyceliomorph.java -> MyceliomorphModel
 OK   entities/living/ModelNauticomorph.java -> NauticomorphModel
 OK   entities/living/ModelOctohugger.java -> OctohuggerModel
 OK   entities/living/ModelOvamorph.java -> OvamorphModel
+OK   entities/living/ModelOvamorphGiger.java -> OvamorphGigerModel
 OK   entities/living/ModelPantheramorph.java -> PantheramorphModel
 OK   entities/living/ModelPraetorian.java -> PraetorianModel
 OK   entities/living/ModelPredalien.java -> PredalienModel
@@ -38,6 +40,7 @@ OK   entities/living/ModelRoyalFacehugger.java -> RoyalFacehuggerModel
 OK   entities/living/ModelRunnerDrone.java -> RunnerDroneModel
 OK   entities/living/ModelRunnerWarrior.java -> RunnerWarriorModel
 OK   entities/living/ModelSpitter.java -> SpitterModel
+OK   entities/living/ModelTrilobite.java -> TrilobiteModel
 OK   entities/living/ModelUltramorph.java -> UltramorphModel
 OK   entities/living/ModelUrsuidae.java -> UrsuidaeModel
 OK   entities/living/ModelVardaMonkey.java -> VardaMonkeyModel
@@ -97,5 +100,8 @@ OK   tile/skulls/ModelGigerAlienHead.java -> GigerAlienHeadModel
 OK   tile/skulls/ModelNeomorphSkull.java -> NeomorphSkullModel
 OK   tile/skulls/ModelProtomorphSkull.java -> ProtomorphSkullModel
 OK   tile/skulls/ModelQueenSkull.java -> QueenSkullModel
+WARN ModelDeaconAdult: could not convert 'updateDefaultPose()'
 WARN ModelMarine: no parts found
+WARN ModelOvamorphGiger: could not convert 'updateDefaultPose()'
 WARN ModelPraetorian: could not convert 'wingspeed = 0.22F'
+WARN ModelTrilobite: could not convert 'updateDefaultPose()'

@@ -74,7 +74,19 @@ public final class AvpConfig
                     .comment("AvP creatures spawn naturally in the world. Needs a restart. (Biomes and weights: data/avp/neoforge/biome_modifier/spawn_*.json.)")
                     .define("naturalSpawns", true);
             String[][] creatures = { { "facehugger", "Facehuggers in jungles, swamps and dark forests (at night / in the dark)." },
-                    { "drone", "Drones (adult Xenomorphs) in jungles, swamps and dark forests (in the dark)." } };
+                    { "drone", "Drones (adult Xenomorphs) in jungles, swamps and dark forests (in the dark)." },
+                    { "warrior", "Warriors in jungles, swamps and dark forests (in the dark)." },
+                    { "runner_drone", "Runners in savannas and badlands (in the dark)." },
+                    { "nauticomorph", "Nauticomorphs in oceans." },
+                    { "yautja_warrior", "Yautja hunting parties in jungles (rare)." },
+                    { "marine", "Colonial Marine patrols on plains (rare)." },
+                    { "engineer", "Engineers in deserts and badlands (very rare)." },
+                    { "trilobite", "Trilobites in deep dark caves (rare)." },
+                    { "deacon_shark", "Deacon sharks in deep oceans." },
+                    { "scelemur", "Scelemurs (Varda monkeys) in jungles." },
+                    { "ursuidae", "Ursuidae (Varda boars) in taigas and forests." },
+                    { "hammerpede", "Hammerpedes in swamps and lush caves." },
+                    { "goo_mutant", "Black goo mutants in the deep dark and badlands (in the dark)." } };
             for (String[] creature : creatures)
             {
                 spawns.put(creature[0], b.comment(creature[1]).define("spawn_" + creature[0], true));
@@ -175,6 +187,11 @@ public final class AvpConfig
         public final ModConfigSpec.DoubleValue xenoAcidSplashDamage;
         public final ModConfigSpec.IntValue xenoAcidWeaponDamage;
         public final ModConfigSpec.IntValue droneMatureTicks;
+        public final ModConfigSpec.IntValue queenEggTicks;
+        public final ModConfigSpec.BooleanValue yautjaHonourCode;
+        public final ModConfigSpec.BooleanValue yautjaCloak;
+        public final ModConfigSpec.BooleanValue marinesAlliedToPlayers;
+        public final ModConfigSpec.DoubleValue marineRifleDamage;
         public final ModConfigSpec.IntValue xenoHungerDrainTicks;
         public final ModConfigSpec.IntValue xenoHungryBelow;
         public final ModConfigSpec.BooleanValue xenosAlwaysHuntPlayers;
@@ -374,8 +391,23 @@ public final class AvpConfig
                     .comment("Durability acid blood eats off the weapon that hit a Xenomorph. 0 = off.")
                     .defineInRange("xenoAcidWeaponDamage", 3, 0, 10_000);
             droneMatureTicks = b
-                    .comment("How long a Drone takes to mature into a Warrior (once the Warrior is ported).")
+                    .comment("How long a Drone takes to mature into a Warrior. Small forms (Runner, Deacon) take the same; big ones (Praetorian, Crusher) three times as long. A Queen only comes from royal jelly.")
                     .defineInRange("droneMatureTicks", 72_000, 200, 1_728_000);
+            queenEggTicks = b
+                    .comment("A well-fed Queen lays an egg this often (ticks) while she isn't fighting, up to 12 nearby.")
+                    .defineInRange("queenEggTicks", 6_000, 100, 1_728_000);
+            yautjaHonourCode = b
+                    .comment("Yautja only hunt worthy prey: Xenomorphs, dangerous monsters and armed players. Off: they hunt every player.")
+                    .define("yautjaHonourCode", true);
+            yautjaCloak = b
+                    .comment("Yautja cloak while they stalk (nearly invisible, and other creatures lose track of them).")
+                    .define("yautjaCloak", true);
+            marinesAlliedToPlayers = b
+                    .comment("Colonial Marines and combat synthetics fight alongside players (only turning on one that attacks them).")
+                    .define("marinesAlliedToPlayers", true);
+            marineRifleDamage = b
+                    .comment("Damage of each pulse rifle round a Marine fires (bursts of 3).")
+                    .defineInRange("marineRifleDamage", 3.0, 0.0, 1000.0);
             xenoHungerDrainTicks = b
                     .comment("Xenomorphs have a hidden hunger meter (0-100). It drops by 1 this often (ticks; 600 = 30 seconds).")
                     .defineInRange("xenoHungerDrainTicks", 600, 20, 72_000);

@@ -38,6 +38,54 @@ public final class ModSounds
     public static final DeferredHolder<SoundEvent, SoundEvent> ALIEN_ATTACK = sound("mobs.alien.attack");
     public static final DeferredHolder<SoundEvent, SoundEvent> TURRET_FIRE = sound("blocks.turret.fire");
 
+    public static final DeferredHolder<SoundEvent, SoundEvent> PULSE_RIFLE = sound("weapons.pulserifle");
+
+    /** Sound sets of the catalog creatures (CreatureSpec.sounds): "set.event" -> sound. */
+    private static final java.util.Map<String, DeferredHolder<SoundEvent, SoundEvent>> CREATURE = new java.util.HashMap<>();
+
+    static
+    {
+        creatureSounds("praetorian", "living", "hurt", "death");
+        creatureSounds("queen", "living", "hurt", "death");
+        creatureSounds("predalien", "living", "hurt", "death", "attack");
+        creatureSounds("prequelmorph", "living", "hurt", "death", "attack");
+        creatureSounds("predator", "living", "hurt", "death");
+        creatureSounds("marine", "hurt", "death");
+    }
+
+    private static void creatureSounds(String set, String... events)
+    {
+        for (String event : events)
+        {
+            CREATURE.put(set + "." + event, sound("mobs." + set + "." + event));
+        }
+    }
+
+    /** A creature's sound: its own set, else the shared alien/chestburster/facehugger sounds, else null. */
+    @javax.annotation.Nullable
+    public static SoundEvent creature(String set, String event)
+    {
+        DeferredHolder<SoundEvent, SoundEvent> holder = CREATURE.get(set + "." + event);
+        if (holder != null)
+        {
+            return holder.get();
+        }
+        return switch (set + "." + event)
+        {
+            case "alien.living" -> ALIEN_LIVING.get();
+            case "alien.hurt" -> ALIEN_HURT.get();
+            case "alien.death" -> ALIEN_DEATH.get();
+            case "alien.attack" -> ALIEN_ATTACK.get();
+            case "chestburster.hurt" -> CHESTBURSTER_HURT.get();
+            case "chestburster.death" -> CHESTBURSTER_DEATH.get();
+            case "chestburster.attack" -> CHESTBURSTER_ATTACK.get();
+            case "facehugger.living" -> FACEHUGGER_LIVING.get();
+            case "facehugger.hurt" -> FACEHUGGER_HURT.get();
+            case "facehugger.death" -> FACEHUGGER_DEATH.get();
+            default -> null;
+        };
+    }
+
     private static DeferredHolder<SoundEvent, SoundEvent> sound(String name)
     {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, name)));

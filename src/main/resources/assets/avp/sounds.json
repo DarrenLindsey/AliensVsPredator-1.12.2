@@ -146,5 +146,159 @@
       "avp:mobs/alien/attack2",
       "avp:mobs/alien/attack3"
     ]
+  },
+  "mobs.praetorian.living": {
+    "subtitle": "subtitles.avp.praetorian.living",
+    "sounds": [
+      "avp:mobs/praetorian/living0",
+      "avp:mobs/praetorian/living1",
+      "avp:mobs/praetorian/living2"
+    ]
+  },
+  "mobs.praetorian.hurt": {
+    "subtitle": "subtitles.avp.praetorian.hurt",
+    "sounds": [
+      "avp:mobs/praetorian/hurt0",
+      "avp:mobs/praetorian/hurt1",
+      "avp:mobs/praetorian/hurt2"
+    ]
+  },
+  "mobs.praetorian.death": {
+    "subtitle": "subtitles.avp.praetorian.death",
+    "sounds": [
+      "avp:mobs/praetorian/death0",
+      "avp:mobs/praetorian/death1"
+    ]
+  },
+  "mobs.queen.living": {
+    "subtitle": "subtitles.avp.queen.living",
+    "sounds": [
+      "avp:mobs/queen/living0",
+      "avp:mobs/queen/living1",
+      "avp:mobs/queen/living2",
+      "avp:mobs/queen/living3"
+    ]
+  },
+  "mobs.queen.hurt": {
+    "subtitle": "subtitles.avp.queen.hurt",
+    "sounds": [
+      "avp:mobs/queen/hurt0",
+      "avp:mobs/queen/hurt1",
+      "avp:mobs/queen/hurt2",
+      "avp:mobs/queen/hurt3"
+    ]
+  },
+  "mobs.queen.death": {
+    "subtitle": "subtitles.avp.queen.death",
+    "sounds": [
+      "avp:mobs/queen/hurt0",
+      "avp:mobs/queen/hurt1",
+      "avp:mobs/queen/hurt2",
+      "avp:mobs/queen/hurt3"
+    ]
+  },
+  "mobs.predalien.living": {
+    "subtitle": "subtitles.avp.predalien.living",
+    "sounds": [
+      "avp:mobs/predalien/living0"
+    ]
+  },
+  "mobs.predalien.death": {
+    "subtitle": "subtitles.avp.predalien.death",
+    "sounds": [
+      "avp:mobs/predalien/death0"
+    ]
+  },
+  "mobs.predalien.attack": {
+    "subtitle": "subtitles.avp.predalien.attack",
+    "sounds": [
+      "avp:mobs/predalien/attack0",
+      "avp:mobs/predalien/attack1"
+    ]
+  },
+  "mobs.predator.living": {
+    "subtitle": "subtitles.avp.predator.living",
+    "sounds": [
+      "avp:mobs/predator/living0",
+      "avp:mobs/predator/living1",
+      "avp:mobs/predator/living2",
+      "avp:mobs/predator/living3"
+    ]
+  },
+  "mobs.predator.hurt": {
+    "subtitle": "subtitles.avp.predator.hurt",
+    "sounds": [
+      "avp:mobs/predator/hurt0",
+      "avp:mobs/predator/hurt1"
+    ]
+  },
+  "mobs.predator.death": {
+    "subtitle": "subtitles.avp.predator.death",
+    "sounds": [
+      "avp:mobs/predator/death0",
+      "avp:mobs/predator/death1"
+    ]
+  },
+  "mobs.predalien.hurt": {
+    "subtitle": "subtitles.avp.predalien.hurt",
+    "sounds": [
+      "avp:mobs/alien/hurt0",
+      "avp:mobs/alien/hurt1",
+      "avp:mobs/predator/hurt0",
+      "avp:mobs/predator/hurt1"
+    ]
+  },
+  "mobs.prequelmorph.living": {
+    "subtitle": "subtitles.avp.prequelmorph.living",
+    "sounds": [
+      "avp:mobs/prequelmorph/living0",
+      "avp:mobs/prequelmorph/living1",
+      "avp:mobs/prequelmorph/living2",
+      "avp:mobs/prequelmorph/living3"
+    ]
+  },
+  "mobs.prequelmorph.hurt": {
+    "subtitle": "subtitles.avp.prequelmorph.hurt",
+    "sounds": [
+      "avp:mobs/prequelmorph/hurt0",
+      "avp:mobs/prequelmorph/hurt1"
+    ]
+  },
+  "mobs.prequelmorph.death": {
+    "subtitle": "subtitles.avp.prequelmorph.death",
+    "sounds": [
+      "avp:mobs/prequelmorph/death0",
+      "avp:mobs/prequelmorph/death1"
+    ]
+  },
+  "mobs.prequelmorph.attack": {
+    "subtitle": "subtitles.avp.prequelmorph.attack",
+    "sounds": [
+      "avp:mobs/prequelmorph/attack0",
+      "avp:mobs/prequelmorph/attack1",
+      "avp:mobs/prequelmorph/attack2",
+      "avp:mobs/prequelmorph/attack3"
+    ]
+  },
+  "mobs.marine.hurt": {
+    "subtitle": "subtitles.avp.marine.hurt",
+    "sounds": [
+      "avp:mobs/marine/hurt"
+    ]
+  },
+  "mobs.marine.death": {
+    "subtitle": "subtitles.avp.marine.death",
+    "sounds": [
+      "avp:mobs/marine/death"
+    ]
+  },
+  "weapons.pulserifle": {
+    "subtitle": "subtitles.avp.pulserifle",
+    "sounds": [
+      "avp:items/weapons/pulserifle/shoot0",
+      "avp:items/weapons/pulserifle/shoot1",
+      "avp:items/weapons/pulserifle/shoot2",
+      "avp:items/weapons/pulserifle/shoot3"
+    ]
   }
 }

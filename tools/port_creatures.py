@@ -369,3 +369,113 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("digging/pack data written")
+
+# ================================================================ the rest of the creatures (catalog: org.avp.entity.creature.Creatures)
+import re
+lang = read_json(f"{NA}/lang/en_us.json", {})
+src = open("src/main/java/org/avp/entity/creature/Creatures.java").read()
+catalog = []  # (id, family, texture, lore)
+for m in re.finditer(r'(?:add|beast)\(CreatureSpec\.of\("(\w+)", (\w+)\)(.*?)\);\n', src, re.S):
+    catalog.append((m.group(1), m.group(2), re.search(r'\.look\("\w+", "([\w.]+)"', m.group(3)).group(1),
+                    re.search(r'\.lore\("(.*?)"\)', m.group(3)).group(1)))
+for m in re.finditer(r'burster\("(\w+)", "\w+", "\w+", "([\w.]+)", [\d.F]+, 0x\w+, "(.*?)"\);', src):
+    catalog.append((m.group(1), "BURSTER", m.group(2), m.group(3)))
+
+NAMES = {"matriarch": "Xenomorph Queen", "chestburster_queen": "Queen Chestburster", "chestburster_predalien": "Predalien Chestburster",
+         "chestburster_runner": "Runner Chestburster", "runner_drone": "Runner Drone", "runner_warrior": "Runner Warrior",
+         "bat_xenomorph": "Bat Xenomorph", "deacon_adult": "Adult Deacon", "royal_facehugger": "Royal Facehugger",
+         "draco_ovamorph": "Dracomorph Egg", "ovamorph_giger": "Giger Ovamorph", "yautja_warrior": "Yautja Warrior",
+         "yautja_berserker": "Yautja Berserker", "marine": "Colonial Marine", "combat_synthetic": "Combat Synthetic",
+         "space_jockey": "Space Jockey", "goo_mutant": "Goo Mutant", "deacon_shark": "Deacon Shark", "yautja_mutant": "Mutant Yautja",
+         "predator_hound": "Predator Hound", "scelemur": "Scelemur", "ursuidae": "Ursuidae"}
+
+for cid, family, tex, lore in catalog:
+    copy(f"{LA}/textures/mob/{tex}", f"{NA}/textures/entity/{tex}")
+    write_json(f"{NA}/models/item/{cid}_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+    name = NAMES.get(cid, cid.replace("_", " ").title())
+    lang[f"entity.avp.{cid}"] = name
+    lang[f"item.avp.{cid}_spawn_egg"] = f"{name} Spawn Egg"
+    lang[f"tooltip.avp.{cid}_spawn_egg"] = lore
+    if family == "XENOMORPH":
+        big = cid in ("matriarch", "dracomorph", "ultramorph")
+        write_json(f"{ND}/avp/loot_table/entities/{cid}.json", {"type": "minecraft:entity", "pools": [{
+            "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:royaljelly",
+                                     "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform",
+                                                                                                "min": 4 if big else 1, "max": 8 if big else 3}},
+                                                   {"function": "minecraft:enchanted_count_increase", "enchantment": "minecraft:looting",
+                                                    "count": {"type": "minecraft:uniform", "min": 0, "max": 1}}]}],
+            "conditions": [{"condition": "minecraft:killed_by_player"}]}]})
+    if family in ("XENOMORPH", "BURSTER", "PARASITE", "EGG"):
+        add_to_tag(f"{ND}/avp/tags/entity_type/xenomorphs.json", [f"avp:{cid}"])
+    if family == "YAUTJA" or cid in ("predator_hound", "yautja_mutant"):
+        add_to_tag(f"{ND}/avp/tags/entity_type/predators.json", [f"avp:{cid}"])
+write_json(f"{ND}/avp/loot_table/entities/ursuidae.json", {"type": "minecraft:entity", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": "minecraft:leather",
+                             "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 0, "max": 2}}]}]},
+    {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "minecraft:porkchop",
+                              "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}},
+                                            {"function": "minecraft:furnace_smelt", "conditions": [{"condition": "minecraft:entity_properties",
+                                             "entity": "this", "predicate": {"flags": {"is_on_fire": True}}}]}]}]}]})
+
+# hosts: bats and ocelots now carry embryos (Bat Xenomorph, Pantheramorph); synthetics never do
+tag = read_json(f"{ND}/avp/tags/entity_type/cannot_host.json", {"replace": False, "values": []})
+tag["values"] = [v for v in tag["values"] if v not in ("minecraft:bat", "minecraft:ocelot")]
+write_json(f"{ND}/avp/tags/entity_type/cannot_host.json", tag)
+add_to_tag(f"{ND}/avp/tags/entity_type/cannot_host.json", ["avp:combat_synthetic", "avp:creature_projectile"])
+add_to_tag(f"{ND}/avp/tags/entity_type/door_threats.json", ["#avp:predators"])
+
+# sounds
+sounds_for("praetorian", {"living": ["living0", "living1", "living2"], "hurt": ["hurt0", "hurt1", "hurt2"], "death": ["death0", "death1"]})
+sounds_for("queen", {"living": ["living0", "living1", "living2", "living3"], "hurt": ["hurt0", "hurt1", "hurt2", "hurt3"],
+                     "death": ["hurt0", "hurt1", "hurt2", "hurt3"]})
+sounds_for("predalien", {"living": ["living0"], "death": ["death0"], "attack": ["attack0", "attack1"]})
+sounds_for("predator", {"living": ["living0", "living1", "living2", "living3"], "hurt": ["hurt0", "hurt1"], "death": ["death0", "death1"]})
+sounds = read_json(f"{NA}/sounds.json", {})
+sounds["mobs.predalien.hurt"] = {"subtitle": "subtitles.avp.predalien.hurt",
+                                 "sounds": ["avp:mobs/alien/hurt0", "avp:mobs/alien/hurt1", "avp:mobs/predator/hurt0", "avp:mobs/predator/hurt1"]}
+write_json(f"{NA}/sounds.json", sounds)
+sounds_for("prequelmorph", {"living": ["living0", "living1", "living2", "living3"], "hurt": ["hurt0", "hurt1"], "death": ["death0", "death1"],
+                            "attack": ["attack0", "attack1", "attack2", "attack3"]})
+sounds_for("marine", {"hurt": ["hurt"], "death": ["death"]})
+sounds = read_json(f"{NA}/sounds.json", {})
+for f in ["shoot0", "shoot1", "shoot2", "shoot3"]:
+    copy(f"{LA}/sounds/items/weapons/pulserifle/{f}.ogg", f"{NA}/sounds/items/weapons/pulserifle/{f}.ogg")
+sounds["weapons.pulserifle"] = {"subtitle": "subtitles.avp.pulserifle", "sounds": [f"avp:items/weapons/pulserifle/shoot{i}" for i in range(4)]}
+write_json(f"{NA}/sounds.json", sounds)
+for s, label in [("praetorian", "Praetorian"), ("queen", "Xenomorph Queen"), ("predalien", "Predalien"), ("predator", "Yautja"),
+                 ("prequelmorph", "Deacon"), ("marine", "Marine")]:
+    for ev, verb in [("living", "growls" if s == "predator" else "hisses"), ("hurt", "hurts"), ("death", "dies"), ("attack", "strikes")]:
+        lang[f"subtitles.avp.{s}.{ev}"] = f"{label} {verb}"
+lang["subtitles.avp.pulserifle"] = "Pulse rifle fires"
+lang["message.avp.implanted"] = "Something has been planted inside you..."
+
+# natural spawns (ModEntityEvents.NATURAL; switches in avp-common.toml)
+spawns("warrior", ["#minecraft:is_jungle", "minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:dark_forest"], 4, (1, 1))
+spawns("runner_drone", ["#minecraft:is_savanna", "#minecraft:is_badlands"], 5, (1, 3))
+spawns("nauticomorph", ["#minecraft:is_ocean"], 3, (1, 1))
+spawns("yautja_warrior", ["#minecraft:is_jungle"], 1, (1, 1))
+spawns("marine", ["minecraft:plains"], 2, (2, 4))
+spawns("engineer", ["minecraft:desert", "#minecraft:is_badlands"], 1, (1, 1))
+spawns("trilobite", ["minecraft:deep_dark"], 2, (1, 1))
+spawns("deacon_shark", ["#minecraft:is_deep_ocean"], 3, (1, 1))
+spawns("scelemur", ["#minecraft:is_jungle"], 6, (2, 4))
+spawns("ursuidae", ["#minecraft:is_taiga", "minecraft:forest"], 4, (1, 2))
+spawns("hammerpede", ["minecraft:swamp", "minecraft:lush_caves"], 4, (1, 3))
+spawns("goo_mutant", ["minecraft:deep_dark", "#minecraft:is_badlands"], 2, (1, 1))
+for cid in ["warrior", "runner_drone", "nauticomorph", "yautja_warrior", "marine", "engineer", "trilobite", "deacon_shark",
+            "scelemur", "ursuidae", "hammerpede", "goo_mutant"]:
+    lang[f"avp.configuration.spawn_{cid}"] = NAMES.get(cid, cid.replace("_", " ").title()) + "s"
+lang.update({
+    "avp.configuration.queenEggTicks": "Queen Egg Laying (ticks)",
+    "avp.configuration.queenEggTicks.tooltip": "A well-fed Queen lays an egg this often while she isn't fighting (up to 12 nearby).",
+    "avp.configuration.yautjaHonourCode": "Yautja Honour Code",
+    "avp.configuration.yautjaHonourCode.tooltip": "Yautja only hunt worthy prey: Xenomorphs, dangerous monsters and armed or armoured players.",
+    "avp.configuration.yautjaCloak": "Yautja Cloaking",
+    "avp.configuration.yautjaCloak.tooltip": "Yautja cloak while stalking; other creatures lose track of them.",
+    "avp.configuration.marinesAlliedToPlayers": "Marines Fight For Players",
+    "avp.configuration.marinesAlliedToPlayers.tooltip": "Marines and synthetics follow players and only turn on one that attacks them.",
+    "avp.configuration.marineRifleDamage": "Pulse Rifle Damage",
+    "avp.configuration.marineRifleDamage.tooltip": "Damage of each round a Marine fires (3-round bursts).",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print(f"catalog creature data written: {len(catalog)} creatures")

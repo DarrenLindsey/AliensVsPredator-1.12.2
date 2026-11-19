@@ -114,6 +114,13 @@ public final class ModItems
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);
         Tab.MAIN.add(CHESTBURSTER_SPAWN_EGG);
         Tab.MAIN.add(OVAMORPH_SPAWN_EGG);
+        // one for every catalog creature
+        ModEntities.CATALOG.forEach((id, type) ->
+        {
+            org.avp.entity.creature.CreatureSpec spec = org.avp.entity.creature.Creatures.ALL.get(id);
+            Tab.MAIN.add(ITEMS.register(id + "_spawn_egg", () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(type,
+                    spec.eggPrimary(), spec.eggSecondary(), new Item.Properties())));
+        });
     }
 
     /** A plain item with no special behaviour (crafting parts, ingots, ...). */

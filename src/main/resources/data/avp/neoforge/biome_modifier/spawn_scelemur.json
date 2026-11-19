@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "avp:spawn_enabled",
+      "creature": "scelemur"
+    }
+  ],
+  "type": "neoforge:add_spawns",
+  "biomes": "#avp:spawns/scelemur",
+  "spawners": [
+    {
+      "type": "avp:scelemur",
+      "weight": 6,
+      "minCount": 2,
+      "maxCount": 4
+    }
+  ]
+}

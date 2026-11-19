@@ -51,6 +51,20 @@ public final class ClientSetup
     {
         AllModelLayers.register(event);
         event.registerLayerDefinition(BlastDoorRenderer.ALARM_LAYER, BlastDoorRenderer::createAlarmLight);
+        event.registerLayerDefinition(org.avp.client.render.HumanRenderer.LAYER, org.avp.client.render.HumanRenderer::createLayer);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static void registerCreature(EntityRenderersEvent.RegisterRenderers event, net.minecraft.world.entity.EntityType type, String id)
+    {
+        if (org.avp.entity.creature.Creatures.ALL.get(id).family() == org.avp.entity.creature.Family.HUMAN)
+        {
+            event.registerEntityRenderer(type, context -> new org.avp.client.render.HumanRenderer(context, id));
+        }
+        else
+        {
+            event.registerEntityRenderer(type, context -> new org.avp.client.render.CreatureRenderer<>(context, id));
+        }
     }
 
     @SubscribeEvent
@@ -63,6 +77,8 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.CHESTBURSTER.get(), org.avp.client.render.ChestbursterRenderer::new);
         event.registerEntityRenderer(ModEntities.OVAMORPH.get(), org.avp.client.render.OvamorphRenderer::new);
         event.registerEntityRenderer(ModEntities.DRONE.get(), org.avp.client.render.DroneRenderer::new);
+        event.registerEntityRenderer(ModEntities.CREATURE_PROJECTILE.get(), NoopRenderer::new); // particles only
+        ModEntities.CATALOG.forEach((id, type) -> registerCreature(event, type.get(), id));
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.BLAST_DOOR.get(), BlastDoorRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.TURRET.get(), org.avp.client.render.TurretRenderer::new);

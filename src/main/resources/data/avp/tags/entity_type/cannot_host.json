@@ -20,9 +20,7 @@
     "minecraft:enderman",
     "minecraft:rabbit",
     "minecraft:chicken",
-    "minecraft:ocelot",
     "minecraft:parrot",
-    "minecraft:bat",
     "minecraft:vex",
     "minecraft:allay",
     "minecraft:bee",
@@ -35,6 +33,8 @@
     "minecraft:salmon",
     "minecraft:tropical_fish",
     "minecraft:pufferfish",
-    "minecraft:phantom"
+    "minecraft:phantom",
+    "avp:combat_synthetic",
+    "avp:creature_projectile"
   ]
 }

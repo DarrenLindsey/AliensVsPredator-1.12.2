@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "avp:spawn_enabled",
+      "creature": "marine"
+    }
+  ],
+  "type": "neoforge:add_spawns",
+  "biomes": "#avp:spawns/marine",
+  "spawners": [
+    {
+      "type": "avp:marine",
+      "weight": 2,
+      "minCount": 2,
+      "maxCount": 4
+    }
+  ]
+}

@@ -265,9 +265,15 @@ public class FacehuggerEntity extends Monster
         implant(host);
     }
 
+    /** The embryo this parasite plants: "standard" (the host decides), "queen" for a Royal Facehugger... */
+    protected String embryoKind()
+    {
+        return EmbryoKinds.STANDARD;
+    }
+
     private void implant(LivingEntity host)
     {
-        host.setData(ModAttachments.EMBRYO, new Embryo(0, AvpConfig.server(AvpConfig.SERVER.embryoGestationTicks), "standard"));
+        host.setData(ModAttachments.EMBRYO, new Embryo(0, AvpConfig.server(AvpConfig.SERVER.embryoGestationTicks), EmbryoKinds.forHost(host, embryoKind())));
         playSound(ModSounds.FACEHUGGER_IMPLANT.get(), 0.6F, 1.0F);
         setFertile(false);
         ticksOnHost = 0;

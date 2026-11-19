@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.avp.block.entity.ShapeBlockEntity;
+import org.avp.config.AvpConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -44,7 +45,7 @@ public class MimicBakedModel extends BakedModelWrapper<BakedModel>
     {
         List<BakedQuad> quads = super.getQuads(state, side, rand, data, renderType);
         BlockState mimic = data.get(ShapeBlockEntity.MIMIC);
-        if (mimic == null)
+        if (mimic == null || !AvpConfig.CLIENT.showCopiedTextures.get())
         {
             return quads;
         }

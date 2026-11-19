@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import org.avp.config.AvpConfig;
 import org.avp.registry.ModBlockEntities;
 import org.avp.registry.ModBlocks;
 import org.avp.registry.ModCreativeTabs;
@@ -31,6 +33,10 @@ public class AliensVsPredator
         ModItems.ITEMS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
+
+        // settings files (config/avp-client.toml and the per-world avp-server.toml)
+        container.registerConfig(ModConfig.Type.CLIENT, AvpConfig.CLIENT_SPEC);
+        container.registerConfig(ModConfig.Type.SERVER, AvpConfig.SERVER_SPEC);
 
         LOGGER.info("AliensVsPredator loading - Building Better Worlds");
     }

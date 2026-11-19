@@ -3,6 +3,7 @@ package org.avp.client.render;
 import org.avp.block.TrophyBlock;
 import org.avp.block.entity.ModelBlockEntity;
 import org.avp.client.model.GeneratedModel;
+import org.avp.config.AvpConfig;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -44,6 +45,11 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
         draw(be.getBlockState(), be.getBlockPos(), models, poseStack, buffers, light, overlay);
     }
 
+    private static int channel(float value)
+    {
+        return Math.round(Mth.clamp(value, 0F, 1F) * 255);
+    }
+
     /**
      * @param pos the block position, or null when drawing the item
      */
@@ -69,7 +75,8 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
             float offX = pos == null ? 0 : (rand.nextFloat() - 0.5F) * 0.3F;
             float offZ = pos == null ? 0 : (rand.nextFloat() - 0.5F) * 0.3F;
             float turn = pos == null ? 0 : rand.nextInt(4) * 90F;
-            color = FastColor.ARGB32.color(255, Math.round(c[0] * 255), Math.round(c[1] * 255), Math.round(c[2] * 255));
+            float bright = AvpConfig.CLIENT.fernBrightness.get().floatValue();
+            color = FastColor.ARGB32.color(255, channel(c[0] * bright), channel(c[1] * bright), channel(c[2] * bright));
 
             poseStack.translate(0.5F, 0, 0.5F);
             poseStack.scale(size, size, size);

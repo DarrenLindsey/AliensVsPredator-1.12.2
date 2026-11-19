@@ -53,3 +53,21 @@ Worlds from 1.12.2 can't be loaded in 1.21.1 anyway, so this doesn't break anyth
 `neo_version` in `gradle.properties` is set to `21.1.77`. If Gradle says it can't find it,
 or you just want the newest fixes, change it to the latest `21.1.x` listed at
 https://projects.neoforged.net/neoforged/neoforge
+
+## Settings (config)
+
+All settings are in `src/main/java/org/avp/config/AvpConfig.java` and can be changed in game:
+**Mods → AliensVsPredator → Config**.
+
+- **Client** settings (`config/avp-client.toml`) only change what you see.
+- **World** settings (`saves/<world>/serverconfig/avp-server.toml`) change gameplay; a server's
+  settings are sent to everyone who joins.
+
+Every new feature should add its options here (see the comment at the top of `AvpConfig`).
+
+## About MDXLib
+
+The 1.12.2 mod needed MDXLib. It is **not** included: it has no open-source license and its
+author asks that it isn't packaged with other mods, and it only works on 1.12.2 anyway. Instead,
+the port has its own code that does the same jobs (e.g. `tools/convert_models.py` and
+`org.avp.client.render`), using MDXLib's source only as a reference for how things behaved.

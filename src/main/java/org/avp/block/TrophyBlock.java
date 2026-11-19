@@ -1,6 +1,7 @@
 package org.avp.block;
 
 import org.avp.block.entity.ModelBlockEntity;
+import org.avp.config.AvpConfig;
 
 import com.mojang.serialization.MapCodec;
 
@@ -82,7 +83,7 @@ public class TrophyBlock extends HorizontalDirectionalBlock implements EntityBlo
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
     {
-        if (!canTip)
+        if (!canTip || !AvpConfig.SERVER.trophiesCanBeTipped.get())
         {
             return InteractionResult.PASS;
         }

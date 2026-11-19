@@ -1,6 +1,7 @@
 package org.avp.block;
 
 import org.avp.block.entity.ShapeBlockEntity;
+import org.avp.config.AvpConfig;
 
 import com.mojang.serialization.MapCodec;
 
@@ -84,7 +85,8 @@ public class ShapeBlock extends BaseEntityBlock
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
     {
-        if (stack.getItem() instanceof BlockItem blockItem
+        if (AvpConfig.SERVER.shapesCanCopyBlocks.get()
+                && stack.getItem() instanceof BlockItem blockItem
                 && !(blockItem.getBlock() instanceof EntityBlock)
                 && level.getBlockEntity(pos) instanceof ShapeBlockEntity shape)
         {

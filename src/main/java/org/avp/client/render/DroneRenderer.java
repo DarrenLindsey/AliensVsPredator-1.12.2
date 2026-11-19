@@ -27,9 +27,14 @@ public class DroneRenderer extends MobRenderer<DroneEntity, DroneEntityModel>
         return TEXTURE;
     }
 
+    /**
+     * The 1.12.2 model's head sits 1.3 blocks in front of its centre, so it poked through walls.
+     * Moving the model back half a block centres the body on the hitbox.
+     */
     @Override
     protected void scale(DroneEntity drone, PoseStack poseStack, float partialTick)
     {
+        poseStack.translate(0F, 0F, 0.5F);
         poseStack.scale(0.9F, 0.9F, 0.9F);
     }
 }

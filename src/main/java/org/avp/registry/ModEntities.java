@@ -34,7 +34,7 @@ public final class ModEntities
 
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.xenomorph.DroneEntity>> DRONE = ENTITIES.register("drone",
             () -> EntityType.Builder.<org.avp.entity.xenomorph.DroneEntity>of(org.avp.entity.xenomorph.DroneEntity::new, MobCategory.MONSTER)
-                    .sized(0.8F, 2.0F).eyeHeight(1.7F).clientTrackingRange(10).build("drone"));
+                    .sized(0.95F, 2.0F).eyeHeight(1.7F).clientTrackingRange(10).build("drone"));
 
     private ModEntities()
     {

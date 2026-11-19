@@ -72,8 +72,25 @@ for line in open(f"{LA}/lang/en_US.lang", encoding="utf-8", errors="replace"):
         old_lang[m.group(1)] = m.group(2).strip()
 
 
+# Clearer names than the 1.12.2 ones ("Unitree Big Leaves" was really the bottom piece)
+BETTER_NAMES = {
+    "unidirt": "Unidentified Dirt",
+    "unitree_leaves": "Unidentified Leaves (Top)",
+    "unitree_leaves_m": "Unidentified Leaves (Middle)",
+    "unitree_leaves_b": "Unidentified Leaves (Bottom)",
+    "paradise_leaves_large": "Large Paradise Leaves",
+    "paradise_leaves_med": "Medium Paradise Leaves",
+    "paradise_leaves_small": "Small Paradise Leaves",
+    "paradise_log_large": "Large Paradise Log",
+    "paradise_log_med": "Medium Paradise Log",
+    "paradise_log_small": "Small Paradise Log",
+    "paradise_dirt_mossy": "Mossy Paradise Dirt",
+    "paradise_dirt_podzol": "Paradise Podzol"
+}
+
+
 def name(i, old):
-    lang[f"block.avp.{i}"] = old_lang.get(old, old)
+    lang[f"block.avp.{i}"] = BETTER_NAMES.get(i) or old_lang.get(old, old)
 
 
 # ---------------------------------------------------------------- dirt & grass

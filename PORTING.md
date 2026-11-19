@@ -112,11 +112,22 @@ Currently decorative (as in 1.12.2). Planned, with the black goo fluid (batch E)
 - With the creatures: a closed, powered medpod removes a Xenomorph embryo (chestburster) from
   whoever is inside, like the surgery pod in Prometheus; configurable cost/time/success chance.
 
-## Planned: wall reinforcement device (idea - details to confirm)
+## Planned: reinforcement (doors and walls)
 
-- A powered device/tool that reinforces walls in an area (e.g. welding plates on), making them
-  resistant to Xenomorph acid and breaking, and explosions; maybe shows reinforced blocks with
-  a plated overlay. Powered by FE; costs materials; configurable radius/strength.
+- **Reinforcement item** (e.g. "Security Reinforcement Kit"): use it on *any* door - vanilla,
+  other mods', trapdoors (and possibly walls/any block) - to upgrade it:
+  - **Extra durability:** much harder to break; mobs can't break it down (zombies on Hard,
+    and later Xenomorphs), resistant to acid and explosions; maybe a "reinforcement health"
+    that gets worn down by attacks and can be repaired.
+  - **Password lock:** the same terminal as blast doors (Security Tuner admin, binding).
+  - **Entity detection:** the blast door sensors - Auto-Open and Threat Detection (lockdown,
+    alarm, redstone signal).
+  - Shown with a visible plated overlay on the upgraded block.
+- **Wall reinforcement device** (earlier idea): a powered device that reinforces walls in an
+  area the same way (acid/explosion/break resistant), FE + materials, configurable radius.
+- Technical note: vanilla and other mods' blocks can't get our block entity, so the upgrade data
+  is stored per position in a NeoForge *data attachment* on the chunk, and events (block break,
+  right-click, mob griefing) apply the behaviour.
 
 ## Planned: AI ideas
 

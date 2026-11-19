@@ -217,6 +217,7 @@ public final class XenoBrain
             if (target instanceof Player player && patience > 0 && xeno.distanceTo(player) > 7 && isWatching(player, xeno))
             {
                 patience--;
+                xeno.setState("STALKING");
                 if (flank == null || --repath <= 0)
                 {
                     flank = flankPoint(player);
@@ -229,6 +230,7 @@ public final class XenoBrain
                 xeno.getLookControl().setLookAt(player);
                 return;
             }
+            xeno.setState("HUNTING");
             super.tick();
         }
 
@@ -273,6 +275,7 @@ public final class XenoBrain
         {
             Vec3 at = xeno.investigatePos();
             xeno.getNavigation().moveTo(at.x, at.y, at.z, 0.9);
+            xeno.setState("INVESTIGATING");
             lookAround = 60 + xeno.getRandom().nextInt(60);
         }
 
@@ -338,6 +341,7 @@ public final class XenoBrain
                 xeno.getNavigation().moveTo(spot.x, spot.y, spot.z, 1.35);
             }
             time = 200;
+            xeno.setState("RETREATING");
             xeno.setTarget(null);
             xeno.setRetreatCooldown(600);
         }
@@ -346,6 +350,12 @@ public final class XenoBrain
         public boolean canContinueToUse()
         {
             return --time > 0 && !xeno.getNavigation().isDone();
+        }
+
+        @Override
+        public void stop()
+        {
+            xeno.setState("LURKING");
         }
     }
 
@@ -375,6 +385,7 @@ public final class XenoBrain
         @Override
         public void start()
         {
+            xeno.setState("AVOIDING TURRET");
             Vec3 spot = darkSpot(xeno, Vec3.atCenterOf(xeno.knownTurret()), 20);
             if (spot != null)
             {
@@ -390,6 +401,12 @@ public final class XenoBrain
         public boolean canContinueToUse()
         {
             return !xeno.getNavigation().isDone();
+        }
+
+        @Override
+        public void stop()
+        {
+            xeno.setState("LURKING");
         }
     }
 
@@ -558,6 +575,7 @@ public final class XenoBrain
         public void start()
         {
             timer = 0;
+            xeno.setState("ACID BREACH");
         }
 
         @Override

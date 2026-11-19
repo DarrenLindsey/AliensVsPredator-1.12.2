@@ -334,3 +334,18 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("acid breach data written")
+
+# ================================================================ glass, crawling, debug labels
+lang = read_json(f"{NA}/lang/en_us.json", {})
+add_to_tag(f"{ND}/avp/tags/block/xeno_breakable.json", ["#c:glass_blocks", "#c:glass_panes", "minecraft:glass", "minecraft:glass_pane",
+                                                        "avp:industrialglass"])
+lang.update({
+    "avp.configuration.xenosBreakGlass": "Smash Glass",
+    "avp.configuration.xenosBreakGlass.tooltip": "They smash glass blocks and panes between them and their prey.",
+    "avp.configuration.xenosCrawl": "Crawl Through Gaps",
+    "avp.configuration.xenosCrawl.tooltip": "They drop to a crawl to squeeze through vents and 1-block-high gaps.",
+    "avp.configuration.xenoDebugLabels": "Debug Labels",
+    "avp.configuration.xenoDebugLabels.tooltip": "Show what each Xenomorph is doing above its head (for testing).",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("glass/crawl data written")

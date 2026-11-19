@@ -188,6 +188,9 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue xenosBreakDoors;
         public final ModConfigSpec.BooleanValue xenosLearnTurrets;
         public final ModConfigSpec.BooleanValue xenosAcidBreach;
+        public final ModConfigSpec.BooleanValue xenosBreakGlass;
+        public final ModConfigSpec.BooleanValue xenosCrawl;
+        public final ModConfigSpec.BooleanValue xenoDebugLabels;
         public final ModConfigSpec.IntValue acidMeltAmount;
         public final ModConfigSpec.IntValue acidBreachInterval;
 
@@ -410,6 +413,15 @@ public final class AvpConfig
                     .comment("Xenomorphs stuck behind an iron door wound a packmate so its acid blood melts through (Alien Resurrection).",
                             "Any Xenomorph bleeding next to such a door eats into it too. Which blocks: the avp:acid_meltable block tag.")
                     .define("xenosAcidBreach", true);
+            xenosBreakGlass = b
+                    .comment("Xenomorphs smash glass (blocks and panes - the avp:xeno_breakable block tag) that stands between them and their prey.")
+                    .define("xenosBreakGlass", true);
+            xenosCrawl = b
+                    .comment("Xenomorphs drop to a crawl (under 1 block tall) to squeeze through vents and 1-block-high gaps.")
+                    .define("xenosCrawl", true);
+            xenoDebugLabels = b
+                    .comment("Show what each Xenomorph is doing above its head (STALKING, INVESTIGATING, ...). For testing.")
+                    .define("xenoDebugLabels", false);
             acidMeltAmount = b
                     .comment("How much acid (damage dealt to bleeding Xenomorphs next to it) melts through a door.")
                     .defineInRange("acidMeltAmount", 12, 1, 1000);

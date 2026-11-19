@@ -34,6 +34,10 @@ public final class ModTags
     public static final TagKey<net.minecraft.world.level.block.Block> ACID_MELTABLE = TagKey.create(Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "acid_meltable"));
 
+    /** Blocks Xenomorphs simply smash through (glass, panes). */
+    public static final TagKey<net.minecraft.world.level.block.Block> XENO_BREAKABLE = TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "xeno_breakable"));
+
     private ModTags()
     {
     }

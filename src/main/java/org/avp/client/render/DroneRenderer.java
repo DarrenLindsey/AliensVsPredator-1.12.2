@@ -36,5 +36,10 @@ public class DroneRenderer extends MobRenderer<DroneEntity, DroneEntityModel>
     {
         poseStack.translate(0F, 0F, 0.5F);
         poseStack.scale(0.9F, 0.9F, 0.9F);
+        if (drone.isCrawling())
+        {
+            // flattened and stretched out, belly to the floor (fits a 1-block gap); the feet stay on the ground
+            poseStack.scale(1.0F, 0.42F, 1.15F);
+        }
     }
 }

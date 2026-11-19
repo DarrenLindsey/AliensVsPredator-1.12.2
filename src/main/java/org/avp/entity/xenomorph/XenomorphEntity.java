@@ -46,6 +46,10 @@ public abstract class XenomorphEntity extends Monster
     private net.minecraft.core.BlockPos knownTurret;
     private int knownTurretTicks;
     private int calmTicks;
+    private int standTicks;
+    /** What it's doing (for the debug label). */
+    private String state = "LURKING";
+    private boolean debugNamed;
 
     /** Hidden hunger meter, 0 (starving) .. MAX_HUNGER (full). */
     private int hunger = 60 + new java.util.Random().nextInt(41);
@@ -61,6 +65,149 @@ public abstract class XenomorphEntity extends Monster
     }
 
     // ---- behaviour state used by XenoBrain
+
+    public void setState(String state)
+    {
+        this.state = state;
+    }
+
+    /** Adults can drop to a crawl to fit through 1-block gaps. */
+    protected boolean canCrawl()
+    {
+        return false;
+    }
+
+    public boolean isCrawling()
+    {
+        return getPose() == net.minecraft.world.entity.Pose.SWIMMING;
+    }
+
+    /** Crawling: under a block tall. */
+    @Override
+    protected net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose)
+    {
+        net.minecraft.world.entity.EntityDimensions standing = super.getDefaultDimensions(pose);
+        if (pose == net.minecraft.world.entity.Pose.SWIMMING && canCrawl())
+        {
+            return net.minecraft.world.entity.EntityDimensions.scalable(standing.width(), 0.9F).withEyeHeight(0.7F);
+        }
+        return standing;
+    }
+
+    private void setCrawling(boolean crawl)
+    {
+        setPose(crawl ? net.minecraft.world.entity.Pose.SWIMMING : net.minecraft.world.entity.Pose.STANDING);
+        refreshDimensions();
+    }
+
+    /** Where it's trying to get to: its target, or a noise it's investigating. */
+    @Nullable
+    private net.minecraft.world.phys.Vec3 goalPos()
+    {
+        return getTarget() != null ? getTarget().position() : investigatePos;
+    }
+
+    /**
+     * Crawling: if it can't reach its goal standing up but can when crawling, it drops down;
+     * it stands up again once there's room. Also drops down when it bumps into a low gap.
+     */
+    private void updateCrawling()
+    {
+        if (!canCrawl() || !org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosCrawl))
+        {
+            return;
+        }
+        if (isCrawling())
+        {
+            net.minecraft.world.phys.AABB standing = super.getDefaultDimensions(net.minecraft.world.entity.Pose.STANDING)
+                    .scale(getScale()).makeBoundingBox(position());
+            standTicks = level().noCollision(this, standing) ? standTicks + 1 : 0;
+            if (standTicks >= 3)
+            {
+                setCrawling(false);
+                standTicks = 0;
+            }
+            return;
+        }
+        net.minecraft.world.phys.Vec3 goal = goalPos();
+        if (goal == null)
+        {
+            return;
+        }
+        net.minecraft.core.BlockPos goalBlock = net.minecraft.core.BlockPos.containing(goal);
+        net.minecraft.world.level.pathfinder.Path upright = getNavigation().createPath(goalBlock, 1);
+        if (upright != null && upright.canReach())
+        {
+            return;
+        }
+        setCrawling(true);
+        net.minecraft.world.level.pathfinder.Path low = getNavigation().createPath(goalBlock, 1);
+        boolean better = low != null && (low.canReach() || upright == null || low.getDistToTarget() + 1 < upright.getDistToTarget());
+        if (better)
+        {
+            getNavigation().moveTo(low, 1.1);
+            standTicks = 0;
+        }
+        else
+        {
+            setCrawling(false);
+        }
+    }
+
+    /** Smashes glass (avp:xeno_breakable) between it and its goal. */
+    private void smashGlass()
+    {
+        net.minecraft.world.phys.Vec3 goal = goalPos();
+        if (goal == null || !org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosBreakGlass)
+                || !net.neoforged.neoforge.event.EventHooks.canEntityGrief((ServerLevel) level(), this))
+        {
+            return;
+        }
+        net.minecraft.world.phys.Vec3 from = position().add(0, 0.3, 0);
+        net.minecraft.world.phys.Vec3 dir = goal.subtract(from).normalize();
+        for (double d = 0.5; d <= 4; d += 0.5)
+        {
+            for (int up = 0; up <= 1; up++)
+            {
+                net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(from.add(dir.scale(d)).add(0, up, 0));
+                if (level().getBlockState(pos).is(org.avp.registry.ModTags.XENO_BREAKABLE))
+                {
+                    if (distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) < 2.5 * 2.5)
+                    {
+                        level().destroyBlock(pos, false, this);
+                        swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                    }
+                    else if (getNavigation().isDone() || horizontalCollision)
+                    {
+                        getNavigation().moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 1.2);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    private void updateDebugLabel()
+    {
+        boolean debug = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoDebugLabels);
+        if (debug)
+        {
+            if (!hasCustomName() || debugNamed)
+            {
+                String now = getTarget() != null && "LURKING".equals(state) ? "HUNTING" : state;
+                setCustomName(net.minecraft.network.chat.Component.literal(now + (isCrawling() ? " (crawling)" : "")
+                        + " | hunger " + hunger + (isHungry() ? " HUNGRY" : "")));
+                setCustomNameVisible(true);
+                debugNamed = true;
+            }
+        }
+        else if (debugNamed)
+        {
+            setCustomName(null);
+            setCustomNameVisible(false);
+            debugNamed = false;
+        }
+    }
 
     @Nullable
     public net.minecraft.world.phys.Vec3 investigatePos()
@@ -188,6 +335,19 @@ public abstract class XenomorphEntity extends Monster
         if (knownTurretTicks > 0 && --knownTurretTicks == 0)
         {
             knownTurret = null;
+        }
+        if (tickCount % 10 == 0 && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.smartXenomorphs))
+        {
+            updateCrawling();
+            smashGlass();
+        }
+        if (tickCount % 10 == 0)
+        {
+            updateDebugLabel();
+            if (getTarget() == null && investigatePos == null && !"RETREATING".equals(state) && !"AVOIDING TURRET".equals(state))
+            {
+                state = "LURKING";
+            }
         }
         // out of combat they slowly heal
         calmTicks = getTarget() == null && hurtTime == 0 ? calmTicks + 1 : 0;

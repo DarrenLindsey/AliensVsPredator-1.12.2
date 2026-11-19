@@ -83,6 +83,12 @@ public class DroneEntity extends XenomorphEntity
         return 12_800;
     }
 
+    @Override
+    protected boolean canCrawl()
+    {
+        return true;
+    }
+
     /** Film Drones stand taller than the classic ones. */
     @Override
     protected float filmScale()

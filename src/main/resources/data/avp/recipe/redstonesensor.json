@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "ARA",
+    "LCL",
+    "ARA"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:ingot_aluminum"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "L": {
+      "item": "avp:powerline"
+    },
+    "C": {
+      "item": "minecraft:comparator"
+    }
+  },
+  "result": {
+    "id": "avp:redstonesensor",
+    "count": 1
+  }
+}

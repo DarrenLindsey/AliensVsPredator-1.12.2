@@ -61,6 +61,8 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.SEAT.get(), NoopRenderer::new); // invisible
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.BLAST_DOOR.get(), BlastDoorRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.POWERLINE.get(), org.avp.client.render.PowerlineRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.POWER_MACHINE.get(), org.avp.client.render.PowerMachineRenderer::new);
     }
 
     /** Skull/biomask/head/fern items draw their 3D model too. */
@@ -99,6 +101,10 @@ public final class ClientSetup
         };
         event.registerItem(beItems, Arrays.stream(ModBlocks.poweredBlocks()).map(Block::asItem).toArray(Item[]::new));
         event.registerItem(beItems, ModBlocks.BLASTDOOR.get().asItem(), ModBlocks.BLASTDOOR_SEVASTOPOL.get().asItem());
+        // power blocks drawn by a renderer (the redstone emitter is a normal cube model)
+        event.registerItem(beItems, Arrays.stream(ModBlocks.powerMachines()).filter(b -> b != ModBlocks.REDSTONEEMITTER.get())
+                .map(Block::asItem).toArray(Item[]::new));
+        event.registerItem(beItems, ModBlocks.POWERLINE.get().asItem());
     }
 
     @SubscribeEvent

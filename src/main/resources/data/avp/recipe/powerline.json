@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " P ",
+    "PCP",
+    " P "
+  ],
+  "key": {
+    "P": {
+      "item": "avp:polycarbonate"
+    },
+    "C": {
+      "tag": "c:ingots/copper"
+    }
+  },
+  "result": {
+    "id": "avp:powerline",
+    "count": 4
+  }
+}

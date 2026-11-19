@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "AAA",
+    "AIA",
+    " B "
+  ],
+  "key": {
+    "A": {
+      "item": "avp:ingot_aluminum"
+    },
+    "I": {
+      "item": "avp:part_ic"
+    },
+    "B": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "result": {
+    "id": "avp:satellitedish",
+    "count": 1
+  }
+}

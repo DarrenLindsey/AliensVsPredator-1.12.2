@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PPP",
+    "SSS",
+    "RCR"
+  ],
+  "key": {
+    "P": {
+      "item": "avp:polycarbonate"
+    },
+    "S": {
+      "item": "avp:silicon"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
+      "tag": "c:ingots/copper"
+    }
+  },
+  "result": {
+    "id": "avp:solarpanel",
+    "count": 1
+  }
+}

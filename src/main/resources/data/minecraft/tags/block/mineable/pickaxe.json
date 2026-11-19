@@ -110,6 +110,17 @@
     "avp:engineership_ampule",
     "avp:medpod",
     "avp:blastdoor",
-    "avp:blastdoor_sevastopol"
+    "avp:blastdoor_sevastopol",
+    "avp:powerline",
+    "avp:solarpanel",
+    "avp:universalgenerator",
+    "avp:generator",
+    "avp:transformer",
+    "avp:transformer_stepdown",
+    "avp:powercell",
+    "avp:satellitedish",
+    "avp:teslacoil",
+    "avp:redstonesensor",
+    "avp:redstoneemitter"
   ]
 }

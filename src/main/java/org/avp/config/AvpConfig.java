@@ -79,6 +79,25 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue medpodRegenerationTicks;
         public final ModConfigSpec.IntValue medpodAbsorptionTicks;
 
+        public final ModConfigSpec.IntValue solarPanelOutput;
+        public final ModConfigSpec.IntValue generatorOutput;
+        public final ModConfigSpec.DoubleValue generatorFuelMultiplier;
+        public final ModConfigSpec.IntValue repulsionOutputPerMagnet;
+        public final ModConfigSpec.IntValue transformerRate;
+        public final ModConfigSpec.IntValue stepdownTransformerRate;
+        public final ModConfigSpec.IntValue powercellCapacity;
+        public final ModConfigSpec.IntValue powercellRate;
+        public final ModConfigSpec.IntValue maxCableNetworkSize;
+        public final ModConfigSpec.IntValue redstoneEmitterEnergyPerTick;
+        public final ModConfigSpec.IntValue satelliteDishEnergyPerTick;
+        public final ModConfigSpec.IntValue teslaCoilEnergyPerTick;
+        public final ModConfigSpec.IntValue teslaCoilEnergyPerZap;
+        public final ModConfigSpec.DoubleValue teslaCoilDamage;
+        public final ModConfigSpec.IntValue teslaCoilRange;
+        public final ModConfigSpec.IntValue teslaCoilCooldown;
+        public final ModConfigSpec.BooleanValue teslaCoilTargetsPlayers;
+        public final ModConfigSpec.BooleanValue teslaCoilSetsFire;
+
         Server(ModConfigSpec.Builder b)
         {
             b.push("blocks");
@@ -112,6 +131,66 @@ public final class AvpConfig
             blastDoorEnergyPerTick = b
                     .comment("FE a blast door uses per tick while powered.")
                     .defineInRange("blastDoorEnergyPerTick", 5, 0, 10_000);
+            redstoneEmitterEnergyPerTick = b
+                    .comment("FE a redstone emitter uses per tick while it gives a redstone signal.")
+                    .defineInRange("redstoneEmitterEnergyPerTick", 1, 0, 10_000);
+            satelliteDishEnergyPerTick = b
+                    .comment("FE a satellite dish uses per tick while powered.")
+                    .defineInRange("satelliteDishEnergyPerTick", 8, 0, 10_000);
+            b.pop();
+
+            b.push("powerNetwork");
+            solarPanelOutput = b
+                    .comment("FE per tick a solar panel makes at noon in clear weather (less in the morning, evening and rain; none at night).")
+                    .defineInRange("solarPanelOutput", 40, 0, 100_000);
+            generatorOutput = b
+                    .comment("FE per tick the Universal Generator makes while burning fuel.")
+                    .defineInRange("generatorOutput", 80, 0, 100_000);
+            generatorFuelMultiplier = b
+                    .comment("How long fuel lasts in the Universal Generator compared to a furnace (1.0 = same as a furnace).")
+                    .defineInRange("generatorFuelMultiplier", 1.0, 0.01, 100.0);
+            repulsionOutputPerMagnet = b
+                    .comment("FE per tick the Repulsion Generator makes for each neodymium magnet inside (it holds up to 8).")
+                    .defineInRange("repulsionOutputPerMagnet", 10, 0, 100_000);
+            transformerRate = b
+                    .comment("Most FE per tick a transformer passes from its back to its front.")
+                    .defineInRange("transformerRate", 4096, 1, 1_000_000);
+            stepdownTransformerRate = b
+                    .comment("Most FE per tick a step-down transformer passes (use it to limit how much power flows).")
+                    .defineInRange("stepdownTransformerRate", 256, 1, 1_000_000);
+            powercellCapacity = b
+                    .comment("How much FE a power cell stores.")
+                    .defineInRange("powercellCapacity", 1_000_000, 1000, 1_000_000_000);
+            powercellRate = b
+                    .comment("Most FE per tick a power cell gives out.")
+                    .defineInRange("powercellRate", 1024, 1, 1_000_000);
+            maxCableNetworkSize = b
+                    .comment("Largest number of connected powerlines that still carry power (limits lag from huge networks).")
+                    .defineInRange("maxCableNetworkSize", 2048, 16, 65_536);
+            b.pop();
+
+            b.push("teslaCoil");
+            teslaCoilEnergyPerTick = b
+                    .comment("FE a tesla coil uses per tick while switched on.")
+                    .defineInRange("teslaCoilEnergyPerTick", 4, 0, 10_000);
+            teslaCoilEnergyPerZap = b
+                    .comment("Extra FE a tesla coil uses each time it strikes a creature.")
+                    .defineInRange("teslaCoilEnergyPerZap", 400, 0, 1_000_000);
+            teslaCoilDamage = b
+                    .comment("Damage per strike (2 = one heart).")
+                    .defineInRange("teslaCoilDamage", 6.0, 0.0, 1000.0);
+            teslaCoilRange = b
+                    .comment("How far (in blocks) a tesla coil can strike.")
+                    .defineInRange("teslaCoilRange", 8, 1, 32);
+            teslaCoilCooldown = b
+                    .comment("Ticks between strikes (20 = 1 second).")
+                    .defineInRange("teslaCoilCooldown", 20, 1, 1200);
+            teslaCoilTargetsPlayers = b
+                    .comment("Tesla coils also strike players (never players in creative or spectator mode).")
+                    .define("teslaCoilTargetsPlayers", false);
+            teslaCoilSetsFire = b
+                    .comment("Strikes set the target on fire for a few seconds.")
+                    .define("teslaCoilSetsFire", true);
             b.pop();
 
             b.push("blastDoors");

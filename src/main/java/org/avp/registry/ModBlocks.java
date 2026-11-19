@@ -10,6 +10,9 @@ import org.avp.block.BlastDoorBlock;
 import org.avp.block.MedpodBlock;
 import org.avp.block.ModelPlantBlock;
 import org.avp.block.PoweredBlock;
+import org.avp.block.PowerMachineBlock;
+import org.avp.block.PowerlineBlock;
+import org.avp.block.RedstoneSensorBlock;
 import org.avp.config.AvpConfig;
 import org.avp.block.ModTreeGrowers;
 import org.avp.block.ShapeBlock;
@@ -280,6 +283,38 @@ public final class ModBlocks
             BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(25.0F, 1200.0F)
                     .noOcclusion().requiresCorrectToolForDrops().pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
             BlastDoorBlock.SEVASTOPOL, 0.09F, true));
+
+    // ---- Power network (batch D1): powerlines, generators, transformers, power cell, machines ----
+    private static final List<DeferredBlock<PowerMachineBlock>> POWER_MACHINES = new ArrayList<>();
+    public static final DeferredBlock<PowerlineBlock> POWERLINE = register("powerline", Tab.MAIN, () -> new PowerlineBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.0F, 3.0F).noOcclusion()));
+    public static final DeferredBlock<RedstoneSensorBlock> REDSTONESENSOR = register("redstonesensor", Tab.MAIN, () -> new RedstoneSensorBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(3.2F, 2.6F)
+                    .lightLevel(state -> state.getValue(RedstoneSensorBlock.POWERED) ? 7 : 0)));
+    public static final DeferredBlock<PowerMachineBlock> SOLARPANEL = powerMachine("solarpanel", PowerMachineBlock.Kind.SOLAR_PANEL, 5.0F, 0);
+    public static final DeferredBlock<PowerMachineBlock> UNIVERSALGENERATOR = powerMachine("universalgenerator", PowerMachineBlock.Kind.GENERATOR, 3.2F, 7);
+    public static final DeferredBlock<PowerMachineBlock> GENERATOR = powerMachine("generator", PowerMachineBlock.Kind.REPULSION_GENERATOR, 5.0F, 0);
+    public static final DeferredBlock<PowerMachineBlock> TRANSFORMER = powerMachine("transformer", PowerMachineBlock.Kind.TRANSFORMER, 5.0F, 0);
+    public static final DeferredBlock<PowerMachineBlock> TRANSFORMER_STEPDOWN = powerMachine("transformer_stepdown", PowerMachineBlock.Kind.STEPDOWN_TRANSFORMER, 5.0F, 0);
+    public static final DeferredBlock<PowerMachineBlock> POWERCELL = powerMachine("powercell", PowerMachineBlock.Kind.POWERCELL, 3.2F, 4);
+    public static final DeferredBlock<PowerMachineBlock> REDSTONEEMITTER = powerMachine("redstoneemitter", PowerMachineBlock.Kind.REDSTONE_EMITTER, 3.2F, 7);
+    public static final DeferredBlock<PowerMachineBlock> SATELLITEDISH = powerMachine("satellitedish", PowerMachineBlock.Kind.SATELLITE_DISH, 3.2F, 0);
+    public static final DeferredBlock<PowerMachineBlock> TESLACOIL = powerMachine("teslacoil", PowerMachineBlock.Kind.TESLA_COIL, 3.0F, 5);
+
+    public static Block[] powerMachines()
+    {
+        return POWER_MACHINES.stream().map(DeferredBlock::get).toArray(Block[]::new);
+    }
+
+    /** @param light light level while running */
+    private static DeferredBlock<PowerMachineBlock> powerMachine(String id, PowerMachineBlock.Kind kind, float hardness, int light)
+    {
+        DeferredBlock<PowerMachineBlock> block = register(id, Tab.MAIN, () -> new PowerMachineBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL).sound(SoundType.METAL).strength(hardness, 6.0F).noOcclusion().requiresCorrectToolForDrops()
+                .lightLevel(state -> state.getValue(PowerMachineBlock.LIT) ? light : 0), kind));
+        POWER_MACHINES.add(block);
+        return block;
+    }
 
     /** Engineer ampule (black goo container): a decorative model block, drawn like the trophies. */
     public static final DeferredBlock<TrophyBlock> ENGINEERSHIP_AMPULE = trophy("engineership_ampule", false);

@@ -4,6 +4,8 @@ import org.avp.AliensVsPredator;
 import org.avp.block.entity.BlastDoorBlockEntity;
 import org.avp.block.entity.ModelBlockEntity;
 import org.avp.block.entity.PoweredBlockEntity;
+import org.avp.block.entity.PowerMachineBlockEntity;
+import org.avp.block.entity.PowerlineBlockEntity;
 import org.avp.block.entity.ShapeBlockEntity;
 import org.avp.block.entity.StorageBlockEntity;
 
@@ -41,6 +43,16 @@ public final class ModBlockEntities
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlastDoorBlockEntity>> BLAST_DOOR = BLOCK_ENTITIES.register("blast_door",
             () -> BlockEntityType.Builder.of(BlastDoorBlockEntity::new, ModBlocks.BLASTDOOR.get(), ModBlocks.BLASTDOOR_SEVASTOPOL.get()).build(null));
+
+    /** Powerlines (only so they can be drawn with their model). */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PowerlineBlockEntity>> POWERLINE = BLOCK_ENTITIES.register("powerline",
+            () -> BlockEntityType.Builder.of(PowerlineBlockEntity::new, ModBlocks.POWERLINE.get()).build(null));
+
+    /** Generators, transformers, power cell, redstone emitter, satellite dish, tesla coil. */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PowerMachineBlockEntity>> POWER_MACHINE = BLOCK_ENTITIES.register("power_machine",
+            () -> BlockEntityType.Builder.of(PowerMachineBlockEntity::new, ModBlocks.powerMachines()).build(null));
 
     private ModBlockEntities()
     {

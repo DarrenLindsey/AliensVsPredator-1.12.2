@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PDP",
+    "TFS",
+    "AAA"
+  ],
+  "key": {
+    "P": {
+      "item": "avp:polycarbonate"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "T": {
+      "item": "avp:transformer"
+    },
+    "S": {
+      "item": "avp:transformer_stepdown"
+    },
+    "F": {
+      "item": "minecraft:furnace"
+    },
+    "A": {
+      "item": "avp:ingot_aluminum"
+    }
+  },
+  "result": {
+    "id": "avp:universalgenerator",
+    "count": 1
+  }
+}

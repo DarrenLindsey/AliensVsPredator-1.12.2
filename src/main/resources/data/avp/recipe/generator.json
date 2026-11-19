@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "APA",
+    "CNC",
+    "ATA"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:ingot_aluminum"
+    },
+    "P": {
+      "item": "avp:polycarbonate"
+    },
+    "C": {
+      "tag": "c:ingots/copper"
+    },
+    "N": {
+      "item": "avp:neodymium"
+    },
+    "T": {
+      "item": "avp:transformer"
+    }
+  },
+  "result": {
+    "id": "avp:generator",
+    "count": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PKP",
+    "KRK",
+    "PKP"
+  ],
+  "key": {
+    "P": {
+      "item": "avp:polycarbonate"
+    },
+    "K": {
+      "item": "avp:part_capacitor"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "avp:powercell",
+    "count": 1
+  }
+}

@@ -48,7 +48,11 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Batch C2b part 2 - Blast doors (4x3 and Sevastopol 2x3): power, passwords, Security Tuner
       admin screen and binding, Auto-Lock, Maintenance Jack prying; network payloads in org.avp.network
 - [ ] Cryostasis tube contents (creature in stasis, cracking when unpowered), temple spawner (with creatures)
-- [ ] Batch D - Power system (FE) and machines
+- [x] Batch D1 - Power network (first pass, plain FE): powerlines, solar panel, Universal Generator
+      (burns fuel), Repulsion Generator (neodymium magnets), transformer + step-down, power cell,
+      redstone sensor (powerline switch) / emitter, satellite dish, tesla coil (strikes hostiles)
+- [ ] Batch D2 - Machines: Assembler (schematics), terminal/workstation, network rack, turret, stasis mechanism
+- [ ] Batch D3 - Make the power system unique and robust (see "Planned: power system" below)
 - [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
 - [ ] Hive resin, supply crate parachute drop (with the creatures/entities)
 - [ ] Ore generation in the world (ores exist but don't spawn yet)
@@ -128,6 +132,36 @@ Currently decorative (as in 1.12.2). Planned, with the black goo fluid (batch E)
 - Technical note: vanilla and other mods' blocks can't get our block entity, so the upgrade data
   is stored per position in a NeoForge *data attachment* on the chunk, and events (block break,
   right-click, mob griefing) apply the behaviour.
+
+## Planned: power system (after the first pass)
+
+The first pass (D1) is plain FE so it works with every other mod. Ideas to give it its own
+character while staying FE-compatible at the edges:
+- **Voltage tiers** (like 1.12.2's volts): low / medium / high lines; transformers step between them;
+  machines need the right tier, the wrong one damages them or trips a breaker.
+- **Line losses and overloads**: long runs lose a little power; overloaded powerlines spark, arc to
+  nearby creatures (the 1.12.2 "electric arc" from bare lines) and can burn out.
+- **Breakers / fuses** and a **power monitor** (terminal screen showing each network's load).
+- **Grid events**: Xenomorphs cutting power, brownouts that flicker lights, emergency backup cells.
+- Tesla coil wirelessly powering CCFL tubes (as in 1.12.2).
+
+## Planned: Working Joe robots
+
+Seegson "Working Joe" androids you build and set up as a network:
+- A control terminal assigns jobs (patrol, guard a door, carry items between storage, repair doors,
+  farm, light-switching, alarm response); Joes report back over the network.
+- Optional **programming**: a small, safe scripting language typed into a terminal (or loaded from a
+  data-pack file) - e.g. `when door "Lab" opens: goto "Lab"; say "Please remain calm"`.
+- They need power (charging stations on the power network) and can be "hacked" or go hostile
+  (config), like in Alien: Isolation.
+
+## Planned: cloning (like iChun's Sync)
+
+- A **clone vat / shell constructor** grows a copy of you (costs power, materials, maybe biomass).
+- A **shell storage** pod keeps clones; step into one to switch bodies (each keeps its own inventory).
+- Dying sends you to your nearest stored clone instead of the respawn point (config).
+- Ties in with the AvP story (Weyland-Yutani cloning, Ripley 8): imperfect clones, possible
+  Xenomorph DNA mixing as an optional hard-mode twist.
 
 ## Planned: AI ideas
 

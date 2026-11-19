@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "ARA",
+    "LTL",
+    "ARA"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:ingot_aluminum"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "L": {
+      "item": "avp:powerline"
+    },
+    "T": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "result": {
+    "id": "avp:redstoneemitter",
+    "count": 1
+  }
+}

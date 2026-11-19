@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "avp:block/redstonesensor"
+    },
+    "powered=true": {
+      "model": "avp:block/redstonesensor_on"
+    }
+  }
+}

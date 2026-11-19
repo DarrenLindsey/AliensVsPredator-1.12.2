@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "avp:block/redstoneemitter"
+    },
+    "lit=true": {
+      "model": "avp:block/redstoneemitter_on"
+    }
+  }
+}

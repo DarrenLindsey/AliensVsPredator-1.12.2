@@ -75,6 +75,12 @@ public class OvamorphEntity extends XenomorphEntity
         return entityData.get(OPEN);
     }
 
+    /** Wake it up so it opens soon (e.g. thawed out of a cryostasis tube). */
+    public void trigger()
+    {
+        triggered = true;
+    }
+
     public boolean isFull()
     {
         return full;
@@ -132,6 +138,40 @@ public class OvamorphEntity extends XenomorphEntity
         hugger.setDeltaMovement(push.x, 0.75, push.z);
         hugger.finalizeSpawn((net.minecraft.server.level.ServerLevel) level(), level().getCurrentDifficultyAt(blockPosition()), MobSpawnType.BREEDING, null);
         level().addFreshEntity(hugger);
+    }
+
+    /**
+     * Capture: use an empty Specimen Containment Unit on a shut egg that still holds its
+     * facehugger. Once it starts to open it's too late.
+     */
+    @Override
+    protected net.minecraft.world.InteractionResult mobInteract(Player player, net.minecraft.world.InteractionHand hand)
+    {
+        net.minecraft.world.item.ItemStack stack = player.getItemInHand(hand);
+        if (!stack.is(org.avp.registry.ModItems.SPECIMEN_CONTAINER.get()))
+        {
+            return super.mobInteract(player, hand);
+        }
+        if (level().isClientSide)
+        {
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        if (!full)
+        {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.specimen.empty_egg"), true);
+            return net.minecraft.world.InteractionResult.CONSUME;
+        }
+        if (openProgress() > -MAX_OPEN)
+        {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.specimen.opening"), true);
+            return net.minecraft.world.InteractionResult.CONSUME;
+        }
+        stack.consume(1, player);
+        player.getInventory().placeItemBackInInventory(new net.minecraft.world.item.ItemStack(org.avp.registry.ModItems.CONTAINED_OVAMORPH.get()));
+        playSound(net.minecraft.sounds.SoundEvents.IRON_TRAPDOOR_CLOSE, 0.8F, 0.7F);
+        player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.specimen.captured"), true);
+        discard();
+        return net.minecraft.world.InteractionResult.CONSUME;
     }
 
     /** Bumping into it: it opens straight away (1.12.2 collideWithEntity). */

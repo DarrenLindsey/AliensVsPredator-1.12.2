@@ -189,3 +189,54 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("creature data written: ovamorph")
+
+# ================================================================ specimen capture (Special Order 937)
+from PIL import Image, ImageDraw
+lang = read_json(f"{NA}/lang/en_us.json", {})
+
+
+def canister(path, with_egg):
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([3, 1, 12, 2], fill=(70, 72, 78, 255))                     # lid
+    d.rectangle([3, 13, 12, 14], fill=(70, 72, 78, 255))                   # base
+    d.rectangle([4, 3, 11, 12], fill=(150, 200, 220, 110), outline=(200, 210, 220, 255))  # glass
+    d.line([(5, 4), (5, 11)], fill=(230, 245, 255, 160))                   # glint
+    if with_egg:
+        d.ellipse([5, 5, 10, 12], fill=(92, 80, 60, 255), outline=(52, 44, 34, 255))
+        d.line([(7, 5), (7, 8)], fill=(40, 34, 26, 255))
+        d.line([(8, 5), (8, 8)], fill=(40, 34, 26, 255))
+    d.rectangle([4, 7, 11, 7], fill=(214, 180, 40, 255))                  # W-Y yellow band
+    img.save(path)
+
+
+canister(f"{NA}/textures/item/specimen_container.png", False)
+canister(f"{NA}/textures/item/contained_ovamorph.png", True)
+for i in ("specimen_container", "contained_ovamorph"):
+    write_json(f"{NA}/models/item/{i}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"avp:item/{i}"}})
+write_json(f"{ND}/avp/recipe/assembly/specimen_container.json", {"type": "avp:assembly", "ingredients": [
+    {"item": "avp:industrialglass", "count": 2}, {"item": "avp:polycarbonate", "count": 2},
+    {"tag": "c:ingots/aluminum", "count": 2}, {"item": "avp:cryo_coolant", "count": 1}],
+    "result": {"id": "avp:specimen_container", "count": 1}})
+lang.update({
+    "item.avp.specimen_container": "Specimen Containment Unit",
+    "item.avp.contained_ovamorph": "Contained Ovamorph",
+    "tooltip.avp.specimen_container": "Weyland-Yutani biological containment unit.\nUse on a shut Ovamorph to capture it.\n\"Priority one: ensure return of organism for analysis.\"",
+    "tooltip.avp.contained_ovamorph": "A live Ovamorph, sealed and dormant.\nUse on a block to release it, or store it in a cryostasis tube.",
+    "message.avp.specimen.captured": "Specimen secured.",
+    "message.avp.specimen.opening": "It's opening - too late to contain it!",
+    "message.avp.specimen.empty_egg": "Nothing left inside to contain.",
+    "message.avp.cryotube.stored": "Specimen placed in cryostasis.",
+    "message.avp.cryotube.occupied": "This tube already holds a specimen.",
+    "message.avp.cryotube.broken": "The glass is shattered - repair it with Industrial Glass.",
+    "message.avp.cryotube.empty": "Empty. Use a contained specimen on it to store it here.",
+    "message.avp.cryotube.frozen": "Specimen in stasis. Royal jelly is collected over time.",
+    "message.avp.cryotube.thawing": "WARNING: no power - the specimen is thawing!",
+    "tooltip.avp.cryostasistube": "Hypersleep chamber. Can hold a contained specimen in stasis.\nKeep it powered.",
+    "avp.configuration.cryotubeHarvestTicks": "Specimen Jelly Interval (ticks)",
+    "avp.configuration.cryotubeHarvestTicks.tooltip": "A frozen specimen in a powered tube gives one royal jelly this often.",
+    "avp.configuration.cryotubeThawTicks": "Thaw Time Without Power (ticks)",
+    "avp.configuration.cryotubeThawTicks.tooltip": "How long a tube can lose power before the specimen breaks out.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("specimen capture data written")

@@ -45,6 +45,8 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
     private final LightPanelModel lightPanel;
     private final CCFLModel ccfl;
     private final CryostasisTubeModel cryo;
+    private final org.avp.client.model.geometry.OvamorphModel egg;
+    private static final ResourceLocation EGG = ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "textures/entity/ovamorph.png");
 
     public PoweredBlockRenderer(BlockEntityRendererProvider.Context context)
     {
@@ -52,6 +54,7 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
         medpod = new MedpodModel(context.bakeLayer(MedpodModel.LAYER));
         ccfl = new CCFLModel(context.bakeLayer(CCFLModel.LAYER));
         cryo = new CryostasisTubeModel(context.bakeLayer(CryostasisTubeModel.LAYER));
+        egg = new org.avp.client.model.geometry.OvamorphModel(context.bakeLayer(org.avp.client.model.geometry.OvamorphModel.LAYER));
     }
 
     private static ResourceLocation tex(String name)
@@ -114,6 +117,10 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
         }
         else if (state.is(ModBlocks.CRYOSTASISTUBE.get()))
         {
+            if (be.contents().is(org.avp.registry.ModItems.CONTAINED_OVAMORPH.get()))
+            {
+                drawFrozenEgg(poseStack, buffers, light, overlay, lit, turn);
+            }
             poseStack.translate(0.5F, 1.125F, 0.5F);
             poseStack.mulPose(Axis.YP.rotationDegrees(turn));
             poseStack.scale(0.75F, -0.75F, 0.75F);
@@ -122,6 +129,27 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
             ResourceLocation glass = CRYO_GLASS[state.getValue(PoweredBlock.DAMAGE)];
             cryo.root().render(poseStack, buffers.getBuffer(RenderType.entityTranslucent(glass)), glow, overlay);
         }
+        poseStack.popPose();
+    }
+
+    /** A shut Ovamorph standing in the tube, tinted ice-blue while frozen. */
+    private void drawFrozenEgg(PoseStack poseStack, MultiBufferSource buffers, int light, int overlay, boolean frozen, float turn)
+    {
+        float s = 1.2F;
+        poseStack.pushPose();
+        poseStack.translate(0.5F, 0.15F + 1.5F * s, 0.5F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(turn));
+        poseStack.scale(s, -s, s);
+        float shut = (float) Math.toRadians(25 + Math.sin(-21 * 0.075) * 25); // lobes closed (OvamorphEntityModel)
+        egg.lFrontLobe2.xRot = shut; egg.lFrontLobe2.zRot = shut;
+        egg.rFrontLobe2.xRot = shut; egg.rFrontLobe2.zRot = -shut;
+        egg.rBackLobe2.xRot = -shut; egg.rBackLobe2.zRot = -shut;
+        egg.lBackLobe2.xRot = -shut; egg.lBackLobe2.zRot = shut;
+        egg.lFrontLobe.xRot = shut * 0.45F; egg.lFrontLobe.zRot = shut * 0.45F;
+        egg.rFrontLobe.xRot = shut * 0.45F; egg.rFrontLobe.zRot = -shut * 0.45F;
+        egg.rBackLobe.xRot = -shut * 0.45F; egg.rBackLobe.zRot = -shut * 0.45F;
+        egg.lBackLobe.xRot = -shut * 0.45F; egg.lBackLobe.zRot = shut * 0.45F;
+        egg.root().render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(EGG)), light, overlay, frozen ? 0xFFB8DCFF : 0xFFFFFFFF);
         poseStack.popPose();
     }
 

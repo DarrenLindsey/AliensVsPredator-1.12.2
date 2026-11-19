@@ -88,6 +88,17 @@ public final class ModItems
         Tab.CRAFTING.add(INGOT_LITHIUM);
     }
 
+    // ---- Specimens (W-Y Special Order 937) ----
+    /** Empty containment unit: use on a shut Ovamorph to capture it. */
+    public static final DeferredItem<Item> SPECIMEN_CONTAINER = simple("specimen_container", Tab.MAIN, 16);
+    /** A captured Ovamorph. */
+    public static final DeferredItem<Item> CONTAINED_OVAMORPH = ITEMS.register("contained_ovamorph",
+            () -> new org.avp.item.ContainedOvamorphItem(new Item.Properties().stacksTo(1)));
+    static
+    {
+        Tab.MAIN.add(CONTAINED_OVAMORPH);
+    }
+
     // ---- Spawn eggs ----
     public static final DeferredItem<Item> FACEHUGGER_SPAWN_EGG = ITEMS.register("facehugger_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.FACEHUGGER, 0xC9B79C, 0x7A6248, new Item.Properties()));

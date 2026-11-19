@@ -270,8 +270,15 @@ public final class ModBlocks
             () -> AvpConfig.server(AvpConfig.SERVER.lightEnergyPerTick));
     public static final DeferredBlock<PoweredBlock> CCFLTUBE = powered("ccfltube", 15, false,
             () -> AvpConfig.server(AvpConfig.SERVER.lightEnergyPerTick));
-    public static final DeferredBlock<PoweredBlock> CRYOSTASISTUBE = powered("cryostasistube", 6, true,
-            () -> AvpConfig.server(AvpConfig.SERVER.cryostasisTubeEnergyPerTick));
+    /** Cryostasis tube: can hold a captured specimen (see CryostasisTubeBlock). */
+    public static final DeferredBlock<PoweredBlock> CRYOSTASISTUBE = register("cryostasistube", Tab.MAIN, () -> new org.avp.block.CryostasisTubeBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.GLASS).strength(2.0F, 6.0F).noOcclusion()
+                    .lightLevel(state -> state.getValue(PoweredBlock.LIT) ? 6 : 0),
+            () -> AvpConfig.server(AvpConfig.SERVER.cryostasisTubeEnergyPerTick)));
+    static
+    {
+        POWERED_BLOCKS.add(CRYOSTASISTUBE);
+    }
     /** Medpod: walk in when open, heals while closed and powered. */
     public static final DeferredBlock<MedpodBlock> MEDPOD = register("medpod", Tab.MAIN, () -> new MedpodBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.METAL).sound(SoundType.METAL).strength(3.0F, 6.0F).noOcclusion().noCollission()

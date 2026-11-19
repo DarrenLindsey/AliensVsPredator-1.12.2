@@ -55,6 +55,119 @@ public class PoweredBlockEntity extends BlockEntity
         return true;
     }
 
+    // ---- cryostasis tube contents (see CryostasisTubeBlock) ----
+    private net.minecraft.world.item.ItemStack contents = net.minecraft.world.item.ItemStack.EMPTY;
+    private int jelly;
+    private int harvestTimer;
+    private int thawTicks;
+
+    public net.minecraft.world.item.ItemStack contents()
+    {
+        return contents;
+    }
+
+    public void setContents(net.minecraft.world.item.ItemStack contents)
+    {
+        this.contents = contents;
+        this.harvestTimer = 0;
+        this.thawTicks = 0;
+        setChanged();
+        sync();
+    }
+
+    public int jelly()
+    {
+        return jelly;
+    }
+
+    public void setJelly(int jelly)
+    {
+        this.jelly = jelly;
+        setChanged();
+    }
+
+    /** Counts up while frozen; returns true when it's time to harvest. */
+    public boolean harvestTick(int interval)
+    {
+        if (++harvestTimer >= interval)
+        {
+            harvestTimer = 0;
+            return true;
+        }
+        return false;
+    }
+
+    public int thawTicks()
+    {
+        return thawTicks;
+    }
+
+    public void setThawTicks(int ticks)
+    {
+        this.thawTicks = ticks;
+    }
+
+    public void sync()
+    {
+        if (level != null && !level.isClientSide)
+        {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+        }
+    }
+
+    /** Hoppers can take the harvested royal jelly out of a cryostasis tube. */
+    public net.neoforged.neoforge.items.IItemHandler jellyOutput()
+    {
+        PoweredBlockEntity be = this;
+        return new net.neoforged.neoforge.items.IItemHandler()
+        {
+            @Override
+            public int getSlots()
+            {
+                return 1;
+            }
+
+            @Override
+            public net.minecraft.world.item.ItemStack getStackInSlot(int slot)
+            {
+                return be.jelly > 0 ? new net.minecraft.world.item.ItemStack(org.avp.registry.ModItems.ROYALJELLY.get(), be.jelly) : net.minecraft.world.item.ItemStack.EMPTY;
+            }
+
+            @Override
+            public net.minecraft.world.item.ItemStack insertItem(int slot, net.minecraft.world.item.ItemStack stack, boolean simulate)
+            {
+                return stack;
+            }
+
+            @Override
+            public net.minecraft.world.item.ItemStack extractItem(int slot, int amount, boolean simulate)
+            {
+                int taken = Math.min(amount, be.jelly);
+                if (taken <= 0)
+                {
+                    return net.minecraft.world.item.ItemStack.EMPTY;
+                }
+                if (!simulate)
+                {
+                    be.setJelly(be.jelly - taken);
+                }
+                return new net.minecraft.world.item.ItemStack(org.avp.registry.ModItems.ROYALJELLY.get(), taken);
+            }
+
+            @Override
+            public int getSlotLimit(int slot)
+            {
+                return 64;
+            }
+
+            @Override
+            public boolean isItemValid(int slot, net.minecraft.world.item.ItemStack stack)
+            {
+                return false;
+            }
+        };
+    }
+
     /** Client-only animation progress (0 = closed, 1 = open), e.g. the medpod lid. */
     private float animation;
     private float animationPrev;
@@ -110,6 +223,13 @@ public class PoweredBlockEntity extends BlockEntity
     {
         super.saveAdditional(tag, registries);
         tag.put("Energy", energy.serializeNBT(registries));
+        if (!contents.isEmpty())
+        {
+            tag.put("Contents", contents.save(registries));
+        }
+        tag.putInt("Jelly", jelly);
+        tag.putInt("HarvestTimer", harvestTimer);
+        tag.putInt("ThawTicks", thawTicks);
     }
 
     @Override
@@ -120,5 +240,28 @@ public class PoweredBlockEntity extends BlockEntity
         {
             energy.deserializeNBT(registries, tag.get("Energy"));
         }
+        contents = tag.contains("Contents") ? net.minecraft.world.item.ItemStack.parseOptional(registries, tag.getCompound("Contents"))
+                : net.minecraft.world.item.ItemStack.EMPTY;
+        jelly = tag.getInt("Jelly");
+        harvestTimer = tag.getInt("HarvestTimer");
+        thawTicks = tag.getInt("ThawTicks");
+    }
+
+    /** The client needs to know what's in a cryostasis tube to draw it. */
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
+    {
+        CompoundTag tag = super.getUpdateTag(registries);
+        if (!contents.isEmpty())
+        {
+            tag.put("Contents", contents.save(registries));
+        }
+        return tag;
+    }
+
+    @Override
+    public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket()
+    {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
     }
 }

@@ -58,6 +58,9 @@ public final class ModCapabilities
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.TURRET.get(), (be, side) -> be.energyFor());
         // hoppers and pipes can load sentry ammo
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.TURRET.get(), (be, side) -> be.ammoInput());
+        // cryostasis tube: hoppers can collect harvested royal jelly
+        event.registerBlock(Capabilities.ItemHandler.BLOCK, (level, pos, state, be, side) ->
+                be instanceof org.avp.block.entity.PoweredBlockEntity tube ? tube.jellyOutput() : null, ModBlocks.CRYOSTASISTUBE.get());
         // the Universal Generator's fuel slot: hoppers and pipes can feed it
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.POWER_MACHINE.get(),
                 (be, side) -> be.kind() == org.avp.block.PowerMachineBlock.Kind.GENERATOR ? be.getFuel() : null);

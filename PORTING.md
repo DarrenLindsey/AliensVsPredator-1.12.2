@@ -172,6 +172,24 @@ character while staying FE-compatible at the edges:
   - W-Y wireless power beacons, colony-wide grid status on MU/TH/UR terminals, "Special Order 937"
     style corporate overrides (admins can lock a grid).
 
+## Specimens (Special Order 937) - started
+
+Done: Specimen Containment Unit captures a shut Ovamorph -> Contained Ovamorph (deploy it anywhere,
+e.g. as a trap) or store it in a powered cryostasis tube, where it stays dormant and gives royal
+jelly over time (hoppers can collect it). Power loss -> the glass cracks, shatters, and the egg
+breaks out awake. Repair with Industrial Glass.
+
+Ideas for later uses of captured specimens:
+- **Bio-research station** (W-Y lab): study specimens to unlock schematics (acid-resistant armour,
+  xeno-tracking upgrades, smartgun parts), Weyland-Yutani "research points".
+- **Corporate bounty / trade**: a W-Y uplink (satellite dish + terminal) that pays for delivered
+  specimens with rare parts or credits.
+- **Controlled hatching / incubator**: hatch a facehugger in containment on purpose - for
+  research, or to breed chestbursters for jelly.
+- **Other specimens**: facehuggers (dead or alive), chestbursters, Drones in stasis, black goo
+  samples - each with its own harvest (jelly, acid, resin, chitin) and research.
+- **Stasis mechanism** (1.12.2 block): display a frozen creature for the "museum" look.
+
 ## Planned: Working Joe robots
 
 Seegson "Working Joe" androids you build and set up as a network:

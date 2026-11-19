@@ -168,6 +168,8 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue medpodRemovesEmbryo;
         public final ModConfigSpec.IntValue chestbursterMatureTicks;
         public final ModConfigSpec.IntValue emptyOvamorphLifetime;
+        public final ModConfigSpec.IntValue cryotubeHarvestTicks;
+        public final ModConfigSpec.IntValue cryotubeThawTicks;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -325,6 +327,12 @@ public final class AvpConfig
             emptyOvamorphLifetime = b
                     .comment("How long an empty (hatched) egg stays before it withers away (ticks; 1.12.2: 5 minutes).")
                     .defineInRange("emptyOvamorphLifetime", 6000, 20, 1_728_000);
+            cryotubeHarvestTicks = b
+                    .comment("A frozen specimen in a powered cryostasis tube gives one royal jelly this often (ticks; 6000 = 5 minutes).")
+                    .defineInRange("cryotubeHarvestTicks", 6000, 20, 1_728_000);
+            cryotubeThawTicks = b
+                    .comment("How long a cryostasis tube can be without power before the specimen thaws and breaks out (ticks).")
+                    .defineInRange("cryotubeThawTicks", 600, 20, 72_000);
             b.pop();
 
             b.push("crafting");

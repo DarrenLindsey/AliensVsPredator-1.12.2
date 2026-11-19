@@ -44,7 +44,8 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       (+ `tools/convert_models.py`, which converts all 99 old box models)
 - [x] Batch C1 - Lockers, gun locker, supply crates (64-slot menus, hopper/AE2/Create item access)
 - [x] Batch C2a - Light panel, fluorescent light (CCFL), cryostasis tube, ampule; FE power + redstone
-- [ ] Batch C2b - Medpod, blast doors
+- [x] Batch C2b part 1 - Medpod (walk in, heals while closed and powered)
+- [ ] Batch C2b part 2 - Blast doors (multi-block, passwords, security tuner, maintenance jack)
 - [ ] Cryostasis tube contents (creature in stasis, cracking when unpowered), temple spawner (with creatures)
 - [ ] Batch D - Power system (FE) and machines
 - [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
@@ -97,6 +98,11 @@ Currently decorative (as in 1.12.2). Planned, with the black goo fluid (batch E)
 - **Mutation:** black goo that touches creatures/plants mutates them, Prometheus-style
   (e.g. worms -> Hammerpedes, people -> goo mutants; both creatures exist in 1.12.2).
 - **Config:** leak chance, mutation rules, or switch it back to decorative only.
+
+## Planned: medpod surgery
+
+- With the creatures: a closed, powered medpod removes a Xenomorph embryo (chestburster) from
+  whoever is inside, like the surgery pod in Prometheus; configurable cost/time/success chance.
 
 ## Planned: AI ideas
 

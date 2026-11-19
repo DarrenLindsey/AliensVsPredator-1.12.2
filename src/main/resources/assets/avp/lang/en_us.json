@@ -188,7 +188,6 @@
   "block.avp.supplychuteblock_seegson": "Supply Crate (Seegson)",
   "avp.configuration.lockersCanHide": "Lockers Can Hide Players",
   "avp.configuration.lockersCanHide.tooltip": "Sneak + right-click a locker with an empty hand to hide inside it; sneak to get out.",
-  "entity.avp.locker_seat": "Locker",
   "block.avp.lightpanel": "Light Panel",
   "block.avp.ccfltube": "Fluorescent Light",
   "block.avp.cryostasistube": "Cryostasis Tube",
@@ -203,5 +202,19 @@
   "avp.configuration.lightEnergyPerTick": "Light Energy Use (FE/tick)",
   "avp.configuration.lightEnergyPerTick.tooltip": "FE a light panel or fluorescent light uses per tick while on.",
   "avp.configuration.cryostasisTubeEnergyPerTick": "Cryostasis Tube Energy Use (FE/tick)",
-  "avp.configuration.cryostasisTubeEnergyPerTick.tooltip": "FE a cryostasis tube uses per tick to keep its contents frozen."
+  "avp.configuration.cryostasisTubeEnergyPerTick.tooltip": "FE a cryostasis tube uses per tick to keep its contents frozen.",
+  "entity.avp.seat": "Seat",
+  "block.avp.medpod": "Medpod",
+  "message.avp.medpod.no_power": "The medpod has no power.",
+  "avp.configuration.medpodEnergyPerTick": "Medpod Energy Use (FE/tick)",
+  "avp.configuration.medpodEnergyPerTick.tooltip": "FE a medpod uses per tick while powered.",
+  "avp.configuration.medpod": "Medpod",
+  "avp.configuration.medpod.button": "Medpod...",
+  "avp.configuration.medpod.tooltip": "How the medpod treats whoever is inside",
+  "avp.configuration.medpodHealInterval": "Heal Interval (ticks)",
+  "avp.configuration.medpodHealInterval.tooltip": "Ticks between heals while inside a closed, powered medpod (20 ticks = 1 second).",
+  "avp.configuration.medpodHealAmount": "Heal Amount",
+  "avp.configuration.medpodHealAmount.tooltip": "Health restored each time (2 = one heart).",
+  "avp.configuration.medpodCuresEffects": "Cures Harmful Effects",
+  "avp.configuration.medpodCuresEffects.tooltip": "The medpod also removes harmful effects like poison and wither."
 }

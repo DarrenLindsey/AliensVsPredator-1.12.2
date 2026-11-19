@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import org.avp.block.entity.StorageBlockEntity;
 import org.avp.config.AvpConfig;
-import org.avp.entity.LockerSeatEntity;
+import org.avp.entity.SeatEntity;
 
 import com.mojang.serialization.MapCodec;
 
@@ -44,12 +44,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Lockers, the gun locker and supply crates.
  *
  * - Right-click: open the 64-slot inventory (the door opens while someone is looking inside).
- * - Lockers: sneak + right-click with an empty hand to hide inside (LockerSeatEntity);
+ * - Lockers: sneak + right-click with an empty hand to hide inside (SeatEntity);
  *   sneak again to get out. Supply crates: sneak + right-click props the lid open/shut.
  * - Lockers are two blocks tall: the bottom half holds the inventory, the top half is just
  *   there to take up space (the same "half" system vanilla doors use).
  */
-public class StorageBlock extends BaseEntityBlock
+public class StorageBlock extends BaseEntityBlock implements SeatBlock
 {
     public static final MapCodec<StorageBlock> CODEC = simpleCodec(p -> new StorageBlock(p, false, false, stack -> true));
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -195,9 +195,9 @@ public class StorageBlock extends BaseEntityBlock
         {
             if (canHide)
             {
-                if (AvpConfig.server(AvpConfig.SERVER.lockersCanHide) && !LockerSeatEntity.isOccupied(level, invPos))
+                if (AvpConfig.server(AvpConfig.SERVER.lockersCanHide) && !SeatEntity.isOccupied(level, invPos))
                 {
-                    LockerSeatEntity.hide(level, invPos, player);
+                    SeatEntity.seatAfterSneak(level, invPos, player);
                 }
             }
             else if (!tall)
@@ -222,6 +222,26 @@ public class StorageBlock extends BaseEntityBlock
         }
     }
 
+    // ---- hiding in a locker (SeatBlock) ----
+
+    @Override
+    public void onSeated(Level level, BlockPos pos, net.minecraft.world.entity.Entity passenger)
+    {
+        setDoorOpen(level, pos, false); // close the door behind them
+    }
+
+    @Override
+    public void onSeatLeft(Level level, BlockPos pos)
+    {
+        openDoorBriefly(level, pos);
+    }
+
+    @Override
+    public BlockPos exitPos(Level level, BlockPos pos)
+    {
+        return pos.relative(level.getBlockState(pos).getValue(FACING)); // step out in front of the door
+    }
+
     /** Opens/closes the door of the storage block at lowerPos (used when hiding in a locker). */
     public static void setDoorOpen(Level level, BlockPos lowerPos, boolean open)
     {
@@ -244,7 +264,7 @@ public class StorageBlock extends BaseEntityBlock
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random)
     {
         // the scheduled tick from openDoorBriefly: close the door again unless someone is still hiding
-        if (state.getValue(PROPPED) && !LockerSeatEntity.isOccupied(level, pos))
+        if (state.getValue(PROPPED) && !SeatEntity.isOccupied(level, pos))
         {
             setOpenState(level, pos, state.setValue(PROPPED, false));
         }

@@ -63,6 +63,10 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue redstonePowersMachines;
         public final ModConfigSpec.IntValue lightEnergyPerTick;
         public final ModConfigSpec.IntValue cryostasisTubeEnergyPerTick;
+        public final ModConfigSpec.IntValue medpodEnergyPerTick;
+        public final ModConfigSpec.IntValue medpodHealInterval;
+        public final ModConfigSpec.IntValue medpodHealAmount;
+        public final ModConfigSpec.BooleanValue medpodCuresEffects;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -91,6 +95,21 @@ public final class AvpConfig
             cryostasisTubeEnergyPerTick = b
                     .comment("FE a cryostasis tube uses per tick to keep its contents frozen.")
                     .defineInRange("cryostasisTubeEnergyPerTick", 10, 0, 10_000);
+            medpodEnergyPerTick = b
+                    .comment("FE a medpod uses per tick while powered.")
+                    .defineInRange("medpodEnergyPerTick", 20, 0, 10_000);
+            b.pop();
+
+            b.push("medpod");
+            medpodHealInterval = b
+                    .comment("Ticks between heals while inside a closed, powered medpod (20 ticks = 1 second).")
+                    .defineInRange("medpodHealInterval", 40, 1, 1200);
+            medpodHealAmount = b
+                    .comment("Health restored each time (2 = one heart).")
+                    .defineInRange("medpodHealAmount", 1, 0, 40);
+            medpodCuresEffects = b
+                    .comment("The medpod also removes harmful effects like poison and wither.")
+                    .define("medpodCuresEffects", true);
             b.pop();
         }
     }

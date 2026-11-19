@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.avp.AliensVsPredator;
+import org.avp.block.MedpodBlock;
 import org.avp.block.ModelPlantBlock;
 import org.avp.block.PoweredBlock;
 import org.avp.config.AvpConfig;
@@ -259,6 +260,16 @@ public final class ModBlocks
             () -> AvpConfig.server(AvpConfig.SERVER.lightEnergyPerTick));
     public static final DeferredBlock<PoweredBlock> CRYOSTASISTUBE = powered("cryostasistube", 6, true,
             () -> AvpConfig.server(AvpConfig.SERVER.cryostasisTubeEnergyPerTick));
+    /** Medpod: walk in when open, heals while closed and powered. */
+    public static final DeferredBlock<MedpodBlock> MEDPOD = register("medpod", Tab.MAIN, () -> new MedpodBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.METAL).sound(SoundType.METAL).strength(3.0F, 6.0F).noOcclusion().noCollission()
+            .lightLevel(state -> state.getValue(PoweredBlock.LIT) ? 6 : 0),
+            () -> AvpConfig.server(AvpConfig.SERVER.medpodEnergyPerTick)));
+    static
+    {
+        POWERED_BLOCKS.add(MEDPOD);
+    }
+
     /** Engineer ampule (black goo container): a decorative model block, drawn like the trophies. */
     public static final DeferredBlock<TrophyBlock> ENGINEERSHIP_AMPULE = trophy("engineership_ampule", false);
 

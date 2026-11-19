@@ -107,6 +107,7 @@
     "avp:lightpanel",
     "avp:ccfltube",
     "avp:cryostasistube",
-    "avp:engineership_ampule"
+    "avp:engineership_ampule",
+    "avp:medpod"
   ]
 }

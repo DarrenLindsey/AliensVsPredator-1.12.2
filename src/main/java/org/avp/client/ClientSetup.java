@@ -56,7 +56,7 @@ public final class ClientSetup
     {
         event.registerBlockEntityRenderer(ModBlockEntities.MODEL_BLOCK.get(), ModelBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.STORAGE.get(), ModelBlockRenderer::new);
-        event.registerEntityRenderer(ModEntities.LOCKER_SEAT.get(), NoopRenderer::new); // invisible
+        event.registerEntityRenderer(ModEntities.SEAT.get(), NoopRenderer::new); // invisible
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
     }
 

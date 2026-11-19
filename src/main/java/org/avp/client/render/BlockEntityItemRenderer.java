@@ -30,7 +30,7 @@ public class BlockEntityItemRenderer extends BlockEntityWithoutLevelRenderer
     /** Blocks whose model is bigger than one block get shrunk to fit inventory slots. */
     private static float itemScale(Block block)
     {
-        return Map.of(ModBlocks.CRYOSTASISTUBE.get(), 0.5F).getOrDefault(block, 1F);
+        return Map.of(ModBlocks.CRYOSTASISTUBE.get(), 0.5F, ModBlocks.MEDPOD.get(), 0.35F).getOrDefault(block, 1F);
     }
 
     @Override

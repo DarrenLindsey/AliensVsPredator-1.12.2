@@ -1,7 +1,7 @@
 package org.avp.registry;
 
 import org.avp.AliensVsPredator;
-import org.avp.entity.LockerSeatEntity;
+import org.avp.entity.SeatEntity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -14,10 +14,10 @@ public final class ModEntities
 {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, AliensVsPredator.MOD_ID);
 
-    /** Invisible seat used to hide inside lockers. */
-    public static final DeferredHolder<EntityType<?>, EntityType<LockerSeatEntity>> LOCKER_SEAT = ENTITIES.register("locker_seat",
-            () -> EntityType.Builder.<LockerSeatEntity>of(LockerSeatEntity::new, MobCategory.MISC)
-                    .sized(0.5F, 0.1F).noSummon().clientTrackingRange(8).build("locker_seat"));
+    /** Invisible seat used to be inside lockers and medpods. */
+    public static final DeferredHolder<EntityType<?>, EntityType<SeatEntity>> SEAT = ENTITIES.register("seat",
+            () -> EntityType.Builder.<SeatEntity>of(SeatEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.1F).noSummon().clientTrackingRange(8).build("seat"));
 
     private ModEntities()
     {

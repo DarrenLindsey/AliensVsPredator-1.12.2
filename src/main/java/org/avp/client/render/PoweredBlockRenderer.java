@@ -6,6 +6,7 @@ import org.avp.block.entity.PoweredBlockEntity;
 import org.avp.client.model.geometry.CCFLModel;
 import org.avp.client.model.geometry.CryostasisTubeModel;
 import org.avp.client.model.geometry.LightPanelModel;
+import org.avp.client.model.geometry.MedpodModel;
 import org.avp.registry.ModBlocks;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -37,6 +38,10 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
     private static final ResourceLocation[] CRYO_GLASS = { tex("cryostasistube-mask.png"), tex("cryostasistube-cracked-mask.png"),
             tex("cryostasistube-shattered-mask.png") };
 
+    private static final ResourceLocation MEDPOD = tex("medpod.png");
+    private static final ResourceLocation MEDPOD_ON = tex("medpod-on.png");
+
+    private final MedpodModel medpod;
     private final LightPanelModel lightPanel;
     private final CCFLModel ccfl;
     private final CryostasisTubeModel cryo;
@@ -44,6 +49,7 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
     public PoweredBlockRenderer(BlockEntityRendererProvider.Context context)
     {
         lightPanel = new LightPanelModel(context.bakeLayer(LightPanelModel.LAYER));
+        medpod = new MedpodModel(context.bakeLayer(MedpodModel.LAYER));
         ccfl = new CCFLModel(context.bakeLayer(CCFLModel.LAYER));
         cryo = new CryostasisTubeModel(context.bakeLayer(CryostasisTubeModel.LAYER));
     }
@@ -86,6 +92,26 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
             drawCcfl(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(CCFL_BALLAST)), light, overlay);
             drawCcfl(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(lit ? CCFL_ON : CCFL_OFF)), glow, overlay);
         }
+        else if (state.is(ModBlocks.MEDPOD.get()))
+        {
+            // 1.12.2 RenderMedpod + ModelMedpod.setRotationAngles (door progress 0..3.125)
+            float progress = be.animation(partialTick) * 3.125F;
+            float door = progress / 2F;
+            medpod.lGlassBack.zRot = door;
+            medpod.rGlassBack.zRot = -door;
+            medpod.glassTop.xRot = door;
+            medpod.bedBack.xRot = -(float) Math.toRadians(progress * 45F / 3.125F);
+
+            poseStack.translate(0.5F, 2.25F, 0.5F);
+            poseStack.scale(1.5F, -1.5F, 1.5F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(-state.getValue(PoweredBlock.FACING).toYRot()));
+            medpod.root().render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(MEDPOD)), light, overlay);
+            if (lit)
+            {
+                // the glowing screens/lights layer
+                medpod.root().render(poseStack, buffers.getBuffer(RenderType.entityTranslucent(MEDPOD_ON)), LightTexture.FULL_BRIGHT, overlay);
+            }
+        }
         else if (state.is(ModBlocks.CRYOSTASISTUBE.get()))
         {
             poseStack.translate(0.5F, 1.125F, 0.5F);
@@ -123,6 +149,6 @@ public class PoweredBlockRenderer implements BlockEntityRenderer<PoweredBlockEnt
     @Override
     public AABB getRenderBoundingBox(PoweredBlockEntity be)
     {
-        return new AABB(be.getBlockPos()).expandTowards(0, 1, 0);
+        return new AABB(be.getBlockPos()).inflate(1, 0, 1).expandTowards(0, 2, 0);
     }
 }

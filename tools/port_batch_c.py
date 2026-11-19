@@ -58,7 +58,7 @@ add_to_tag(f"{ND}/avp/tags/item/gun_locker_items.json", ["#c:tools/ranged_weapon
 
 lang["avp.configuration.lockersCanHide"] = "Lockers Can Hide Players"
 lang["avp.configuration.lockersCanHide.tooltip"] = "Sneak + right-click a locker with an empty hand to hide inside it; sneak to get out."
-lang["entity.avp.locker_seat"] = "Locker"
+lang["entity.avp.seat"] = "Seat"
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch C1 data written")
 
@@ -105,3 +105,31 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch C2a data written")
+
+
+# ---------------------------------------------------------------- batch C2b: medpod
+i = "medpod"
+write_json(f"{NA}/blockstates/{i}.json", {"variants": {"": {"model": "avp:block/powered"}}})
+write_json(f"{NA}/models/item/{i}.json", {"parent": "minecraft:builtin/entity", "display": BLOCK_DISPLAY,
+                                          "textures": {"particle": "minecraft:block/iron_block"}})
+write_json(f"{ND}/avp/loot_table/blocks/{i}.json", {"type": "minecraft:block", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": f"avp:{i}"}],
+    "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
+add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", [f"avp:{i}"])
+lang.update({
+    "block.avp.medpod": "Medpod",
+    "message.avp.medpod.no_power": "The medpod has no power.",
+    "avp.configuration.medpodEnergyPerTick": "Medpod Energy Use (FE/tick)",
+    "avp.configuration.medpodEnergyPerTick.tooltip": "FE a medpod uses per tick while powered.",
+    "avp.configuration.medpod": "Medpod",
+    "avp.configuration.medpod.button": "Medpod...",
+    "avp.configuration.medpod.tooltip": "How the medpod treats whoever is inside",
+    "avp.configuration.medpodHealInterval": "Heal Interval (ticks)",
+    "avp.configuration.medpodHealInterval.tooltip": "Ticks between heals while inside a closed, powered medpod (20 ticks = 1 second).",
+    "avp.configuration.medpodHealAmount": "Heal Amount",
+    "avp.configuration.medpodHealAmount.tooltip": "Health restored each time (2 = one heart).",
+    "avp.configuration.medpodCuresEffects": "Cures Harmful Effects",
+    "avp.configuration.medpodCuresEffects.tooltip": "The medpod also removes harmful effects like poison and wither.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("batch C2b (medpod) data written")

@@ -113,6 +113,22 @@ public class PoweredBlock extends BaseEntityBlock
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
     {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlockEntities.POWERED.get(), PoweredBlockEntity::serverTick);
+        return level.isClientSide
+                ? createTickerHelper(type, ModBlockEntities.POWERED.get(), PoweredBlockEntity::clientTick)
+                : createTickerHelper(type, ModBlockEntities.POWERED.get(), PoweredBlockEntity::serverTick);
+    }
+
+    /** Extra work every server tick, after the power check (e.g. the medpod healing). */
+    public void poweredTick(Level level, BlockPos pos, BlockState state, PoweredBlockEntity be)
+    {
+    }
+
+    /**
+     * Where an opening animation is heading on the client: 1 = fully open, 0 = closed.
+     * The block entity moves its animation value towards this a little every tick.
+     */
+    public float animationTarget(BlockState state)
+    {
+        return 0;
     }
 }

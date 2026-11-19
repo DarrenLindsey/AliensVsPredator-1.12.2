@@ -52,6 +52,10 @@ public class PoweredBlockEntity extends BlockEntity
 
     private final Buffer energy = new Buffer();
 
+    /** Client-only animation progress (0 = closed, 1 = open), e.g. the medpod lid. */
+    private float animation;
+    private float animationPrev;
+
     public PoweredBlockEntity(BlockPos pos, BlockState state)
     {
         super(ModBlockEntities.POWERED.get(), pos, state);
@@ -60,6 +64,23 @@ public class PoweredBlockEntity extends BlockEntity
     public EnergyStorage getEnergy()
     {
         return energy;
+    }
+
+    /** Animation value between the last two ticks, for smooth drawing. */
+    public float animation(float partialTick)
+    {
+        return animationPrev + (animation - animationPrev) * partialTick;
+    }
+
+    public static void clientTick(Level level, BlockPos pos, BlockState state, PoweredBlockEntity be)
+    {
+        be.animationPrev = be.animation;
+        if (state.getBlock() instanceof PoweredBlock block)
+        {
+            float target = block.animationTarget(state);
+            float step = 0.025F / 3.125F; // 1.12.2 medpod speed: 0.025 per tick up to 3.125
+            be.animation = target > be.animation ? Math.min(target, be.animation + step) : Math.max(target, be.animation - step);
+        }
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, PoweredBlockEntity be)
@@ -84,8 +105,10 @@ public class PoweredBlockEntity extends BlockEntity
         }
         if (state.getValue(PoweredBlock.LIT) != on)
         {
-            level.setBlock(pos, state.setValue(PoweredBlock.LIT, on), Block.UPDATE_ALL);
+            state = state.setValue(PoweredBlock.LIT, on);
+            level.setBlock(pos, state, Block.UPDATE_ALL);
         }
+        block.poweredTick(level, pos, state, be);
     }
 
     @Override

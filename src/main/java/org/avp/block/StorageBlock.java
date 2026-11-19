@@ -231,7 +231,7 @@ public class StorageBlock extends BaseEntityBlock implements SeatBlock
     }
 
     @Override
-    public void onSeatLeft(Level level, BlockPos pos)
+    public void onSeatLeft(Level level, BlockPos pos, net.minecraft.world.entity.Entity passenger, int ticksInside)
     {
         openDoorBriefly(level, pos);
     }

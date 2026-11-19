@@ -14,8 +14,11 @@ public interface SeatBlock
     {
     }
 
-    /** Someone just got out (e.g. open the door). */
-    default void onSeatLeft(Level level, BlockPos pos)
+    /**
+     * Someone just got out (e.g. open the door).
+     * @param ticksInside how long they were seated
+     */
+    default void onSeatLeft(Level level, BlockPos pos, Entity passenger, int ticksInside)
     {
     }
 

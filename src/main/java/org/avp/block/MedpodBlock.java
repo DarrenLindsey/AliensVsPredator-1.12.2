@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -32,7 +33,8 @@ import net.minecraft.world.phys.BlockHitResult;
  * - Close the lid while you're inside: with power on it slowly heals you and can cure
  *   harmful effects (new - the 1.12.2 medpod had no healing). Later it will also remove
  *   Xenomorph embryos.
- * - Sneak to get out; the lid opens.
+ * - Sneak to get out; the lid opens. After a full treatment (closed + powered, a few seconds)
+ *   you also get a short golden-apple-style boost: Regeneration II and Absorption.
  */
 public class MedpodBlock extends PoweredBlock implements SeatBlock
 {
@@ -123,13 +125,22 @@ public class MedpodBlock extends PoweredBlock implements SeatBlock
     // ---- being inside (SeatBlock) ----
 
     @Override
-    public void onSeatLeft(Level level, BlockPos pos)
+    public void onSeatLeft(Level level, BlockPos pos, Entity passenger, int ticksInside)
     {
         BlockState state = level.getBlockState(pos);
-        if (state.is(this) && !state.getValue(OPEN))
+        if (!state.is(this) || state.getValue(OPEN))
         {
-            level.setBlock(pos, state.setValue(OPEN, true), Block.UPDATE_ALL); // open up to let them out
+            return;
         }
+        // getting out of a closed, powered pod after a full treatment: a short "golden apple" boost
+        if (state.getValue(LIT) && passenger instanceof net.minecraft.world.entity.LivingEntity living
+                && AvpConfig.server(AvpConfig.SERVER.medpodBoost)
+                && ticksInside >= AvpConfig.server(AvpConfig.SERVER.medpodBoostMinTicks))
+        {
+            living.addEffect(new MobEffectInstance(MobEffects.REGENERATION, AvpConfig.server(AvpConfig.SERVER.medpodRegenerationTicks), 1));
+            living.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, AvpConfig.server(AvpConfig.SERVER.medpodAbsorptionTicks), 0));
+        }
+        level.setBlock(pos, state.setValue(OPEN, true), Block.UPDATE_ALL); // open up to let them out
     }
 
     @Override

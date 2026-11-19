@@ -67,6 +67,10 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue medpodHealInterval;
         public final ModConfigSpec.IntValue medpodHealAmount;
         public final ModConfigSpec.BooleanValue medpodCuresEffects;
+        public final ModConfigSpec.BooleanValue medpodBoost;
+        public final ModConfigSpec.IntValue medpodBoostMinTicks;
+        public final ModConfigSpec.IntValue medpodRegenerationTicks;
+        public final ModConfigSpec.IntValue medpodAbsorptionTicks;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -110,6 +114,18 @@ public final class AvpConfig
             medpodCuresEffects = b
                     .comment("The medpod also removes harmful effects like poison and wither.")
                     .define("medpodCuresEffects", true);
+            medpodBoost = b
+                    .comment("Getting out after a treatment gives a short golden-apple-style boost (Regeneration II + Absorption).")
+                    .define("medpodBoost", true);
+            medpodBoostMinTicks = b
+                    .comment("How long you must stay in a closed, powered medpod to get the boost (20 ticks = 1 second).")
+                    .defineInRange("medpodBoostMinTicks", 100, 0, 12_000);
+            medpodRegenerationTicks = b
+                    .comment("How long the Regeneration II lasts (golden apple: 100 = 5 seconds).")
+                    .defineInRange("medpodRegenerationTicks", 100, 0, 12_000);
+            medpodAbsorptionTicks = b
+                    .comment("How long the Absorption lasts (golden apple: 2400 = 2 minutes).")
+                    .defineInRange("medpodAbsorptionTicks", 600, 0, 12_000);
             b.pop();
         }
     }

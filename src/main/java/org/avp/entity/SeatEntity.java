@@ -39,6 +39,8 @@ public class SeatEntity extends Entity
     @Nullable
     private UUID pendingPlayer;
     private int age;
+    /** Ticks since someone was seated. */
+    private int seatedTicks;
 
     public SeatEntity(EntityType<? extends SeatEntity> type, Level level)
     {
@@ -88,6 +90,7 @@ public class SeatEntity extends Entity
 
     private void seat(Entity entity)
     {
+        seatedTicks = 0;
         entity.startRiding(this, true);
         entity.setYRot(getYRot());
         entity.setYHeadRot(getYRot());
@@ -130,6 +133,10 @@ public class SeatEntity extends Entity
         {
             discard();
         }
+        else
+        {
+            seatedTicks++;
+        }
     }
 
     @Override
@@ -138,7 +145,7 @@ public class SeatEntity extends Entity
         super.removePassenger(passenger);
         if (!level().isClientSide && level().getBlockState(blockPosition()).getBlock() instanceof SeatBlock block)
         {
-            block.onSeatLeft(level(), blockPosition());
+            block.onSeatLeft(level(), blockPosition(), passenger, seatedTicks);
         }
     }
 

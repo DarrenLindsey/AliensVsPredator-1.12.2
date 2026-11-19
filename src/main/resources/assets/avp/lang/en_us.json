@@ -216,5 +216,13 @@
   "avp.configuration.medpodHealAmount": "Heal Amount",
   "avp.configuration.medpodHealAmount.tooltip": "Health restored each time (2 = one heart).",
   "avp.configuration.medpodCuresEffects": "Cures Harmful Effects",
-  "avp.configuration.medpodCuresEffects.tooltip": "The medpod also removes harmful effects like poison and wither."
+  "avp.configuration.medpodCuresEffects.tooltip": "The medpod also removes harmful effects like poison and wither.",
+  "avp.configuration.medpodBoost": "Golden Apple Boost",
+  "avp.configuration.medpodBoost.tooltip": "Getting out after a treatment gives a short golden-apple-style boost (Regeneration II + Absorption).",
+  "avp.configuration.medpodBoostMinTicks": "Treatment Time for Boost (ticks)",
+  "avp.configuration.medpodBoostMinTicks.tooltip": "How long you must stay in a closed, powered medpod to get the boost (20 ticks = 1 second).",
+  "avp.configuration.medpodRegenerationTicks": "Regeneration Length (ticks)",
+  "avp.configuration.medpodRegenerationTicks.tooltip": "How long the Regeneration II lasts (golden apple: 100 = 5 seconds).",
+  "avp.configuration.medpodAbsorptionTicks": "Absorption Length (ticks)",
+  "avp.configuration.medpodAbsorptionTicks.tooltip": "How long the Absorption lasts (golden apple: 2400 = 2 minutes)."
 }

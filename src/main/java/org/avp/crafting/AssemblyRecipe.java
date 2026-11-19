@@ -94,6 +94,62 @@ public record AssemblyRecipe(List<SizedIngredient> ingredients, ItemStack result
         inventory.setChanged();
     }
 
+    // ---- the same checks on an automation buffer (the Assembler's input slots)
+
+    /** Can one be made from the items in this inventory? */
+    public boolean canAssemble(net.neoforged.neoforge.items.IItemHandler buffer)
+    {
+        List<ItemStack> copy = new ArrayList<>();
+        for (int i = 0; i < buffer.getSlots(); i++)
+        {
+            copy.add(buffer.getStackInSlot(i).copy());
+        }
+        for (SizedIngredient need : ingredients)
+        {
+            if (take(copy, need.ingredient(), need.count()) < need.count())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Does this recipe use every kind of item in the buffer? (So a full buffer isn't mistaken for a smaller recipe.) */
+    public boolean usesEverything(net.neoforged.neoforge.items.IItemHandler buffer)
+    {
+        for (int i = 0; i < buffer.getSlots(); i++)
+        {
+            ItemStack stack = buffer.getStackInSlot(i);
+            if (!stack.isEmpty() && ingredients.stream().noneMatch(need -> need.ingredient().test(stack)))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Takes the materials for one out of the buffer (check canAssemble first). */
+    public void consume(net.neoforged.neoforge.items.IItemHandler buffer)
+    {
+        for (SizedIngredient need : ingredients)
+        {
+            int left = need.count();
+            for (int i = 0; i < buffer.getSlots() && left > 0; i++)
+            {
+                if (need.ingredient().test(buffer.getStackInSlot(i)))
+                {
+                    left -= buffer.extractItem(i, left, false).getCount();
+                }
+            }
+        }
+    }
+
+    /** Is this item used by this recipe at all? */
+    public boolean uses(ItemStack stack)
+    {
+        return ingredients.stream().anyMatch(need -> need.ingredient().test(stack));
+    }
+
     private static List<ItemStack> copyMain(Inventory inventory)
     {
         List<ItemStack> copy = new ArrayList<>();

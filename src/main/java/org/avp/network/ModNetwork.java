@@ -57,6 +57,25 @@ public final class ModNetwork
                     .ifPresent(holder -> assembler.assemble(player, castAssembly(holder), Math.max(1, Math.min(64, payload.count()))));
         });
 
+        registrar.playToServer(AssemblerSettingPayload.TYPE, AssemblerSettingPayload.CODEC, (payload, context) ->
+        {
+            Player player = context.player();
+            if (player.distanceToSqr(payload.pos().getCenter()) > 64
+                    || !(player.level().getBlockEntity(payload.pos()) instanceof org.avp.block.entity.AssemblerBlockEntity assembler))
+            {
+                return;
+            }
+            switch (payload.action())
+            {
+                case AssemblerSettingPayload.LOCK -> assembler.lock(net.minecraft.resources.ResourceLocation.tryParse(payload.recipe()));
+                case AssemblerSettingPayload.TOGGLE_AUTO_OUTPUT -> assembler.toggleAutoOutput();
+                case AssemblerSettingPayload.EMPTY_BUFFERS -> assembler.emptyBuffers(player);
+                default ->
+                {
+                }
+            }
+        });
+
         registrar.playToServer(TurretSettingPayload.TYPE, TurretSettingPayload.CODEC, (payload, context) ->
         {
             Player player = context.player();

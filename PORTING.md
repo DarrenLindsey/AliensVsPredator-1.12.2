@@ -203,6 +203,21 @@ Both support NeoForge 1.21.1. Two levels:
    - AE2: inscriber/charger recipes for AvP electronics (processors, RAM, circuit boards).
    Both are declared as *optional* dependencies in `neoforge.mods.toml`.
 
+## Using the Assembler with Applied Energistics 2
+
+The Assembler works with AE2 through a normal **Processing Pattern** (no extra mod code needed):
+
+1. Place an AE2 **Pattern Provider** against the Assembler (and power the Assembler).
+2. In a Pattern Encoding Terminal, make a **Processing** pattern: inputs = the schematic's
+   materials (as shown on the Assembler screen), output = the schematic's result.
+3. Put the pattern in the provider. Open the Assembler and turn **Auto-Output ON** so results
+   are pushed back into the provider (or pull them out with an Import Bus instead).
+4. If two schematics use exactly the same materials (the reflective shapes), select it on the
+   Assembler screen and press **Lock to this schematic** - one Assembler per locked schematic.
+
+The same input/output buffers work with Create funnels/arms, hoppers and item pipes.
+Later: a JEI/EMI plugin so patterns can be encoded straight from the schematic list.
+
 ## Settings (config)
 
 All settings are in `src/main/java/org/avp/config/AvpConfig.java` and can be changed in game:

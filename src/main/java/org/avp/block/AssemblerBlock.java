@@ -54,6 +54,16 @@ public class AssemblerBlock extends BaseEntityBlock
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving)
+    {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof AssemblerBlockEntity assembler)
+        {
+            assembler.dropContents(level, pos);
+        }
+        super.onRemove(state, level, pos, newState, moving);
+    }
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state)

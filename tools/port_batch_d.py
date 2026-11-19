@@ -547,3 +547,24 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch D2b (turret) data written")
+
+
+# ================================================================ Assembler automation (AE2 / Create / hoppers)
+lang = read_json(f"{NA}/lang/en_us.json", {})
+lang.update({
+    "screen.avp.assembler.lock": "Lock to this schematic",
+    "screen.avp.assembler.unlock": "Unlock (any schematic)",
+    "screen.avp.assembler.output_on": "Auto-Output: ON",
+    "screen.avp.assembler.output_off": "Auto-Output: OFF",
+    "screen.avp.assembler.empty": "Empty",
+    "screen.avp.assembler.any": "any schematic",
+    "screen.avp.assembler.automation": "Automation: %s | in: %s | out: %s",
+    "screen.avp.assembler.status.waiting": "Waiting for materials",
+    "screen.avp.assembler.status.ambiguous": "Lock a schematic!",
+    "screen.avp.assembler.status.output_full": "Output full",
+    "screen.avp.assembler.status.no_power": "No power",
+    "tooltip.avp.assembler": "W-Y automated fabricator: builds parts and equipment from raw materials.\n"
+                             "Machines (AE2 pattern providers, Create, hoppers) can feed it and take results.\n\"Building Better Worlds.\"",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("assembler automation data written")

@@ -9,6 +9,7 @@ import org.avp.block.entity.AssemblerBlockEntity;
 import org.avp.config.AvpConfig;
 import org.avp.crafting.AssemblyRecipe;
 import org.avp.network.AssemblePayload;
+import org.avp.network.AssemblerSettingPayload;
 import org.avp.registry.ModRecipes;
 
 import net.minecraft.client.gui.GuiGraphics;
@@ -30,7 +31,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class AssemblerScreen extends Screen
 {
     private static final int WIDTH = 280;
-    private static final int HEIGHT = 196;
+    private static final int HEIGHT = 236;
     private static final int ROWS = 9;
     private static final int ROW_HEIGHT = 18;
     private static final int[] AMOUNTS = { 1, 4, 16, 64 };
@@ -44,6 +45,8 @@ public class AssemblerScreen extends Screen
     private int left;
     private int top;
     private final List<Button> buildButtons = new ArrayList<>();
+    private Button lockButton;
+    private Button outputButton;
 
     public AssemblerScreen(BlockPos pos)
     {
@@ -75,10 +78,28 @@ public class AssemblerScreen extends Screen
         {
             int amount = AMOUNTS[i];
             Button button = Button.builder(Component.literal("x" + amount), b -> assemble(amount))
-                    .bounds(left + 136 + i * 35, top + HEIGHT - 26, 33, 20).build();
+                    .bounds(left + 136 + i * 35, top + 174, 33, 20).build();
             buildButtons.add(addRenderableWidget(button));
         }
+        // automation (AE2 pattern providers, Create, hoppers)
+        lockButton = addRenderableWidget(Button.builder(Component.empty(), b -> setting(AssemblerSettingPayload.LOCK))
+                .bounds(left + 6, top + 202, 120, 16).build());
+        outputButton = addRenderableWidget(Button.builder(Component.empty(), b -> setting(AssemblerSettingPayload.TOGGLE_AUTO_OUTPUT))
+                .bounds(left + 130, top + 202, 84, 16).build());
+        addRenderableWidget(Button.builder(Component.translatable("screen.avp.assembler.empty"), b -> setting(AssemblerSettingPayload.EMPTY_BUFFERS))
+                .bounds(left + 218, top + 202, 56, 16).build());
         refilter();
+    }
+
+    private void setting(int action)
+    {
+        String recipe = action == AssemblerSettingPayload.LOCK && selected != null ? selected.id().toString() : "";
+        PacketDistributor.sendToServer(new AssemblerSettingPayload(pos, action, recipe));
+    }
+
+    private AssemblerBlockEntity assembler()
+    {
+        return minecraft != null && minecraft.level != null && minecraft.level.getBlockEntity(pos) instanceof AssemblerBlockEntity a ? a : null;
     }
 
     private void refilter()
@@ -119,6 +140,14 @@ public class AssemblerScreen extends Screen
         boolean affordable = selected != null && minecraft != null && minecraft.player != null
                 && selected.value().canAssemble(minecraft.player.getInventory());
         buildButtons.forEach(b -> b.active = affordable);
+        AssemblerBlockEntity assembler = assembler();
+        if (assembler != null)
+        {
+            boolean lockedToThis = selected != null && selected.id().equals(assembler.locked());
+            lockButton.setMessage(Component.translatable(lockedToThis ? "screen.avp.assembler.unlock" : "screen.avp.assembler.lock"));
+            lockButton.active = lockedToThis || selected != null;
+            outputButton.setMessage(Component.translatable(assembler.autoOutput() ? "screen.avp.assembler.output_on" : "screen.avp.assembler.output_off"));
+        }
     }
 
     @Override
@@ -192,6 +221,24 @@ public class AssemblerScreen extends Screen
         else if (shown.isEmpty())
         {
             g.drawString(font, Component.translatable("screen.avp.assembler.none"), left + 136, top + 22, 0xFF888888, false);
+        }
+
+        // automation status line
+        AssemblerBlockEntity assembler = assembler();
+        if (assembler != null)
+        {
+            g.fill(left + 4, top + 198, left + WIDTH - 4, top + 199, 0xFF1E4A1E);
+            Component lockedTo = assembler.lockedRecipe().map(h -> (Component) h.value().result().getHoverName())
+                    .orElse(Component.translatable("screen.avp.assembler.any"));
+            Component line = Component.translatable("screen.avp.assembler.automation", lockedTo, assembler.bufferedInput(), assembler.bufferedOutput());
+            int room = WIDTH - 12;
+            if (!assembler.status().isEmpty())
+            {
+                Component status = Component.translatable("screen.avp.assembler.status." + assembler.status());
+                g.drawString(font, status, left + WIDTH - 6 - font.width(status), top + 222, 0xFFFFAA00, false);
+                room -= font.width(status) + 8;
+            }
+            g.drawString(font, font.plainSubstrByWidth(line.getString(), room), left + 6, top + 222, 0xFF6FBF6F, false);
         }
 
         // tooltip for the list

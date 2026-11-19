@@ -396,7 +396,7 @@
   "tooltip.avp.satellitedish": "Long-range uplink dish for colony-to-orbit communications.",
   "tooltip.avp.teslacoil": "Experimental W-Y perimeter defence.\nStrikes hostile organisms in range. Do not touch.",
   "tooltip.avp.terminal": "MU/TH/UR 6000 terminal.\nShows the status of the power grid it is wired to.",
-  "tooltip.avp.assembler": "W-Y automated fabricator: builds parts and equipment from raw materials.\n\"Building Better Worlds.\"",
+  "tooltip.avp.assembler": "W-Y automated fabricator: builds parts and equipment from raw materials.\nMachines (AE2 pattern providers, Create, hoppers) can feed it and take results.\n\"Building Better Worlds.\"",
   "tooltip.avp.cryo_coolant": "Hypersleep-grade cryogenic coolant.\nKeeps a sleeper's metabolism near zero.",
   "tooltip.avp.part_sensor_array": "The sensor package from an M314 motion tracker.",
   "tooltip.avp.part_servo": "Precision servo motor, as used in Seegson's Working Joes.",
@@ -446,5 +446,16 @@
   "avp.configuration.turretTurnSpeed": "Turn Speed (degrees/tick)",
   "avp.configuration.turretTurnSpeed.tooltip": "How fast it turns; each Processor upgrade adds half again.",
   "avp.configuration.turretBypassesInvulnerability": "Every Shot Lands",
-  "avp.configuration.turretBypassesInvulnerability.tooltip": "Shots ignore the short invulnerability after a hit (like 1.12.2)."
+  "avp.configuration.turretBypassesInvulnerability.tooltip": "Shots ignore the short invulnerability after a hit (like 1.12.2).",
+  "screen.avp.assembler.lock": "Lock to this schematic",
+  "screen.avp.assembler.unlock": "Unlock (any schematic)",
+  "screen.avp.assembler.output_on": "Auto-Output: ON",
+  "screen.avp.assembler.output_off": "Auto-Output: OFF",
+  "screen.avp.assembler.empty": "Empty",
+  "screen.avp.assembler.any": "any schematic",
+  "screen.avp.assembler.automation": "Automation: %s | in: %s | out: %s",
+  "screen.avp.assembler.status.waiting": "Waiting for materials",
+  "screen.avp.assembler.status.ambiguous": "Lock a schematic!",
+  "screen.avp.assembler.status.output_full": "Output full",
+  "screen.avp.assembler.status.no_power": "No power"
 }

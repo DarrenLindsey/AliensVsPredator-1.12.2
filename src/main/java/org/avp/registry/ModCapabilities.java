@@ -53,6 +53,8 @@ public final class ModCapabilities
                 ModBlocks.POWERLINE.get(), ModBlocks.REDSTONESENSOR.get());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.POWER_MACHINE.get(), (be, side) -> be.energyFor(side));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ASSEMBLER.get(), (be, side) -> be.energyFor());
+        // automation (AE2 pattern providers, Create, hoppers): materials in, results out
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.ASSEMBLER.get(), (be, side) -> be.automation());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.TURRET.get(), (be, side) -> be.energyFor());
         // hoppers and pipes can load sentry ammo
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.TURRET.get(), (be, side) -> be.ammoInput());

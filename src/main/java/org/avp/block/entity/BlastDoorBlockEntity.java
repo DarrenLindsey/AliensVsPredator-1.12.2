@@ -46,7 +46,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
  *
  * - Sensors (set on the admin screen): Auto-Open opens the door for nearby players and
  *   closes it after they leave; Threat Detection slams it shut and locks it down while a
- *   hostile creature is near, with an alarm and a redstone signal from every piece.
+ *   hostile creature is near, with a flashing red light and a redstone signal from every piece.
  *
  * The password stays on the server: it's saved with the world but never sent to clients.
  */
@@ -230,11 +230,7 @@ public class BlastDoorBlockEntity extends BlockEntity
             }
             if (lockdown)
             {
-                if (level.getGameTime() % 40 == 0)
-                {
-                    playSound(ModSounds.BLASTDOOR_PASS_DENY.get()); // alarm
-                }
-                return; // nothing else happens during lockdown
+                return; // nothing else happens during lockdown (the renderer flashes a red light)
             }
         }
         else if (lockdown)

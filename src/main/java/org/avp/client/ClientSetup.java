@@ -50,6 +50,7 @@ public final class ClientSetup
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event)
     {
         AllModelLayers.register(event);
+        event.registerLayerDefinition(BlastDoorRenderer.ALARM_LAYER, BlastDoorRenderer::createAlarmLight);
     }
 
     @SubscribeEvent

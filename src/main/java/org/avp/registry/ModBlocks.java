@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.avp.AliensVsPredator;
+import org.avp.block.BlastDoorBlock;
 import org.avp.block.MedpodBlock;
 import org.avp.block.ModelPlantBlock;
 import org.avp.block.PoweredBlock;
@@ -269,6 +270,16 @@ public final class ModBlocks
     {
         POWERED_BLOCKS.add(MEDPOD);
     }
+
+    /** Blast doors: multi-block, need power, optional password (see BlastDoorBlockEntity). */
+    public static final DeferredBlock<BlastDoorBlock> BLASTDOOR = register("blastdoor", Tab.MAIN, () -> new BlastDoorBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(25.0F, 1200.0F)
+                    .noOcclusion().requiresCorrectToolForDrops().pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
+            BlastDoorBlock.BIG, 0.03F, false));
+    public static final DeferredBlock<BlastDoorBlock> BLASTDOOR_SEVASTOPOL = register("blastdoor_sevastopol", Tab.MAIN, () -> new BlastDoorBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(25.0F, 1200.0F)
+                    .noOcclusion().requiresCorrectToolForDrops().pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
+            BlastDoorBlock.SEVASTOPOL, 0.09F, true));
 
     /** Engineer ampule (black goo container): a decorative model block, drawn like the trophies. */
     public static final DeferredBlock<TrophyBlock> ENGINEERSHIP_AMPULE = trophy("engineership_ampule", false);

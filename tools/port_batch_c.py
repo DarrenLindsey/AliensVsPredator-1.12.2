@@ -145,3 +145,82 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch C2b (medpod) data written")
+
+
+# ---------------------------------------------------------------- batch C2b: blast doors, maintenance jack
+import shutil
+LA = "legacy-1.12.2/src/main/resources/assets/avp"
+DOORS = {"blastdoor": "Blast Door", "blastdoor_sevastopol": "Blast Door (Sevastopol)"}
+for i, name in DOORS.items():
+    write_json(f"{NA}/blockstates/{i}.json", {"variants": {"": {"model": "avp:block/powered"}}})
+    write_json(f"{NA}/models/item/{i}.json", {"parent": "minecraft:builtin/entity", "display": BLOCK_DISPLAY,
+                                              "textures": {"particle": "minecraft:block/iron_block"}})
+    # only the controller piece (part 0) drops the door
+    write_json(f"{ND}/avp/loot_table/blocks/{i}.json", {"type": "minecraft:block", "pools": [{
+        "rolls": 1, "entries": [{"type": "minecraft:item", "name": f"avp:{i}"}],
+        "conditions": [{"condition": "minecraft:survives_explosion"},
+                       {"condition": "minecraft:block_state_property", "block": f"avp:{i}", "properties": {"part": "0"}}]}]})
+    lang[f"block.avp.{i}"] = name
+add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", [f"avp:{i}" for i in DOORS])
+add_to_tag(f"{ND}/minecraft/tags/block/needs_iron_tool.json", [f"avp:{i}" for i in DOORS])
+
+# maintenance jack item
+shutil.copy(f"{LA}/textures/items/tool.maintenancejack.png", f"{NA}/textures/item/tool_maintenancejack.png")
+write_json(f"{NA}/models/item/tool_maintenancejack.json", {"parent": "minecraft:item/handheld",
+                                                           "textures": {"layer0": "avp:item/tool_maintenancejack"}})
+lang["item.avp.tool_maintenancejack"] = "Maintenance Jack"
+lang["item.avp.tool_securitytuner"] = "Security Access Tuner"
+
+# sounds: copy the blast door .ogg files and their sounds.json entries
+old_sounds = json.load(open(f"{LA}/sounds.json"))
+sounds = read_json(f"{NA}/sounds.json", {})
+for key, entry in old_sounds.items():
+    if "blastdoor" in key:
+        sounds[key] = entry
+        for s in entry["sounds"]:
+            path = (s if isinstance(s, str) else s["name"]).split(":")[1]
+            os.makedirs(os.path.dirname(f"{NA}/sounds/{path}.ogg"), exist_ok=True)
+            shutil.copy(f"{LA}/sounds/{path}.ogg", f"{NA}/sounds/{path}.ogg")
+write_json(f"{NA}/sounds.json", sounds)
+
+lang.update({
+    "message.avp.blastdoor.no_power": "The blast door has no power.",
+    "message.avp.blastdoor.opened": "Blast door opened.",
+    "message.avp.blastdoor.closed": "Blast door closed.",
+    "message.avp.blastdoor.unlocked": "Access granted.",
+    "message.avp.blastdoor.denied": "Access denied.",
+    "message.avp.blastdoor.wrong_tuner": "This tuner isn't bound to this door.",
+    "message.avp.blastdoor.jack_only_unpowered": "The Maintenance Jack only works on closed doors with no power.",
+    "message.avp.blastdoor.cannot_pry": "Blast doors can't be pried open on this world.",
+    "message.avp.blastdoor.prying": "The blast door is %s%% open.",
+    "message.avp.blastdoor.password_set": "Password set.",
+    "message.avp.blastdoor.password_removed": "Password removed.",
+    "message.avp.blastdoor.autolock_on": "Auto-Lock enabled.",
+    "message.avp.blastdoor.autolock_off": "Auto-Lock disabled.",
+    "message.avp.blastdoor.bound": "Tuner bound to %s.",
+    "screen.avp.blastdoor.title": "Blast Door %s",
+    "screen.avp.blastdoor.password": "Password",
+    "screen.avp.blastdoor.password_hint": "Enter password, then press Enter",
+    "screen.avp.blastdoor.new_password_hint": "New password (empty = none), Enter to set",
+    "screen.avp.blastdoor.locked": "LOCKED",
+    "screen.avp.blastdoor.unlocked": "UNLOCKED",
+    "screen.avp.blastdoor.admin": "ADMIN",
+    "screen.avp.blastdoor.autolock_enable": "Enable Auto-Lock",
+    "screen.avp.blastdoor.autolock_disable": "Disable Auto-Lock",
+    "screen.avp.blastdoor.bind": "Bind Tuner to This Door",
+    "screen.avp.blastdoor.admin_help": "Only bound tuners can manage a bound door.",
+    "tooltip.avp.securitytuner.unbound": "Not bound to a door",
+    "tooltip.avp.securitytuner.bound": "Bound to %s",
+    "tooltip.avp.maintenancejack": "Forces open blast doors that have no power.",
+    "avp.configuration.blastDoorEnergyPerTick": "Blast Door Energy Use (FE/tick)",
+    "avp.configuration.blastDoorEnergyPerTick.tooltip": "FE a blast door uses per tick while powered.",
+    "avp.configuration.blastDoors": "Blast Doors",
+    "avp.configuration.blastDoors.button": "Blast Doors...",
+    "avp.configuration.blastDoors.tooltip": "Locks and forcing doors open",
+    "avp.configuration.blastDoorAutolockTicks": "Auto-Lock Delay (ticks)",
+    "avp.configuration.blastDoorAutolockTicks.tooltip": "With Auto-Lock on, an unlocked door closes and locks again after this many ticks (20 = 1 second).",
+    "avp.configuration.blastDoorsCanBePried": "Doors Can Be Pried Open",
+    "avp.configuration.blastDoorsCanBePried.tooltip": "Unpowered blast doors can be forced partly open with a Maintenance Jack.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("batch C2b (blast doors) data written")

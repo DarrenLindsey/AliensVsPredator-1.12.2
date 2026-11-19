@@ -1,0 +1,37 @@
+{
+  "blocks.blastdoor.sevastopol.open": {
+    "sounds": [
+      "avp:blocks/blastdoor/sevastopol/open"
+    ]
+  },
+  "blocks.blastdoor.sevastopol.close": {
+    "sounds": [
+      "avp:blocks/blastdoor/sevastopol/close"
+    ]
+  },
+  "blocks.blastdoor.open": {
+    "sounds": [
+      "avp:blocks/blastdoor/open"
+    ]
+  },
+  "blocks.blastdoor.close": {
+    "sounds": [
+      "avp:blocks/blastdoor/close"
+    ]
+  },
+  "blocks.blastdoor.lock": {
+    "sounds": [
+      "avp:blocks/blastdoor/lock"
+    ]
+  },
+  "blocks.blastdoor.unlock": {
+    "sounds": [
+      "avp:blocks/blastdoor/unlock"
+    ]
+  },
+  "blocks.blastdoor.pass_deny": {
+    "sounds": [
+      "avp:blocks/blastdoor/password_deny"
+    ]
+  }
+}

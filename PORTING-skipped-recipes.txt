@@ -3,8 +3,7 @@ ammo_ar: needs avp:ammo.ar
 ammo_flamethrower: needs avp:ammo.flamethrower
 ammo_pistol: needs avp:ammo.pistol
 assembler: needs avp:assembler
-blastdoor_sevastopol: needs avp:blastdoor.sevastopol
-block_blastdoor: needs avp:blastdoor
+blastdoor_sevastopol: needs avp:part.led.display
 capacitor: needs ore:lithium
 chargepack: needs avp:chargepack
 grenade_incindiary: needs avp:grenade.incindiary
@@ -23,7 +22,6 @@ gun_pistol_action: needs avp:part.pistol.action
 gun_pistol_barrel: needs avp:part.pistol.barrel
 gun_pistol_stock: needs avp:part.pistol.stock
 led_display: needs avp:part.led.display
-maintenancejack: needs avp:tool.maintenancejack
 mk50_body: needs avp:body.mk50
 mk50_boots: needs avp:boots.mk50
 mk50_helm: needs avp:helm.mk50

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.avp.AliensVsPredator;
 import org.avp.client.model.MimicBakedModel;
 import org.avp.client.model.geometry.AllModelLayers;
+import org.avp.client.render.BlastDoorRenderer;
 import org.avp.client.render.BlockEntityItemRenderer;
 import org.avp.client.render.ModelBlockItemRenderer;
 import org.avp.client.render.PoweredBlockRenderer;
@@ -58,6 +59,7 @@ public final class ClientSetup
         event.registerBlockEntityRenderer(ModBlockEntities.STORAGE.get(), ModelBlockRenderer::new);
         event.registerEntityRenderer(ModEntities.SEAT.get(), NoopRenderer::new); // invisible
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.BLAST_DOOR.get(), BlastDoorRenderer::new);
     }
 
     /** Skull/biomask/head/fern items draw their 3D model too. */
@@ -95,6 +97,7 @@ public final class ClientSetup
             }
         };
         event.registerItem(beItems, Arrays.stream(ModBlocks.poweredBlocks()).map(Block::asItem).toArray(Item[]::new));
+        event.registerItem(beItems, ModBlocks.BLASTDOOR.get().asItem(), ModBlocks.BLASTDOOR_SEVASTOPOL.get().asItem());
     }
 
     @SubscribeEvent

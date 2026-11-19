@@ -64,6 +64,9 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue lightEnergyPerTick;
         public final ModConfigSpec.IntValue cryostasisTubeEnergyPerTick;
         public final ModConfigSpec.IntValue medpodEnergyPerTick;
+        public final ModConfigSpec.IntValue blastDoorEnergyPerTick;
+        public final ModConfigSpec.IntValue blastDoorAutolockTicks;
+        public final ModConfigSpec.BooleanValue blastDoorsCanBePried;
         public final ModConfigSpec.IntValue medpodHealInterval;
         public final ModConfigSpec.IntValue medpodHealAmount;
         public final ModConfigSpec.BooleanValue medpodCuresEffects;
@@ -104,6 +107,18 @@ public final class AvpConfig
             medpodEnergyPerTick = b
                     .comment("FE a medpod uses per tick while powered.")
                     .defineInRange("medpodEnergyPerTick", 20, 0, 10_000);
+            blastDoorEnergyPerTick = b
+                    .comment("FE a blast door uses per tick while powered.")
+                    .defineInRange("blastDoorEnergyPerTick", 5, 0, 10_000);
+            b.pop();
+
+            b.push("blastDoors");
+            blastDoorAutolockTicks = b
+                    .comment("With Auto-Lock on, an unlocked blast door closes and locks again after this many ticks (20 = 1 second).")
+                    .defineInRange("blastDoorAutolockTicks", 200, 20, 72_000);
+            blastDoorsCanBePried = b
+                    .comment("Unpowered blast doors can be forced partly open with a Maintenance Jack.")
+                    .define("blastDoorsCanBePried", true);
             b.pop();
 
             b.push("medpod");

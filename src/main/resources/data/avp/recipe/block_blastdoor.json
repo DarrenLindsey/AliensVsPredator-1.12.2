@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "aba",
+    "cdc",
+    "aba"
+  ],
+  "key": {
+    "a": {
+      "item": "avp:polycarbonate"
+    },
+    "b": {
+      "tag": "c:obsidians"
+    },
+    "c": {
+      "item": "minecraft:iron_door"
+    },
+    "d": {
+      "item": "minecraft:sticky_piston"
+    }
+  },
+  "result": {
+    "id": "avp:blastdoor"
+  }
+}

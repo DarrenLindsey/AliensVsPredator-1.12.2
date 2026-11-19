@@ -108,6 +108,8 @@
     "avp:ccfltube",
     "avp:cryostasistube",
     "avp:engineership_ampule",
-    "avp:medpod"
+    "avp:medpod",
+    "avp:blastdoor",
+    "avp:blastdoor_sevastopol"
   ]
 }

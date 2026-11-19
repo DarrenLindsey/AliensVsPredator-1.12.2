@@ -37,6 +37,11 @@ public final class ModCapabilities
     public static void registerEnergy(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.POWERED.get(), (be, side) -> be.getEnergy());
+        // blast doors: any piece accepts power for the whole door
+        event.registerBlock(Capabilities.EnergyStorage.BLOCK, (level, pos, state, be, side) ->
+                state.getBlock() instanceof org.avp.block.BlastDoorBlock door && door.controller(level, state, pos) != null
+                        ? door.controller(level, state, pos).getEnergy() : null,
+                ModBlocks.BLASTDOOR.get(), ModBlocks.BLASTDOOR_SEVASTOPOL.get());
     }
 
     private ModCapabilities()

@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "avp:oremonazite",
-    "avp:orecobalt"
+    "avp:orecobalt",
+    "avp:blastdoor",
+    "avp:blastdoor_sevastopol"
   ]
 }

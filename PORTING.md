@@ -45,7 +45,8 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Batch C1 - Lockers, gun locker, supply crates (64-slot menus, hopper/AE2/Create item access)
 - [x] Batch C2a - Light panel, fluorescent light (CCFL), cryostasis tube, ampule; FE power + redstone
 - [x] Batch C2b part 1 - Medpod (walk in, heals while closed and powered)
-- [ ] Batch C2b part 2 - Blast doors (multi-block, passwords, security tuner, maintenance jack)
+- [x] Batch C2b part 2 - Blast doors (4x3 and Sevastopol 2x3): power, passwords, Security Tuner
+      admin screen and binding, Auto-Lock, Maintenance Jack prying; network payloads in org.avp.network
 - [ ] Cryostasis tube contents (creature in stasis, cracking when unpowered), temple spawner (with creatures)
 - [ ] Batch D - Power system (FE) and machines
 - [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
@@ -110,6 +111,12 @@ Currently decorative (as in 1.12.2). Planned, with the black goo fluid (batch E)
 
 - With the creatures: a closed, powered medpod removes a Xenomorph embryo (chestburster) from
   whoever is inside, like the surgery pod in Prometheus; configurable cost/time/success chance.
+
+## Planned: wall reinforcement device (idea - details to confirm)
+
+- A powered device/tool that reinforces walls in an area (e.g. welding plates on), making them
+  resistant to Xenomorph acid and breaking, and explosions; maybe shows reinforced blocks with
+  a plated overlay. Powered by FE; costs materials; configurable radius/strength.
 
 ## Planned: AI ideas
 

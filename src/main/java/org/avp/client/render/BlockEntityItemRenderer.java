@@ -2,7 +2,6 @@ package org.avp.client.render;
 
 import java.util.Map;
 
-import org.avp.block.entity.PoweredBlockEntity;
 import org.avp.registry.ModBlocks;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -15,6 +14,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Draws items for blocks that have their own block entity renderer (lights, cryostasis tube)
@@ -30,7 +31,8 @@ public class BlockEntityItemRenderer extends BlockEntityWithoutLevelRenderer
     /** Blocks whose model is bigger than one block get shrunk to fit inventory slots. */
     private static float itemScale(Block block)
     {
-        return Map.of(ModBlocks.CRYOSTASISTUBE.get(), 0.5F, ModBlocks.MEDPOD.get(), 0.35F).getOrDefault(block, 1F);
+        return Map.of(ModBlocks.CRYOSTASISTUBE.get(), 0.5F, ModBlocks.MEDPOD.get(), 0.35F,
+                ModBlocks.BLASTDOOR.get(), 0.25F, ModBlocks.BLASTDOOR_SEVASTOPOL.get(), 0.33F).getOrDefault(block, 1F);
     }
 
     @Override
@@ -46,8 +48,14 @@ public class BlockEntityItemRenderer extends BlockEntityWithoutLevelRenderer
         poseStack.translate(0.5F, 0, 0.5F);
         poseStack.scale(scale, scale, scale);
         poseStack.translate(-0.5F, 0, -0.5F);
-        PoweredBlockEntity be = new PoweredBlockEntity(BlockPos.ZERO, block.defaultBlockState());
-        Minecraft.getInstance().getBlockEntityRenderDispatcher().renderItem(be, poseStack, buffers, light, overlay);
+        if (block instanceof EntityBlock entityBlock)
+        {
+            BlockEntity be = entityBlock.newBlockEntity(BlockPos.ZERO, block.defaultBlockState());
+            if (be != null)
+            {
+                Minecraft.getInstance().getBlockEntityRenderDispatcher().renderItem(be, poseStack, buffers, light, overlay);
+            }
+        }
         poseStack.popPose();
     }
 }

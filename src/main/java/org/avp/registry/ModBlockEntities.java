@@ -1,6 +1,7 @@
 package org.avp.registry;
 
 import org.avp.AliensVsPredator;
+import org.avp.block.entity.BlastDoorBlockEntity;
 import org.avp.block.entity.ModelBlockEntity;
 import org.avp.block.entity.PoweredBlockEntity;
 import org.avp.block.entity.ShapeBlockEntity;
@@ -35,6 +36,11 @@ public final class ModBlockEntities
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredBlockEntity>> POWERED = BLOCK_ENTITIES.register("powered",
             () -> BlockEntityType.Builder.of(PoweredBlockEntity::new, ModBlocks.poweredBlocks()).build(null));
+
+    /** Blast door controllers (power, password, locks). */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlastDoorBlockEntity>> BLAST_DOOR = BLOCK_ENTITIES.register("blast_door",
+            () -> BlockEntityType.Builder.of(BlastDoorBlockEntity::new, ModBlocks.BLASTDOOR.get(), ModBlocks.BLASTDOOR_SEVASTOPOL.get()).build(null));
 
     private ModBlockEntities()
     {

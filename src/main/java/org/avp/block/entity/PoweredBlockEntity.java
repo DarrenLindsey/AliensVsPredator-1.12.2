@@ -1,7 +1,6 @@
 package org.avp.block.entity;
 
 import org.avp.block.PoweredBlock;
-import org.avp.config.AvpConfig;
 import org.avp.registry.ModBlockEntities;
 
 import net.minecraft.core.BlockPos;
@@ -31,26 +30,7 @@ public class PoweredBlockEntity extends BlockEntity
 {
     public static final int CAPACITY = 10_000;
 
-    /** EnergyStorage with a way for the block itself to use energy (outside machines can't pull it out). */
-    private static class Buffer extends EnergyStorage
-    {
-        Buffer()
-        {
-            super(CAPACITY, CAPACITY, 0);
-        }
-
-        boolean consume(int amount)
-        {
-            if (energy < amount)
-            {
-                return false;
-            }
-            energy -= amount;
-            return true;
-        }
-    }
-
-    private final Buffer energy = new Buffer();
+    private final EnergyBuffer energy = new EnergyBuffer(CAPACITY);
 
     /** Who last got out and when (game time), so the medpod doesn't pull them straight back in. Not saved. */
     private final java.util.Map<java.util.UUID, Long> recentExits = new java.util.HashMap<>();
@@ -112,19 +92,10 @@ public class PoweredBlockEntity extends BlockEntity
         {
             return;
         }
-        boolean on;
-        if (!AvpConfig.server(AvpConfig.SERVER.machinesNeedPower))
+        boolean on = be.energy.tickPower(level, pos, block.energyPerTick());
+        if (on)
         {
-            on = true;
-        }
-        else if (be.energy.consume(block.energyPerTick()))
-        {
-            on = true;
             be.setChanged();
-        }
-        else
-        {
-            on = AvpConfig.server(AvpConfig.SERVER.redstonePowersMachines) && level.hasNeighborSignal(pos);
         }
         if (state.getValue(PoweredBlock.LIT) != on)
         {

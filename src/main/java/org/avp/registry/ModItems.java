@@ -55,6 +55,15 @@ public final class ModItems
     public static final DeferredItem<Item> TOOL_SECURITYTUNER = simple("tool_securitytuner", Tab.MAIN, 1);
     // </generated>
 
+    // ---- Tools ----
+    /** Forces blast doors open when they have no power (100 uses). */
+    public static final DeferredItem<Item> TOOL_MAINTENANCEJACK = ITEMS.register("tool_maintenancejack",
+            () -> new Item(new Item.Properties().stacksTo(1).durability(100)));
+    static
+    {
+        Tab.MAIN.add(TOOL_MAINTENANCEJACK);
+    }
+
     /** A plain item with no special behaviour (crafting parts, ingots, ...). */
     private static DeferredItem<Item> simple(String id, Tab tab, int maxStack)
     {

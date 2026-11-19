@@ -77,6 +77,17 @@ Decided for the creatures phase (1 block = 1 metre, player = 1.8 blocks):
   sizes don't break chasing indoors.
 - Skull/trophy sizes get revisited together with the creatures so they match each other.
 
+## Planned: new machines
+
+- **Stasis harvesting (cryostasis tube):** capture a mob with a capture item, load it into a
+  powered tube; it's shown frozen inside and periodically rolls the mob's loot table (no kill
+  needed) into an internal inventory that hoppers / AE2 / Create can empty. Losing power cracks
+  and then shatters the glass and releases the mob (the 1.12.2 behaviour, now a risk to manage).
+- **Growth Acceleration Tube** (variant): holds a seed/sapling/crop, grows it and rolls its
+  harvest drops on a timer.
+- Config: FE per harvest, time between harvests, mob allow/deny lists (e.g. no bosses),
+  whether hostile creatures can break out.
+
 ## Planned: AI ideas
 
 - **Fear system**: players (and maybe NPC marines) get a fear level from darkness, nearby

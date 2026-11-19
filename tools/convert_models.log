@@ -43,7 +43,7 @@ OK   entities/living/ModelUrsuidae.java -> UrsuidaeModel
 OK   entities/living/ModelVardaMonkey.java -> VardaMonkeyModel
 OK   entities/living/ModelWarrior.java -> WarriorModel
 OK   entities/living/ModelYautja.java -> YautjaModel
-OK   items/Model88MOD4.java -> 88MOD4Model
+OK   items/Model88MOD4.java -> Gun88MOD4Model
 OK   items/ModelAK47.java -> AK47Model
 OK   items/ModelM240ICU.java -> M240ICUModel
 OK   items/ModelM4.java -> M4Model

@@ -21,9 +21,9 @@ import net.minecraft.resources.ResourceLocation;
  * Re-running the script overwrites this file - put custom code in another class.
  */
 @SuppressWarnings("unused")
-public class 88MOD4Model implements GeneratedModel
+public class Gun88MOD4Model implements GeneratedModel
 {
-    public static final ModelLayerLocation LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "88_m_o_d4"), "main");
+    public static final ModelLayerLocation LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "gun88_m_o_d4"), "main");
 
     private final ModelPart root;
     private final Map<String, ModelPart> parts = new LinkedHashMap<>();
@@ -38,7 +38,7 @@ public class 88MOD4Model implements GeneratedModel
     public final ModelPart barrelRight;
     public final ModelPart handleGrip;
 
-    public 88MOD4Model(ModelPart root)
+    public Gun88MOD4Model(ModelPart root)
     {
         this.root = root;
         this.barrelNose = root.getChild("barrelNose");

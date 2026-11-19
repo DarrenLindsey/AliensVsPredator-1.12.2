@@ -124,6 +124,8 @@ def convert(path):
 
     roots = [n for n in order if parts[n].parent is None]
     new_name = (cls[5:] if cls.startswith("Model") else cls) + "Model"
+    if new_name[0].isdigit():
+        new_name = "Gun" + new_name  # Model88MOD4 -> Gun88MOD4Model (Java names can't start with a digit)
 
     def cubes(p):
         if not p.boxes:

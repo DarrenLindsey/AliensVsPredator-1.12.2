@@ -205,7 +205,6 @@ public final class ModBlocks
 
     // ---- Decorative blocks (batch B) ----
     public static final DeferredBlock<Block> INDUSTRIALWALL2 = simple("industrialwall2", Kind.METAL, 5F, 15F);
-    public static final DeferredBlock<Block> SKULLS = simple("skulls", Kind.STONE, 1.5F, 6F);
 
     // Skulls, biomasks and heads: drawn by ModelBlockRenderer with models converted from 1.12.2
     private static final List<DeferredBlock<? extends Block>> MODEL_BLOCKS = new ArrayList<>();

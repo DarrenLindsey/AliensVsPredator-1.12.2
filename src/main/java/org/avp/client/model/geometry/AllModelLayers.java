@@ -52,7 +52,7 @@ public final class AllModelLayers
         event.registerLayerDefinition(VardaMonkeyModel.LAYER, VardaMonkeyModel::createLayer);
         event.registerLayerDefinition(WarriorModel.LAYER, WarriorModel::createLayer);
         event.registerLayerDefinition(YautjaModel.LAYER, YautjaModel::createLayer);
-        event.registerLayerDefinition(88MOD4Model.LAYER, 88MOD4Model::createLayer);
+        event.registerLayerDefinition(Gun88MOD4Model.LAYER, Gun88MOD4Model::createLayer);
         event.registerLayerDefinition(AK47Model.LAYER, AK47Model::createLayer);
         event.registerLayerDefinition(M240ICUModel.LAYER, M240ICUModel::createLayer);
         event.registerLayerDefinition(M4Model.LAYER, M4Model::createLayer);

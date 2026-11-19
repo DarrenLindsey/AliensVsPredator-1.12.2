@@ -10,6 +10,8 @@ import org.avp.client.render.ModelBlockRenderInfo;
 import org.avp.client.render.ModelBlockRenderer;
 import org.avp.registry.ModBlockEntities;
 import org.avp.registry.ModBlocks;
+import org.avp.registry.ModMenus;
+import org.avp.client.screen.StorageScreen;
 
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,6 +23,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
@@ -48,6 +51,7 @@ public final class ClientSetup
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event)
     {
         event.registerBlockEntityRenderer(ModBlockEntities.MODEL_BLOCK.get(), ModelBlockRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.STORAGE.get(), ModelBlockRenderer::new);
     }
 
     /** Skull/biomask/head/fern items draw their 3D model too. */
@@ -69,6 +73,13 @@ public final class ClientSetup
             }
         };
         event.registerItem(extensions, Arrays.stream(ModBlocks.modelBlocks()).map(Block::asItem).toArray(Item[]::new));
+        event.registerItem(extensions, Arrays.stream(ModBlocks.storageBlocks()).map(Block::asItem).toArray(Item[]::new));
+    }
+
+    @SubscribeEvent
+    public static void registerScreens(RegisterMenuScreensEvent event)
+    {
+        event.register(ModMenus.STORAGE.get(), StorageScreen::new);
     }
 
     /** Wrap the slope/corner/... models so they can show a copied block's texture. */

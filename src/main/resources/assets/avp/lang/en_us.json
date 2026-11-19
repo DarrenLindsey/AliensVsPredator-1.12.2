@@ -180,5 +180,12 @@
   "avp.configuration.trophiesCanBeTipped": "Trophies Can Be Tipped",
   "avp.configuration.trophiesCanBeTipped.tooltip": "Players can right-click the Giger alien head to lay it flat or tilt it.",
   "avp.configuration.trophySize": "Trophy Size",
-  "avp.configuration.trophySize.tooltip": "Size of placed skulls, biomasks and heads. 1.0 = normal; 2.0 = twice as big."
+  "avp.configuration.trophySize.tooltip": "Size of placed skulls, biomasks and heads. 1.0 = normal; 2.0 = twice as big.",
+  "block.avp.locker": "Locker",
+  "block.avp.gunlocker": "Gun Locker",
+  "block.avp.supplychuteblock": "Supply Crate (Weyland-Yutani)",
+  "block.avp.supplychuteblock_marines": "Supply Crate (USCM)",
+  "block.avp.supplychuteblock_seegson": "Supply Crate (Seegson)",
+  "avp.configuration.openLockersAreWalkThrough": "Open Lockers Are Walk-Through",
+  "avp.configuration.openLockersAreWalkThrough.tooltip": "You can step into an open locker to hide inside it, like in 1.12.2."
 }

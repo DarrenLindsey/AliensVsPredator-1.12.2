@@ -98,6 +98,11 @@
     "avp:ridge",
     "avp:pyramid",
     "avp:invertedridge",
-    "avp:invertedpyramid"
+    "avp:invertedpyramid",
+    "avp:locker",
+    "avp:gunlocker",
+    "avp:supplychuteblock",
+    "avp:supplychuteblock_marines",
+    "avp:supplychuteblock_seegson"
   ]
 }

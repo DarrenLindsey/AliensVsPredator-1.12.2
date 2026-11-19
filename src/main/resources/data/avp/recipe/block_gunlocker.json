@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "aaa",
+    "aba",
+    "aaa"
+  ],
+  "key": {
+    "a": {
+      "tag": "c:ingots/aluminum"
+    },
+    "b": {
+      "item": "minecraft:iron_door"
+    }
+  },
+  "result": {
+    "id": "avp:gunlocker"
+  }
+}

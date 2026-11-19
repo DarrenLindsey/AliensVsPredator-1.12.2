@@ -18,6 +18,9 @@ import org.avp.client.model.geometry.BiomaskTrackerModel;
 import org.avp.client.model.geometry.EngineerModel;
 import org.avp.client.model.geometry.GigerAlienHeadModel;
 import org.avp.client.model.geometry.GroundFernModel;
+import org.avp.client.model.geometry.LockerModel;
+import org.avp.client.model.geometry.SupplyChuteModel;
+import org.avp.block.StorageBlock;
 import org.avp.client.model.geometry.NeomorphSkullModel;
 import org.avp.client.model.geometry.ProtomorphSkullModel;
 import org.avp.client.model.geometry.QueenSkullModel;
@@ -39,6 +42,23 @@ import net.minecraft.world.level.block.Block;
  */
 public final class ModelBlockRenderInfo
 {
+    /** How the old 1.12.2 renderer placed the model. */
+    public enum Kind
+    {
+        /** Skulls etc.: scaled to Info.size and stood on the floor. */
+        TROPHY,
+        /** Ferns: random size/colour/turn per position. */
+        PLANT,
+        /** Machines/furniture: the old TESR transform as-is (translate, flip, face the player). */
+        PROP
+    }
+
+    /** Sets animated parts (e.g. a door angle) before drawing. */
+    public interface Poser
+    {
+        void pose(GeneratedModel model, net.minecraft.world.level.block.state.BlockState state);
+    }
+
     /**
      * @param layer   the converted model's geometry
      * @param factory wraps the baked geometry so parts can be found by name
@@ -47,12 +67,12 @@ public final class ModelBlockRenderInfo
      * @param scale   old preRenderTransforms scale
      * @param x,y,z   old preRenderTransforms translate
      * @param turnY   extra turn around the vertical axis, in degrees
-     * @param plant   true for ferns (random size/colour, different base transform)
+     * @param kind    how the model is placed (see Kind)
      * @param size    trophies only: how big the placed trophy is, in blocks (its longest side).
      *                The renderer scales it to this size and stands it on the floor of the block.
      */
     public record Info(ModelLayerLocation layer, Function<ModelPart, GeneratedModel> factory, ResourceLocation texture,
-                       List<String> parts, float scale, float x, float y, float z, float turnY, boolean plant, float size)
+                       List<String> parts, float scale, float x, float y, float z, float turnY, Kind kind, float size, Poser poser)
     {
     }
 
@@ -73,7 +93,7 @@ public final class ModelBlockRenderInfo
     private static Info trophy(ModelLayerLocation layer, Function<ModelPart, GeneratedModel> factory, String texture, List<String> parts,
                                float scale, float x, float y, float z, float turnY, float size)
     {
-        return new Info(layer, factory, tex(texture), parts, scale, x, y, z, turnY, false, size);
+        return new Info(layer, factory, tex(texture), parts, scale, x, y, z, turnY, Kind.TROPHY, size, null);
     }
 
     /** Called once on the client after blocks are registered. */
@@ -98,8 +118,19 @@ public final class ModelBlockRenderInfo
         add(ModBlocks.HEAD_AETHON, trophy(AethonHeadModel.LAYER, AethonHeadModel::new, "mob/aethon/aethon.png", List.of("head"), 1.9F, 0, -1.5F, 0, 0, 0.8F));
         add(ModBlocks.HEAD_GIGERALIEN, trophy(GigerAlienHeadModel.LAYER, GigerAlienHeadModel::new, "mob/gigeralien.png", List.of("head"), 1.0F, 0, -1.25F, -0.25F, 90, 0.9F));
 
-        add(ModBlocks.PARADISIAN_GROUND_FERN, new Info(GroundFernModel.LAYER, GroundFernModel::new, tex("tile/plants/paradisiangroundfern.png"), List.of(), 1, 0, 1.455F, 0, 0, true, 1));
-        add(ModBlocks.PARADISIAN_TREE_FERN, new Info(TreeFernModel.LAYER, TreeFernModel::new, tex("tile/plants/paradisiantreefern.png"), List.of(), 1, 0, 1.455F, 0, 0, true, 1));
+        add(ModBlocks.PARADISIAN_GROUND_FERN, new Info(GroundFernModel.LAYER, GroundFernModel::new, tex("tile/plants/paradisiangroundfern.png"), List.of(), 1, 0, 1.455F, 0, 0, Kind.PLANT, 1, null));
+        add(ModBlocks.PARADISIAN_TREE_FERN, new Info(TreeFernModel.LAYER, TreeFernModel::new, tex("tile/plants/paradisiantreefern.png"), List.of(), 1, 0, 1.455F, 0, 0, Kind.PLANT, 1, null));
+
+        // lockers: 1.12.2 RenderLocker/RenderGunLocker (translate y 1.41, scale 0.95, door swings -1.5 rad when open)
+        Poser lockerDoor = (model, state) -> model.parts().get("door").yRot =
+                state.hasProperty(StorageBlock.VIEWED) && StorageBlock.isOpen(state) ? -1.5F : 0F;
+        add(ModBlocks.LOCKER, new Info(LockerModel.LAYER, LockerModel::new, tex("tile/locker.png"), List.of(), 0.95F, 0, 1.41F, 0, 0, Kind.PROP, 1, lockerDoor));
+        add(ModBlocks.GUNLOCKER, new Info(LockerModel.LAYER, LockerModel::new, tex("tile/gunlocker.png"), List.of(), 0.95F, 0, 1.41F, 0, 0, Kind.PROP, 1, lockerDoor));
+        // supply crates: 1.12.2 RenderSupplyCrate draws only the crate parts of the supply chute model
+        List<String> crateParts = List.of("casing", "lHinge", "rHinge", "lid");
+        add(ModBlocks.SUPPLYCRATE, new Info(SupplyChuteModel.LAYER, SupplyChuteModel::new, tex("tile/supplychute.png"), crateParts, 1F, 0, 1.5F, 0, 0, Kind.PROP, 1, null));
+        add(ModBlocks.SUPPLYCRATE_MARINES, new Info(SupplyChuteModel.LAYER, SupplyChuteModel::new, tex("tile/supplychute.marines.png"), crateParts, 1F, 0, 1.5F, 0, 0, Kind.PROP, 1, null));
+        add(ModBlocks.SUPPLYCRATE_SEEGSON, new Info(SupplyChuteModel.LAYER, SupplyChuteModel::new, tex("tile/supplychute.seegson.png"), crateParts, 1F, 0, 1.5F, 0, 0, Kind.PROP, 1, null));
     }
 
     @Nullable

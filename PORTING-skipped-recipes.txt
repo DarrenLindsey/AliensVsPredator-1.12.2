@@ -5,9 +5,6 @@ ammo_pistol: needs avp:ammo.pistol
 assembler: needs avp:assembler
 blastdoor_sevastopol: needs avp:blastdoor.sevastopol
 block_blastdoor: needs avp:blastdoor
-block_gunlocker: needs avp:gunlocker
-block_industrialwall2: needs avp:industrialwall2
-block_locker: needs avp:locker
 capacitor: needs ore:lithium
 chargepack: needs avp:chargepack
 engineership_ampule: needs avp:engineership.ampule

@@ -3,6 +3,7 @@ package org.avp.registry;
 import org.avp.AliensVsPredator;
 import org.avp.block.entity.ModelBlockEntity;
 import org.avp.block.entity.ShapeBlockEntity;
+import org.avp.block.entity.StorageBlockEntity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -23,6 +24,11 @@ public final class ModBlockEntities
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ShapeBlockEntity>> SHAPE = BLOCK_ENTITIES.register("shape",
             () -> BlockEntityType.Builder.of(ShapeBlockEntity::new, ModBlocks.shapeBlocks()).build(null));
+
+    /** Lockers and supply crates (64-slot inventory). */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",
+            () -> BlockEntityType.Builder.of(StorageBlockEntity::new, ModBlocks.storageBlocks()).build(null));
 
     private ModBlockEntities()
     {

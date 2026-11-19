@@ -10,11 +10,14 @@ import org.avp.block.ModelPlantBlock;
 import org.avp.block.ModTreeGrowers;
 import org.avp.block.ShapeBlock;
 import org.avp.block.StalagmiteBlock;
+import org.avp.block.StorageBlock;
 import org.avp.block.TrophyBlock;
 import org.avp.block.UnidentifiedTreeLeavesBlock;
 import org.avp.block.WheatGrassBlock;
 
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -235,6 +238,23 @@ public final class ModBlocks
     public static final DeferredBlock<ShapeBlock> INVERTEDRIDGE = shape("invertedridge");
     public static final DeferredBlock<ShapeBlock> INVERTEDPYRAMID = shape("invertedpyramid");
 
+    // ---- Storage (batch C): 64-slot inventories, open to hoppers / AE2 / Create via ModCapabilities ----
+    /** Items the gun locker accepts: anything tagged as a ranged weapon (bows, crossbows, and AvP guns later). */
+    public static final TagKey<Item> GUN_LOCKER_ITEMS = TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "gun_locker_items"));
+    private static final List<DeferredBlock<? extends Block>> STORAGE_BLOCKS = new ArrayList<>();
+    public static final DeferredBlock<StorageBlock> LOCKER = storage("locker", true, MapColor.METAL);
+    public static final DeferredBlock<StorageBlock> GUNLOCKER = storage("gunlocker", true, MapColor.METAL);
+    public static final DeferredBlock<StorageBlock> SUPPLYCRATE = storage("supplychuteblock", false, MapColor.COLOR_LIGHT_GRAY);
+    public static final DeferredBlock<StorageBlock> SUPPLYCRATE_MARINES = storage("supplychuteblock_marines", false, MapColor.COLOR_GREEN);
+    public static final DeferredBlock<StorageBlock> SUPPLYCRATE_SEEGSON = storage("supplychuteblock_seegson", false, MapColor.COLOR_ORANGE);
+
+    /** Blocks that use the StorageBlockEntity. */
+    public static Block[] storageBlocks()
+    {
+        return STORAGE_BLOCKS.stream().map(DeferredBlock::get).toArray(Block[]::new);
+    }
+
     /** Blocks that use the ModelBlockEntity (for ModBlockEntities). */
     public static Block[] modelBlocks()
     {
@@ -296,6 +316,16 @@ public final class ModBlocks
                 .mapColor(MapColor.PLANT).noCollission().instabreak().sound(SoundType.GRASS)
                 .pushReaction(PushReaction.DESTROY)));
         MODEL_BLOCKS.add(block);
+        return block;
+    }
+
+    private static DeferredBlock<StorageBlock> storage(String id, boolean tall, MapColor color)
+    {
+        boolean gunsOnly = id.equals("gunlocker");
+        DeferredBlock<StorageBlock> block = register(id, Tab.MAIN, () -> new StorageBlock(BlockBehaviour.Properties.of()
+                .mapColor(color).sound(SoundType.METAL).strength(3.0F, 6.0F).noOcclusion().requiresCorrectToolForDrops(),
+                tall, gunsOnly ? stack -> stack.is(GUN_LOCKER_ITEMS) : stack -> true));
+        STORAGE_BLOCKS.add(block);
         return block;
     }
 

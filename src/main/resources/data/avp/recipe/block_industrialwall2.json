@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "bbb",
+    "aaa",
+    "bbb"
+  ],
+  "key": {
+    "a": {
+      "item": "avp:polycarbonate"
+    },
+    "b": {
+      "item": "minecraft:stone"
+    }
+  },
+  "result": {
+    "id": "avp:industrialwall2",
+    "count": 16
+  }
+}

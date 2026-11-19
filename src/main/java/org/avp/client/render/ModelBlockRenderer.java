@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.avp.block.StorageBlock;
 import org.avp.block.TrophyBlock;
-import org.avp.block.entity.ModelBlockEntity;
 import org.avp.client.model.GeneratedModel;
 import org.avp.config.AvpConfig;
 
@@ -24,7 +24,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import org.joml.Vector3f;
 
@@ -32,7 +34,7 @@ import org.joml.Vector3f;
  * Draws skulls, biomasks, heads and ferns using models converted from 1.12.2.
  * The same {@link #draw} is used for the item in your hand/inventory (ModelBlockItemRenderer).
  */
-public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
+public class ModelBlockRenderer<T extends BlockEntity> implements BlockEntityRenderer<T>
 {
     // the three greens from the 1.12.2 TileEntityPlant, plus the rare white fern
     private static final float[][] FERN_COLORS = { { 0.1F, 0.2F, 0.05F }, { 0.15F, 0.25F, 0.05F }, { 0.1F, 0.25F, 0.05F } };
@@ -46,9 +48,16 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
     }
 
     @Override
-    public void render(ModelBlockEntity be, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int light, int overlay)
+    public void render(T be, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int light, int overlay)
     {
         draw(be.getBlockState(), be.getBlockPos(), models, poseStack, buffers, light, overlay);
+    }
+
+    /** Lockers are two blocks tall: make sure they aren't hidden when only the top half is on screen. */
+    @Override
+    public AABB getRenderBoundingBox(T be)
+    {
+        return new AABB(be.getBlockPos()).expandTowards(0, 1, 0);
     }
 
     private static int channel(float value)
@@ -70,11 +79,15 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
         GeneratedModel model = ModelBlockRenderInfo.model(info, models);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(info.texture()));
         poseStack.pushPose();
-        if (!info.plant() && pos != null)
+        if (info.kind() == ModelBlockRenderInfo.Kind.TROPHY && pos != null)
         {
             placeOnFloor(info, state, models, poseStack);
         }
         int color = transform(info, state, pos, poseStack);
+        if (info.poser() != null)
+        {
+            info.poser().pose(model, state);
+        }
         for (ModelPart part : partsToDraw(info, model))
         {
             part.render(poseStack, vc, light, overlay, color);
@@ -96,6 +109,10 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
         GeneratedModel model = ModelBlockRenderInfo.model(info, models);
         PoseStack poseStack = new PoseStack();
         transform(info, state, null, poseStack);
+        if (info.poser() != null)
+        {
+            info.poser().pose(model, state);
+        }
         float[] b = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE };
         Vector3f corner = new Vector3f();
         for (ModelPart part : partsToDraw(info, model))
@@ -167,7 +184,16 @@ public class ModelBlockRenderer implements BlockEntityRenderer<ModelBlockEntity>
     private static int transform(ModelBlockRenderInfo.Info info, BlockState state, BlockPos pos, PoseStack poseStack)
     {
         int color = -1; // white = no tint
-        if (info.plant())
+        if (info.kind() == ModelBlockRenderInfo.Kind.PROP)
+        {
+            // the 1.12.2 TESR transform: centre, lift, flip upside down, face the player
+            Direction facing = state.hasProperty(StorageBlock.FACING) ? state.getValue(StorageBlock.FACING) : Direction.SOUTH;
+            poseStack.translate(0.5F + info.x(), info.y(), 0.5F + info.z());
+            poseStack.scale(info.scale(), -info.scale(), info.scale());
+            poseStack.mulPose(Axis.YP.rotationDegrees(180F - facing.toYRot()));
+            return color;
+        }
+        if (info.kind() == ModelBlockRenderInfo.Kind.PLANT)
         {
             // size/colour/turn picked from the position, so every fern looks a bit different but never changes
             RandomSource rand = RandomSource.create(pos == null ? 0 : Mth.getSeed(pos));

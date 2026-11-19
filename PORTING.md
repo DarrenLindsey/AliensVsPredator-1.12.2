@@ -39,7 +39,14 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Step 2a - Simple decorative blocks (73) and simple items/foods (28)
 - [x] Step 2b - Stairs (5), slabs (5), ores with special drops (silicon, monazite, cobalt)
 - [x] Step 2c - Recipes: 45 crafting + 9 smelting/blasting/smoking/campfire (`tools/port_step2.py`)
-- [ ] Step 2d - Remaining special blocks (hive resin, skulls, striped wall, black goo fluid, lithium ingot)
+- [x] Batch A - Natural blocks: dirt, grass, logs, leaves, tendons, sapling, stalagmite, wheat grass
+- [x] Batch B - Decorative 3D blocks: skulls, biomasks, heads, ferns, slopes/corners/ridges/pyramids
+      (+ `tools/convert_models.py`, which converts all 99 old box models)
+- [x] Batch C1 - Lockers, gun locker, supply crates (64-slot menus, hopper/AE2/Create item access)
+- [ ] Batch C2 - Medpod, blast doors, cryostasis tube, ampule, light panel, CCFL tube, temple spawner
+- [ ] Batch D - Power system (FE) and machines
+- [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
+- [ ] Hive resin, supply crate parachute drop (with the creatures/entities)
 - [ ] Ore generation in the world (ores exist but don't spawn yet)
 - [ ] Step 3 - One creature end to end (template for the rest)
 - [ ] Step 4 - Other creatures, guns, armour, tile entities

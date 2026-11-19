@@ -326,7 +326,7 @@ public final class ModBlocks
                 .mapColor(color).sound(SoundType.METAL).strength(3.0F, 6.0F).noOcclusion().requiresCorrectToolForDrops()
                 // you can be inside a locker while hiding: no suffocation damage or black screen
                 .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false),
-                tall, gunsOnly ? stack -> stack.is(GUN_LOCKER_ITEMS) : stack -> true));
+                tall, id.equals("locker"), gunsOnly ? stack -> stack.is(GUN_LOCKER_ITEMS) : stack -> true));
         STORAGE_BLOCKS.add(block);
         return block;
     }

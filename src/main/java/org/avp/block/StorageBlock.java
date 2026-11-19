@@ -51,7 +51,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class StorageBlock extends BaseEntityBlock
 {
-    public static final MapCodec<StorageBlock> CODEC = simpleCodec(p -> new StorageBlock(p, false, stack -> true));
+    public static final MapCodec<StorageBlock> CODEC = simpleCodec(p -> new StorageBlock(p, false, false, stack -> true));
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     /** Someone has the inventory open. */
@@ -60,12 +60,18 @@ public class StorageBlock extends BaseEntityBlock
     public static final BooleanProperty PROPPED = BooleanProperty.create("propped");
 
     private final boolean tall;
+    private final boolean canHide;
     private final Predicate<ItemStack> filter;
 
-    public StorageBlock(Properties properties, boolean tall, Predicate<ItemStack> filter)
+    /**
+     * @param tall    two blocks tall (lockers)
+     * @param canHide players can hide inside (the plain locker - the gun locker is full of racks)
+     */
+    public StorageBlock(Properties properties, boolean tall, boolean canHide, Predicate<ItemStack> filter)
     {
         super(properties);
         this.tall = tall;
+        this.canHide = canHide;
         this.filter = filter;
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER)
                 .setValue(VIEWED, false).setValue(PROPPED, false));
@@ -187,14 +193,14 @@ public class StorageBlock extends BaseEntityBlock
         }
         if (player.isShiftKeyDown())
         {
-            if (tall)
+            if (canHide)
             {
                 if (AvpConfig.server(AvpConfig.SERVER.lockersCanHide) && !LockerSeatEntity.isOccupied(level, invPos))
                 {
                     LockerSeatEntity.hide(level, invPos, player);
                 }
             }
-            else
+            else if (!tall)
             {
                 BlockState lower = level.getBlockState(invPos);
                 setOpenState(level, invPos, lower.setValue(PROPPED, !lower.getValue(PROPPED)));

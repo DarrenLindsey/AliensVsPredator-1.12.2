@@ -91,8 +91,10 @@ public class MedpodBlock extends PoweredBlock implements SeatBlock
             // walk in: anyone standing in the open pod (and not sneaking) lies down in it
             if (seat == null)
             {
+                int cooldown = AvpConfig.server(AvpConfig.SERVER.medpodReentryCooldown);
                 List<Player> players = level.getEntitiesOfClass(Player.class, new AABB(pos),
-                        p -> !p.isPassenger() && !p.isShiftKeyDown() && !p.isSpectator());
+                        p -> !p.isPassenger() && !p.isShiftKeyDown() && !p.isSpectator()
+                                && !be.exitedRecently(p.getUUID(), level.getGameTime(), cooldown));
                 if (!players.isEmpty())
                 {
                     SeatEntity.seatNow(level, pos, players.get(0));
@@ -128,8 +130,13 @@ public class MedpodBlock extends PoweredBlock implements SeatBlock
     public void onSeatLeft(Level level, BlockPos pos, Entity passenger, int ticksInside)
     {
         BlockState state = level.getBlockState(pos);
-        if (!state.is(this) || state.getValue(OPEN))
+        if (!state.is(this))
         {
+            return;
+        }
+        if (state.getValue(OPEN))
+        {
+            ejectAndRemember(level, pos, state, passenger); // left while it was already open
             return;
         }
         // getting out of a closed, powered pod after a full treatment: a short "golden apple" boost
@@ -141,6 +148,23 @@ public class MedpodBlock extends PoweredBlock implements SeatBlock
             living.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, AvpConfig.server(AvpConfig.SERVER.medpodAbsorptionTicks), 0));
         }
         level.setBlock(pos, state.setValue(OPEN, true), Block.UPDATE_ALL); // open up to let them out
+        ejectAndRemember(level, pos, state, passenger);
+    }
+
+    /** A small push out of the pod, and remember who left so they aren't pulled straight back in. */
+    private static void ejectAndRemember(Level level, BlockPos pos, BlockState state, Entity passenger)
+    {
+        if (level.getBlockEntity(pos) instanceof PoweredBlockEntity be)
+        {
+            be.markExited(passenger.getUUID(), level.getGameTime());
+        }
+        double strength = AvpConfig.server(AvpConfig.SERVER.medpodEjectStrength);
+        if (strength > 0)
+        {
+            var front = state.getValue(FACING).getNormal();
+            passenger.setDeltaMovement(front.getX() * strength, 0.1, front.getZ() * strength);
+            passenger.hurtMarked = true; // send the new motion to the player's client
+        }
     }
 
     @Override

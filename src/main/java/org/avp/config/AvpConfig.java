@@ -68,6 +68,8 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue medpodHealAmount;
         public final ModConfigSpec.BooleanValue medpodCuresEffects;
         public final ModConfigSpec.BooleanValue medpodBoost;
+        public final ModConfigSpec.IntValue medpodReentryCooldown;
+        public final ModConfigSpec.DoubleValue medpodEjectStrength;
         public final ModConfigSpec.IntValue medpodBoostMinTicks;
         public final ModConfigSpec.IntValue medpodRegenerationTicks;
         public final ModConfigSpec.IntValue medpodAbsorptionTicks;
@@ -114,6 +116,12 @@ public final class AvpConfig
             medpodCuresEffects = b
                     .comment("The medpod also removes harmful effects like poison and wither.")
                     .define("medpodCuresEffects", true);
+            medpodReentryCooldown = b
+                    .comment("After getting out, the medpod won't take you back in for this many ticks (20 = 1 second).")
+                    .defineInRange("medpodReentryCooldown", 20, 0, 1200);
+            medpodEjectStrength = b
+                    .comment("How hard you're pushed out of the medpod when you get out (0 = no push).")
+                    .defineInRange("medpodEjectStrength", 0.3, 0.0, 2.0);
             medpodBoost = b
                     .comment("Getting out after a treatment gives a short golden-apple-style boost (Regeneration II + Absorption).")
                     .define("medpodBoost", true);
@@ -148,6 +156,11 @@ public final class AvpConfig
     public static boolean client(ModConfigSpec.BooleanValue value)
     {
         return get(CLIENT_SPEC, value);
+    }
+
+    public static double server(ModConfigSpec.DoubleValue value)
+    {
+        return get(SERVER_SPEC, value);
     }
 
     public static int server(ModConfigSpec.IntValue value)

@@ -224,5 +224,9 @@
   "avp.configuration.medpodRegenerationTicks": "Regeneration Length (ticks)",
   "avp.configuration.medpodRegenerationTicks.tooltip": "How long the Regeneration II lasts (golden apple: 100 = 5 seconds).",
   "avp.configuration.medpodAbsorptionTicks": "Absorption Length (ticks)",
-  "avp.configuration.medpodAbsorptionTicks.tooltip": "How long the Absorption lasts (golden apple: 2400 = 2 minutes)."
+  "avp.configuration.medpodAbsorptionTicks.tooltip": "How long the Absorption lasts (golden apple: 2400 = 2 minutes).",
+  "avp.configuration.medpodReentryCooldown": "Re-entry Delay (ticks)",
+  "avp.configuration.medpodReentryCooldown.tooltip": "After getting out, the medpod won't take you back in for this many ticks (20 = 1 second).",
+  "avp.configuration.medpodEjectStrength": "Exit Push Strength",
+  "avp.configuration.medpodEjectStrength.tooltip": "How hard you're pushed out of the medpod when you get out (0 = no push)."
 }

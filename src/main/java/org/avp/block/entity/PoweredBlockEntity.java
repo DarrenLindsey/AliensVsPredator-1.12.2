@@ -52,6 +52,29 @@ public class PoweredBlockEntity extends BlockEntity
 
     private final Buffer energy = new Buffer();
 
+    /** Who last got out and when (game time), so the medpod doesn't pull them straight back in. Not saved. */
+    private final java.util.Map<java.util.UUID, Long> recentExits = new java.util.HashMap<>();
+
+    public void markExited(java.util.UUID entity, long gameTime)
+    {
+        recentExits.put(entity, gameTime);
+    }
+
+    public boolean exitedRecently(java.util.UUID entity, long gameTime, int cooldownTicks)
+    {
+        Long when = recentExits.get(entity);
+        if (when == null)
+        {
+            return false;
+        }
+        if (gameTime - when >= cooldownTicks)
+        {
+            recentExits.remove(entity);
+            return false;
+        }
+        return true;
+    }
+
     /** Client-only animation progress (0 = closed, 1 = open), e.g. the medpod lid. */
     private float animation;
     private float animationPrev;

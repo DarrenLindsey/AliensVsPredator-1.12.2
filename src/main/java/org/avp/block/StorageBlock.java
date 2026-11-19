@@ -67,6 +67,12 @@ public class StorageBlock extends BaseEntityBlock implements SeatBlock
      * @param tall    two blocks tall (lockers)
      * @param canHide players can hide inside (the plain locker - the gun locker is full of racks)
      */
+    /** Can players hide inside (the plain locker)? */
+    public boolean canHide()
+    {
+        return canHide;
+    }
+
     public StorageBlock(Properties properties, boolean tall, boolean canHide, Predicate<ItemStack> filter)
     {
         super(properties);

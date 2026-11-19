@@ -37,6 +37,16 @@ public abstract class XenomorphEntity extends Monster
 
     private int jelly;
     private int age;
+    // film-style behaviour state (see XenoBrain)
+    @Nullable
+    private net.minecraft.world.phys.Vec3 investigatePos;
+    private int investigateTicks;
+    private int retreatCooldown;
+    @Nullable
+    private net.minecraft.core.BlockPos knownTurret;
+    private int knownTurretTicks;
+    private int calmTicks;
+
     /** Hidden hunger meter, 0 (starving) .. MAX_HUNGER (full). */
     private int hunger = 60 + new java.util.Random().nextInt(41);
     public static final int MAX_HUNGER = 100;
@@ -44,6 +54,46 @@ public abstract class XenomorphEntity extends Monster
     protected XenomorphEntity(EntityType<? extends XenomorphEntity> type, Level level)
     {
         super(type, level);
+        // they keep away from fire and lava
+        setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.DANGER_FIRE, 16.0F);
+        setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.DAMAGE_FIRE, -1.0F);
+        setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.LAVA, -1.0F);
+    }
+
+    // ---- behaviour state used by XenoBrain
+
+    @Nullable
+    public net.minecraft.world.phys.Vec3 investigatePos()
+    {
+        return investigatePos;
+    }
+
+    public void investigate(@Nullable net.minecraft.world.phys.Vec3 at)
+    {
+        investigatePos = at;
+        investigateTicks = at == null ? 0 : 400;
+    }
+
+    public int retreatCooldown()
+    {
+        return retreatCooldown;
+    }
+
+    public void setRetreatCooldown(int ticks)
+    {
+        retreatCooldown = ticks;
+    }
+
+    @Nullable
+    public net.minecraft.core.BlockPos knownTurret()
+    {
+        return knownTurret;
+    }
+
+    public void rememberTurret(net.minecraft.core.BlockPos turret)
+    {
+        knownTurret = turret;
+        knownTurretTicks = 1200; // a minute
     }
 
     /** What it grows into, or null if this is a final form. */
@@ -127,6 +177,25 @@ public abstract class XenomorphEntity extends Monster
             return;
         }
         age++;
+        if (investigateTicks > 0 && --investigateTicks == 0)
+        {
+            investigatePos = null;
+        }
+        if (retreatCooldown > 0)
+        {
+            retreatCooldown--;
+        }
+        if (knownTurretTicks > 0 && --knownTurretTicks == 0)
+        {
+            knownTurret = null;
+        }
+        // out of combat they slowly heal
+        calmTicks = getTarget() == null && hurtTime == 0 ? calmTicks + 1 : 0;
+        if (calmTicks > 200 && tickCount % 40 == 0 && getHealth() < getMaxHealth()
+                && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosRegenerate))
+        {
+            heal(1.0F);
+        }
         // eat royal jelly it walks over
         if (tickCount % 5 == 0)
         {
@@ -203,18 +272,53 @@ public abstract class XenomorphEntity extends Monster
         return !(target instanceof net.minecraft.world.entity.player.Player player) || !player.isCreative() && !player.isSpectator();
     }
 
-    /** The standard adult Xenomorph AI (1.12.2 SpeciesXenomorph.addStandardXenomorphAISet). */
+    /**
+     * The adult Xenomorph AI. With "Smart Xenomorphs" on (default) it's the film-style behaviour in
+     * XenoBrain; off, it's the simple 1.12.2 set (SpeciesXenomorph.addStandardXenomorphAISet).
+     */
     protected void addHunterGoals(double speed)
     {
+        boolean smart = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.smartXenomorphs);
         goalSelector.addGoal(0, new net.minecraft.world.entity.ai.goal.FloatGoal(this));
-        goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.LeapAtTargetGoal(this, 0.5F));
-        goalSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.MeleeAttackGoal(this, speed * 1.15, false));
-        goalSelector.addGoal(5, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, speed * 0.8));
-        goalSelector.addGoal(6, new net.minecraft.world.entity.ai.goal.LookAtPlayerGoal(this, net.minecraft.world.entity.player.Player.class, 16F));
-        goalSelector.addGoal(7, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));
+        if (smart)
+        {
+            goalSelector.addGoal(1, new XenoBrain.RetreatGoal(this));
+            goalSelector.addGoal(1, new XenoBrain.AvoidTurretGoal(this));
+        }
+        goalSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.LeapAtTargetGoal(this, 0.5F));
+        goalSelector.addGoal(3, smart ? new XenoBrain.StalkAndStrikeGoal(this, speed * 1.2)
+                : new net.minecraft.world.entity.ai.goal.MeleeAttackGoal(this, speed * 1.15, false));
+        if (org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosBreakDoors))
+        {
+            if (getNavigation() instanceof net.minecraft.world.entity.ai.navigation.GroundPathNavigation ground)
+            {
+                ground.setCanOpenDoors(true); // lets it path to doors (it can't open them - it smashes them)
+            }
+            goalSelector.addGoal(4, new net.minecraft.world.entity.ai.goal.BreakDoorGoal(this, 120, d -> true));
+        }
+        if (smart)
+        {
+            goalSelector.addGoal(4, new XenoBrain.InvestigateGoal(this));
+            goalSelector.addGoal(5, new XenoBrain.BreakLightsGoal(this));
+            goalSelector.addGoal(6, new XenoBrain.LurkGoal(this, speed * 0.8));
+        }
+        else
+        {
+            goalSelector.addGoal(6, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, speed * 0.8));
+        }
+        goalSelector.addGoal(7, new net.minecraft.world.entity.ai.goal.LookAtPlayerGoal(this, net.minecraft.world.entity.player.Player.class, 16F));
+        goalSelector.addGoal(8, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));
+
         targetSelector.addGoal(0, new net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal(this, XenomorphEntity.class).setAlertOthers());
-        targetSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this,
-                net.minecraft.world.entity.player.Player.class, 10, true, false, this::wantsToHunt));
+        if (smart)
+        {
+            targetSelector.addGoal(1, new XenoBrain.SensePlayersGoal(this));
+        }
+        else
+        {
+            targetSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this,
+                    net.minecraft.world.entity.player.Player.class, 10, true, false, this::wantsToHunt));
+        }
         // food: only when hungry (see the hunger meter)
         targetSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(this,
                 net.minecraft.world.entity.LivingEntity.class, 20, true, false,
@@ -249,6 +353,11 @@ public abstract class XenomorphEntity extends Monster
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount)
     {
         boolean hurt = super.hurt(source, amount);
+        if (hurt && !level().isClientSide && (source.is(org.avp.registry.ModDamageTypes.SENTRY) || source.is(org.avp.registry.ModDamageTypes.SENTRY_AP))
+                && knownTurretTicks < 1100)
+        {
+            XenoBrain.learnTurret(this);
+        }
         if (hurt && !level().isClientSide && source.getDirectEntity() instanceof net.minecraft.world.entity.LivingEntity attacker
                 && attacker.distanceToSqr(this) < 9 && !attacker.getType().is(org.avp.registry.ModTags.XENOMORPHS))
         {

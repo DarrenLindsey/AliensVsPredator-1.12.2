@@ -179,6 +179,14 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue xenoHungryBelow;
         public final ModConfigSpec.BooleanValue xenosAlwaysHuntPlayers;
         public final ModConfigSpec.BooleanValue xenosStarve;
+        public final ModConfigSpec.BooleanValue smartXenomorphs;
+        public final ModConfigSpec.IntValue xenoHearingRange;
+        public final ModConfigSpec.IntValue xenoSightRange;
+        public final ModConfigSpec.BooleanValue xenosRetreatWhenHurt;
+        public final ModConfigSpec.BooleanValue xenosRegenerate;
+        public final ModConfigSpec.BooleanValue xenosBreakLights;
+        public final ModConfigSpec.BooleanValue xenosBreakDoors;
+        public final ModConfigSpec.BooleanValue xenosLearnTurrets;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -369,6 +377,33 @@ public final class AvpConfig
             xenosStarve = b
                     .comment("Xenomorphs with an empty hunger meter slowly lose health.")
                     .define("xenosStarve", false);
+            b.push("behaviour");
+            smartXenomorphs = b
+                    .comment("Film-style Xenomorph behaviour: senses (sight + hearing), investigating noises, stalking and striking when you look away,",
+                            "flanking in packs, retreating to heal, avoiding fire and remembering turrets. Off: simple 'run at the nearest player' AI.")
+                    .define("smartXenomorphs", true);
+            xenoHearingRange = b
+                    .comment("How far (blocks) they hear a sprinting or fighting player. Walking is heard at half this, sneaking at a quarter.")
+                    .defineInRange("xenoHearingRange", 20, 0, 64);
+            xenoSightRange = b
+                    .comment("How far (blocks) they spot a player in plain view. A sneaking player is spotted at a third of this.")
+                    .defineInRange("xenoSightRange", 28, 0, 64);
+            xenosRetreatWhenHurt = b
+                    .comment("Badly hurt (or burning) Xenomorphs break off and pull back into the dark.")
+                    .define("xenosRetreatWhenHurt", true);
+            xenosRegenerate = b
+                    .comment("Out of combat, Xenomorphs slowly heal.")
+                    .define("xenosRegenerate", true);
+            xenosBreakLights = b
+                    .comment("Xenomorphs sometimes smash torches and lanterns near them to make it darker.")
+                    .define("xenosBreakLights", true);
+            xenosBreakDoors = b
+                    .comment("Xenomorphs can smash through wooden doors (iron doors and blast doors stop them).")
+                    .define("xenosBreakDoors", true);
+            xenosLearnTurrets = b
+                    .comment("A Xenomorph shot by a sentry turret remembers it, warns the others nearby, and they keep out of its range for a while.")
+                    .define("xenosLearnTurrets", true);
+            b.pop();
             b.pop();
 
             b.push("crafting");

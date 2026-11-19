@@ -77,7 +77,12 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Drone: adult Xenomorph AI (hunts players/animals, spares embryo hosts, calls others when hit),
       wall climbing, acid blood (splash + weapon damage), 1.12.2 animation, natural spawning,
       "Film-Accurate Sizes" option (SCALE attribute), matures into the Warrior once ported.
+- [x] Xenomorph hunger meter and film-style behaviour (org.avp.entity.xenomorph.XenoBrain): senses
+      (sight + hearing, sneaking, locker hiding), investigating, stalking/flanking, retreat + regeneration,
+      learning turret positions, fire avoidance, lurking in the dark, smashing lights and wooden doors.
 - [ ] Next: Warrior, Praetorian, Queen + hive resin / hive building (Drones build resin)
+- [ ] Model continuity pass (at the very end): check every creature's hitbox vs. model size and
+      centre the model on its hitbox (the Drone needed this: its head stuck out 1.3 blocks).
 - [ ] Step 4 - Other creatures, guns, armour, tile entities
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation
 

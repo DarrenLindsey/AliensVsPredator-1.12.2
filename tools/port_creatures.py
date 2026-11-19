@@ -294,3 +294,29 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("xenomorph hunger lang written")
+
+# ================================================================ film-style Xenomorph behaviour
+lang = read_json(f"{NA}/lang/en_us.json", {})
+lang.update({
+    "avp.configuration.behaviour": "Xenomorph Behaviour",
+    "avp.configuration.behaviour.button": "Xenomorph Behaviour...",
+    "avp.configuration.behaviour.tooltip": "How smart the Xenomorphs are",
+    "avp.configuration.smartXenomorphs": "Film-Style Behaviour",
+    "avp.configuration.smartXenomorphs.tooltip": "Senses, investigating, stalking, flanking, retreating and learning. Off: simple 1.12.2 AI.",
+    "avp.configuration.xenoHearingRange": "Hearing Range (blocks)",
+    "avp.configuration.xenoHearingRange.tooltip": "Sprinting or fighting is heard this far; walking at half, sneaking at a quarter.",
+    "avp.configuration.xenoSightRange": "Sight Range (blocks)",
+    "avp.configuration.xenoSightRange.tooltip": "How far they spot a player in plain view; sneaking players at a third.",
+    "avp.configuration.xenosRetreatWhenHurt": "Retreat When Hurt",
+    "avp.configuration.xenosRetreatWhenHurt.tooltip": "Badly hurt or burning Xenomorphs pull back into the dark.",
+    "avp.configuration.xenosRegenerate": "Regenerate",
+    "avp.configuration.xenosRegenerate.tooltip": "Out of combat, Xenomorphs slowly heal.",
+    "avp.configuration.xenosBreakLights": "Smash Lights",
+    "avp.configuration.xenosBreakLights.tooltip": "They sometimes smash torches and lanterns to make it darker.",
+    "avp.configuration.xenosBreakDoors": "Smash Wooden Doors",
+    "avp.configuration.xenosBreakDoors.tooltip": "They can smash through wooden doors (iron and blast doors stop them).",
+    "avp.configuration.xenosLearnTurrets": "Learn Turret Positions",
+    "avp.configuration.xenosLearnTurrets.tooltip": "Shot by a sentry turret, they remember it, warn the others and keep out of its range.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("xenomorph behaviour lang written")

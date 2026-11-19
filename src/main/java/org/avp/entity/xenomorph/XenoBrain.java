@@ -1,0 +1,522 @@
+package org.avp.entity.xenomorph;
+
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.avp.block.StorageBlock;
+import org.avp.block.entity.TurretBlockEntity;
+import org.avp.config.AvpConfig;
+import org.avp.entity.SeatEntity;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.TargetGoal;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Film-style Xenomorph behaviour ("smartXenomorphs" setting). Used by XenomorphEntity.addHunterGoals.
+ *
+ * - Senses: they SEE players in their line of sight and HEAR players who sprint, fight or walk
+ *   nearby. Sneaking makes you much harder to notice. A player hiding in a locker can't be found.
+ * - Investigate: a noise they can't pin down makes them go and look.
+ * - Stalk: watched from a distance, they don't charge across the open - they slip out to the side
+ *   and strike when you look away (or when you've stared too long). Packs come from different sides.
+ * - Retreat: badly hurt or burning, they pull back into the dark; out of combat they heal.
+ * - Learn: shot by a sentry turret, they remember it, warn the others and keep out of its range.
+ * - Darkness: they wander towards dark places and may smash torches and lanterns.
+ */
+public final class XenoBrain
+{
+    private XenoBrain()
+    {
+    }
+
+    // ------------------------------------------------------------------ perception
+
+    /** Hidden in a locker (riding the locker's invisible seat)? */
+    public static boolean isHidden(Player player)
+    {
+        return player.getVehicle() instanceof SeatEntity seat
+                && player.level().getBlockState(seat.blockPosition()).getBlock() instanceof StorageBlock storage && storage.canHide();
+    }
+
+    /** Is the player looking at this Xenomorph (within ~30 degrees) with a clear view? */
+    public static boolean isWatching(Player player, LivingEntity xeno)
+    {
+        Vec3 toXeno = xeno.getEyePosition().subtract(player.getEyePosition()).normalize();
+        return player.getViewVector(1.0F).dot(toXeno) > 0.86 && player.hasLineOfSight(xeno);
+    }
+
+    /** How "loud" the player is right now: sprinting/fighting = full hearing range, walking = half, sneaking = a quarter. */
+    private static double hearingRange(Player player)
+    {
+        double range = AvpConfig.server(AvpConfig.SERVER.xenoHearingRange);
+        boolean fighting = player.tickCount - player.getLastHurtMobTimestamp() < 60 || player.hurtTime > 0;
+        if (player.isSprinting() || fighting)
+        {
+            return range;
+        }
+        if (player.isShiftKeyDown())
+        {
+            return range * 0.25;
+        }
+        return player.walkDist - player.walkDistO > 0.01F ? range * 0.5 : range * 0.15;
+    }
+
+    private static double sightRange(Player player)
+    {
+        double range = AvpConfig.server(AvpConfig.SERVER.xenoSightRange);
+        if (player.isInvisible())
+        {
+            return 3;
+        }
+        return player.isShiftKeyDown() ? range / 3 : range;
+    }
+
+    /** Darkness of a spot (lower = darker), for choosing where to lurk. */
+    private static int lightAt(Level level, BlockPos pos)
+    {
+        return Math.max(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos) - level.getSkyDarken());
+    }
+
+    /** Picks the darkest of a few random spots (null = none found). */
+    @Nullable
+    private static Vec3 darkSpot(XenomorphEntity xeno, @Nullable Vec3 awayFrom, int range)
+    {
+        Vec3 best = null;
+        int bestLight = Integer.MAX_VALUE;
+        for (int i = 0; i < 6; i++)
+        {
+            Vec3 spot = awayFrom != null ? DefaultRandomPos.getPosAway(xeno, range, 5, awayFrom) : DefaultRandomPos.getPos(xeno, range, 5);
+            if (spot != null)
+            {
+                int light = lightAt(xeno.level(), BlockPos.containing(spot));
+                if (light < bestLight)
+                {
+                    best = spot;
+                    bestLight = light;
+                }
+            }
+        }
+        return best;
+    }
+
+    // ------------------------------------------------------------------ targeting
+
+    /** Picks a player it can see or hear. Heard-but-not-seen players are investigated rather than attacked. */
+    public static class SensePlayersGoal extends TargetGoal
+    {
+        private final XenomorphEntity xeno;
+        private Player found;
+
+        public SensePlayersGoal(XenomorphEntity xeno)
+        {
+            super(xeno, false, false);
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.TARGET));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (xeno.getRandom().nextInt(5) != 0)
+            {
+                return false;
+            }
+            found = null;
+            double range = Math.max(AvpConfig.server(AvpConfig.SERVER.xenoHearingRange), AvpConfig.server(AvpConfig.SERVER.xenoSightRange));
+            List<Player> players = xeno.level().getEntitiesOfClass(Player.class, xeno.getBoundingBox().inflate(range),
+                    p -> xeno.wantsToHunt(p) && !isHidden(p));
+            players.sort(Comparator.comparingDouble(xeno::distanceToSqr));
+            for (Player player : players)
+            {
+                double distance = xeno.distanceTo(player);
+                boolean seen = distance <= sightRange(player) && xeno.getSensing().hasLineOfSight(player);
+                boolean heard = distance <= hearingRange(player);
+                if (seen || heard && distance < 6)
+                {
+                    found = player;
+                    return true;
+                }
+                if (heard)
+                {
+                    xeno.investigate(player.position()); // something's there... go and look
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void start()
+        {
+            mob.setTarget(found);
+            super.start();
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            LivingEntity target = mob.getTarget();
+            if (target instanceof Player player && isHidden(player))
+            {
+                xeno.investigate(player.position()); // lost them: search around the lockers
+                return false;
+            }
+            return super.canContinueToUse();
+        }
+    }
+
+    // ------------------------------------------------------------------ attacking
+
+    /**
+     * Melee, but with patience: from a distance, while the target watches it, the Xenomorph moves
+     * to a flanking spot instead of charging - then strikes when the target looks away, when it's
+     * close, or when it runs out of patience. Packs pick different sides.
+     */
+    public static class StalkAndStrikeGoal extends MeleeAttackGoal
+    {
+        private final XenomorphEntity xeno;
+        private int patience;
+        private Vec3 flank;
+        private int repath;
+
+        public StalkAndStrikeGoal(XenomorphEntity xeno, double speed)
+        {
+            super(xeno, speed, false);
+            this.xeno = xeno;
+        }
+
+        @Override
+        public void start()
+        {
+            super.start();
+            patience = 60 + xeno.getRandom().nextInt(80);
+            flank = null;
+        }
+
+        @Override
+        public void tick()
+        {
+            LivingEntity target = xeno.getTarget();
+            if (target instanceof Player player && patience > 0 && xeno.distanceTo(player) > 7 && isWatching(player, xeno))
+            {
+                patience--;
+                if (flank == null || --repath <= 0)
+                {
+                    flank = flankPoint(player);
+                    repath = 40;
+                }
+                if (flank != null)
+                {
+                    xeno.getNavigation().moveTo(flank.x, flank.y, flank.z, 1.1);
+                }
+                xeno.getLookControl().setLookAt(player);
+                return;
+            }
+            super.tick();
+        }
+
+        /** A spot off to one side of the target, so the pack comes from different directions. */
+        @Nullable
+        private Vec3 flankPoint(Player target)
+        {
+            Vec3 fromTarget = xeno.position().subtract(target.position()).multiply(1, 0, 1).normalize();
+            List<XenomorphEntity> pack = xeno.level().getEntitiesOfClass(XenomorphEntity.class, xeno.getBoundingBox().inflate(24),
+                    x -> x.getTarget() == target);
+            int index = Math.max(0, pack.indexOf(xeno));
+            float side = (index % 2 == 0 ? 1 : -1) * (60F + 25F * (index / 2));
+            Vec3 dir = fromTarget.yRot(side * Mth.DEG_TO_RAD);
+            Vec3 point = target.position().add(dir.scale(8));
+            BlockPos pos = BlockPos.containing(point);
+            return xeno.getNavigation().createPath(pos, 1) != null ? Vec3.atBottomCenterOf(pos) : null;
+        }
+    }
+
+    // ------------------------------------------------------------------ investigating
+
+    /** Goes to the last place it heard something and looks around. */
+    public static class InvestigateGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        private int lookAround;
+
+        public InvestigateGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            return xeno.getTarget() == null && xeno.investigatePos() != null;
+        }
+
+        @Override
+        public void start()
+        {
+            Vec3 at = xeno.investigatePos();
+            xeno.getNavigation().moveTo(at.x, at.y, at.z, 0.9);
+            lookAround = 60 + xeno.getRandom().nextInt(60);
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return xeno.getTarget() == null && xeno.investigatePos() != null && lookAround > 0;
+        }
+
+        @Override
+        public void tick()
+        {
+            if (xeno.getNavigation().isDone())
+            {
+                lookAround--;
+                if (lookAround % 20 == 0)
+                {
+                    xeno.getLookControl().setLookAt(xeno.getX() + xeno.getRandom().nextGaussian() * 4, xeno.getEyeY(),
+                            xeno.getZ() + xeno.getRandom().nextGaussian() * 4);
+                }
+            }
+        }
+
+        @Override
+        public void stop()
+        {
+            xeno.investigate(null);
+        }
+    }
+
+    // ------------------------------------------------------------------ retreating, danger
+
+    /** Badly hurt or burning: break off and pull back somewhere dark. */
+    public static class RetreatGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        private int time;
+
+        public RetreatGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!AvpConfig.server(AvpConfig.SERVER.xenosRetreatWhenHurt) || xeno.retreatCooldown() > 0)
+            {
+                return false;
+            }
+            boolean hurt = xeno.getHealth() < xeno.getMaxHealth() * 0.35F;
+            return (hurt || xeno.isOnFire()) && xeno.getTarget() != null;
+        }
+
+        @Override
+        public void start()
+        {
+            LivingEntity threat = xeno.getTarget();
+            Vec3 spot = darkSpot(xeno, threat == null ? null : threat.position(), 16);
+            if (spot != null)
+            {
+                xeno.getNavigation().moveTo(spot.x, spot.y, spot.z, 1.35);
+            }
+            time = 200;
+            xeno.setTarget(null);
+            xeno.setRetreatCooldown(600);
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return --time > 0 && !xeno.getNavigation().isDone();
+        }
+    }
+
+    /** Keeps out of the range of a sentry turret it has learned about. */
+    public static class AvoidTurretGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+
+        public AvoidTurretGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            BlockPos turret = xeno.knownTurret();
+            if (turret == null)
+            {
+                return false;
+            }
+            double range = xeno.level().getBlockEntity(turret) instanceof TurretBlockEntity t ? t.range() + 2 : 26;
+            return xeno.distanceToSqr(Vec3.atCenterOf(turret)) < range * range;
+        }
+
+        @Override
+        public void start()
+        {
+            Vec3 spot = darkSpot(xeno, Vec3.atCenterOf(xeno.knownTurret()), 20);
+            if (spot != null)
+            {
+                xeno.getNavigation().moveTo(spot.x, spot.y, spot.z, 1.3);
+            }
+            if (xeno.getTarget() != null && xeno.getTarget().distanceToSqr(Vec3.atCenterOf(xeno.knownTurret())) < 24 * 24)
+            {
+                xeno.setTarget(null); // not worth walking into the guns
+            }
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return !xeno.getNavigation().isDone();
+        }
+    }
+
+    /** Finds the turret that shot it (within 40 blocks), remembers it, and warns the pack. */
+    public static void learnTurret(XenomorphEntity xeno)
+    {
+        if (!AvpConfig.server(AvpConfig.SERVER.xenosLearnTurrets))
+        {
+            return;
+        }
+        BlockPos center = xeno.blockPosition();
+        BlockPos found = null;
+        double best = Double.MAX_VALUE;
+        int chunks = 3;
+        for (int cx = -chunks; cx <= chunks; cx++)
+        {
+            for (int cz = -chunks; cz <= chunks; cz++)
+            {
+                var chunk = xeno.level().getChunkSource().getChunkNow((center.getX() >> 4) + cx, (center.getZ() >> 4) + cz);
+                if (chunk == null)
+                {
+                    continue;
+                }
+                for (var be : chunk.getBlockEntities().values())
+                {
+                    if (be instanceof TurretBlockEntity turret)
+                    {
+                        double d = turret.getBlockPos().distSqr(center);
+                        if (d < best && d < 40 * 40)
+                        {
+                            best = d;
+                            found = turret.getBlockPos();
+                        }
+                    }
+                }
+            }
+        }
+        if (found == null)
+        {
+            return;
+        }
+        for (XenomorphEntity other : xeno.level().getEntitiesOfClass(XenomorphEntity.class, new AABB(center).inflate(16)))
+        {
+            other.rememberTurret(found);
+        }
+    }
+
+    // ------------------------------------------------------------------ darkness
+
+    /** Wanders, but prefers dark places. */
+    public static class LurkGoal extends WaterAvoidingRandomStrollGoal
+    {
+        private final XenomorphEntity xeno;
+
+        public LurkGoal(XenomorphEntity xeno, double speed)
+        {
+            super(xeno, speed);
+            this.xeno = xeno;
+        }
+
+        @Nullable
+        @Override
+        protected Vec3 getPosition()
+        {
+            Vec3 dark = darkSpot(xeno, null, 12);
+            return dark != null ? dark : super.getPosition();
+        }
+    }
+
+    /** Now and then, smashes a torch or lantern nearby (setting). */
+    public static class BreakLightsGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        private BlockPos light;
+
+        public BreakLightsGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        private static boolean isLight(BlockState state)
+        {
+            return state.getBlock() instanceof TorchBlock || state.getBlock() instanceof LanternBlock || state.is(Blocks.JACK_O_LANTERN);
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!AvpConfig.server(AvpConfig.SERVER.xenosBreakLights) || xeno.getTarget() != null || xeno.getRandom().nextInt(80) != 0
+                    || !net.neoforged.neoforge.event.EventHooks.canEntityGrief((net.minecraft.server.level.ServerLevel) xeno.level(), xeno))
+            {
+                return false;
+            }
+            BlockPos origin = xeno.blockPosition();
+            for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-6, -2, -6), origin.offset(6, 3, 6)))
+            {
+                if (isLight(xeno.level().getBlockState(pos)))
+                {
+                    light = pos.immutable();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void start()
+        {
+            xeno.getNavigation().moveTo(light.getX() + 0.5, light.getY(), light.getZ() + 0.5, 1.0);
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return light != null && isLight(xeno.level().getBlockState(light)) && !xeno.getNavigation().isDone();
+        }
+
+        @Override
+        public void tick()
+        {
+            if (light != null && xeno.distanceToSqr(Vec3.atCenterOf(light)) < 4.5)
+            {
+                xeno.level().destroyBlock(light, true, xeno);
+                xeno.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                light = null;
+            }
+        }
+    }
+}

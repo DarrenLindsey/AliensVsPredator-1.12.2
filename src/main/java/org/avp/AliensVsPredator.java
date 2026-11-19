@@ -1,244 +1,36 @@
-/** AliensVsPredator Minecraft Mod - Copyright (C) 2012-2019 ASX **/
 package org.avp;
 
-import org.apache.logging.log4j.Logger;
-import org.avp.client.KeybindHandler;
-import org.avp.client.Renders;
-import org.avp.client.Resources;
-import org.avp.client.Sounds;
-import org.avp.client.render.BiomeColorHandler;
-import org.avp.world.CapabilityHandler;
-import org.avp.world.hives.HiveHandler;
-
-import com.asx.mdx.core.mods.IMod;
-import com.asx.mdx.lib.util.Game;
-
+import com.mojang.logging.LogUtils;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.avp.registry.ModBlocks;
+import org.avp.registry.ModCreativeTabs;
+import org.avp.registry.ModItems;
+import org.slf4j.Logger;
 
-@Mod(name = AliensVsPredator.Properties.NAME, modid = AliensVsPredator.Properties.ID, dependencies = AliensVsPredator.Properties.DEPENDENCIES)
-public class AliensVsPredator implements IMod
+/**
+ * Entry point of the mod. Forge finds this class through the @Mod annotation
+ * (the id must match mod_id in gradle.properties / mods.toml).
+ *
+ * In 1.12.2 this was done with preInit/init/postInit events. In 1.20.1 we just
+ * hand our DeferredRegisters to the "mod event bus" and Forge registers
+ * everything at the right time for us.
+ */
+@Mod(AliensVsPredator.MOD_ID)
+public class AliensVsPredator
 {
-    public static class Properties
-    {
-        public static final String NAME         = "AliensVsPredator";
-        public static final String ID           = "avp";
-        public static final String DEPENDENCIES = "required-after:mdxlib";
-        public static final String DOMAIN       = ID + ":";
-    }
+    public static final String MOD_ID = "avp";
+    public static final Logger LOGGER = LogUtils.getLogger();
 
-    @Mod.Instance(AliensVsPredator.Properties.ID)
-    private static AliensVsPredator instance;
+    public AliensVsPredator()
+    {
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-    private static BlockHandler     blocks;
-    private static ItemHandler      items;
+        ModBlocks.BLOCKS.register(modBus);
+        ModItems.ITEMS.register(modBus);
+        ModCreativeTabs.TABS.register(modBus);
 
-    @Override
-    public ModContainer container()
-    {
-        return Game.getModContainer(AliensVsPredator.Properties.ID);
-    }
-
-    @Mod.EventHandler
-    public void pre(FMLPreInitializationEvent event)
-    {
-        console().pre(event);
-        settings().pre(event);
-        webRequests().pre(event);
-        capabilities().pre(event);
-        tabs().pre(event);
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Mod.EventHandler
-    public void preClient(FMLPreInitializationEvent event)
-    {
-        renderers().pre(event);
-    }
-
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event)
-    {
-        console().init(event);
-        network().init(event);
-        dimensions().init(event);
-        materials().init(event);
-        world().init(event);
-        interfaces().init(event);
-        events().init(event);
-        commands().init(event);
-        playermodehandler().init(event);
-        schematics().init(event);
-        entities().init(event);
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Mod.EventHandler
-    public void initClient(FMLInitializationEvent event)
-    {
-        renderers().init(event);
-        biomeColors().init(event);
-    }
-
-    @Mod.EventHandler
-    public void post(FMLPostInitializationEvent event)
-    {
-        console().post(event);
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Mod.EventHandler
-    public void postClient(FMLPostInitializationEvent event)
-    {
-        keybinds().post(event);
-    }
-
-    @EventHandler
-    public void onServerStarting(FMLServerStartingEvent event)
-    {
-        commands().onServerStarting(event);
-    }
-
-    @EventHandler
-    public void onServerStopped(FMLServerStoppedEvent event)
-    {
-        HiveHandler.instance.clearCaches();
-    }
-
-    public static AliensVsPredator instance()
-    {
-        return AliensVsPredator.instance;
-    }
-    
-    public static WebRequestHandler webRequests()
-    {
-        return WebRequestHandler.instance;
-    }
-
-    public static Console console()
-    {
-        return Console.instance;
-    }
-
-    public static Logger log()
-    {
-        return Console.logger;
-    }
-    
-    public static ItemHandler items()
-    {
-        return items == null ? items = new ItemHandler() : items;
-    }
-
-    public static BlockHandler blocks()
-    {
-        return blocks == null ? blocks = new BlockHandler() : blocks;
-    }
-    
-    @SideOnly(Side.CLIENT)
-    public static BiomeColorHandler biomeColors()
-    {
-        return BiomeColorHandler.instance;
-    }
-    
-    public static CraftingHandler crafting()
-    {
-        return CraftingHandler.instance;
-    }
-
-    public static MaterialHandler materials()
-    {
-        return MaterialHandler.instance;
-    }
-
-    public static EventHandlers events()
-    {
-        return EventHandlers.instance;
-    }
-
-    public static NetworkHandler network()
-    {
-        return NetworkHandler.instance;
-    }
-
-    public static DimensionHandler dimensions()
-    {
-        return DimensionHandler.instance;
-    }
-
-    public static WorldHandler world()
-    {
-        return WorldHandler.instance;
-    }
-
-    public static EntityHandler entities()
-    {
-        return EntityHandler.instance;
-    }
-
-    public static Tab tabs()
-    {
-        return Tab.instance;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static Renders renderers()
-    {
-        return Renders.instance;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static KeybindHandler keybinds()
-    {
-        return KeybindHandler.instance;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static Resources resources()
-    {
-        return Resources.instance;
-    }
-
-    public static Sounds sounds()
-    {
-        return Sounds.instance;
-    }
-
-    public static GuiHandler interfaces()
-    {
-        return GuiHandler.instance;
-    }
-
-    public static CapabilityHandler capabilities()
-    {
-        return CapabilityHandler.instance;
-    }
-
-    public static PlayerModeHandler playermodehandler()
-    {
-        return PlayerModeHandler.instance;
-    }
-
-    public static Schematics schematics()
-    {
-        return Schematics.instance;
-    }
-
-    public static CommandHandler commands()
-    {
-        return CommandHandler.instance;
-    }
-
-    public static Settings settings()
-    {
-        return Settings.instance;
+        LOGGER.info("AliensVsPredator loading - Building Better Worlds");
     }
 }

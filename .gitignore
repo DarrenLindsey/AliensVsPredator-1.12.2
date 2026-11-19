@@ -1,28 +1,23 @@
-# Everything
-/*
+# Gradle / build output
+.gradle/
+build/
+out/
+bin/
 
-# Directories
-!/src
-!/gradle
+# Minecraft run folders (worlds, logs, configs from testing)
+run/
+run-data/
 
-# files
-!/.gitignore
-!/.gitmodules
-!/CONTRIBUTING.MD
-!/LICENSE.txt
-!/README.md
-!/gradle.properties
-!/build.gradle
-!/gradlew
-!/gradlew.bat
-!/.travis.yml
-!/travisSetup.sh
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+
 .DS_Store
 
-# Do not include gradle.properties, in contains sensitive information.
-# Create an empty file called gradle.properties and enter the following:
-#
-# curseForgeApiKey=00000-00000-00000-00000-00000
-#
-gradle.properties
-mdxlib_at.cfg
+# Put secrets (e.g. a CurseForge API key) in ~/.gradle/gradle.properties, not in this repo

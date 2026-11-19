@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "avp:unitree_tendons",
-    "avp:paradisian_wheat_grass"
+    "avp:paradisian_wheat_grass",
+    "avp:paradisian_ground_fern",
+    "avp:paradisian_tree_fern"
   ]
 }

@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import org.avp.registry.ModBlockEntities;
 import org.avp.registry.ModBlocks;
 import org.avp.registry.ModCreativeTabs;
 import org.avp.registry.ModItems;
@@ -28,6 +29,7 @@ public class AliensVsPredator
     {
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
 
         LOGGER.info("AliensVsPredator loading - Building Better Worlds");

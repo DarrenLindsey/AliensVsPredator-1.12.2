@@ -1,11 +1,16 @@
 package org.avp.registry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.avp.AliensVsPredator;
+import org.avp.block.ModelPlantBlock;
 import org.avp.block.ModTreeGrowers;
+import org.avp.block.ShapeBlock;
 import org.avp.block.StalagmiteBlock;
+import org.avp.block.TrophyBlock;
 import org.avp.block.UnidentifiedTreeLeavesBlock;
 import org.avp.block.WheatGrassBlock;
 
@@ -198,6 +203,51 @@ public final class ModBlocks
             .mapColor(MapColor.PLANT).noCollission().instabreak().sound(SoundType.GRASS)
             .offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.DESTROY)));
 
+    // ---- Decorative blocks (batch B) ----
+    public static final DeferredBlock<Block> INDUSTRIALWALL2 = simple("industrialwall2", Kind.METAL, 5F, 15F);
+    public static final DeferredBlock<Block> SKULLS = simple("skulls", Kind.STONE, 1.5F, 6F);
+
+    // Skulls, biomasks and heads: drawn by ModelBlockRenderer with models converted from 1.12.2
+    private static final List<DeferredBlock<? extends Block>> MODEL_BLOCKS = new ArrayList<>();
+    public static final DeferredBlock<TrophyBlock> SKULL_ENGINEER = trophy("skull_engineer", false);
+    public static final DeferredBlock<TrophyBlock> SKULL_SPACEJOCKEY = trophy("skull_spacejockey", false);
+    public static final DeferredBlock<TrophyBlock> SKULL_XENOMORPH = trophy("skull_xenomorph", false);
+    public static final DeferredBlock<TrophyBlock> SKULL_XENOMORPH_WARRIOR = trophy("skull_xenomorph_warrior", false);
+    public static final DeferredBlock<TrophyBlock> SKULL_YAUTJA = trophy("skull_yautja", false);
+    public static final DeferredBlock<TrophyBlock> SKULL_MATRIARCH = trophy("skull_matriarch", false);
+    public static final DeferredBlock<TrophyBlock> SKULL_PROTOMORPH = trophy("skull_protomorph", false);
+    public static final DeferredBlock<TrophyBlock> SKULL_NEOMORPH = trophy("skull_neomorph", false);
+    public static final DeferredBlock<TrophyBlock> BIOMASK_CLASSIC = trophy("biomask_classic", false);
+    public static final DeferredBlock<TrophyBlock> BIOMASK_BERSERKER = trophy("biomask_berserker", false);
+    public static final DeferredBlock<TrophyBlock> BIOMASK_FALCONER = trophy("biomask_falconer", false);
+    public static final DeferredBlock<TrophyBlock> BIOMASK_TRACKER = trophy("biomask_tracker", false);
+    public static final DeferredBlock<TrophyBlock> HEAD_AETHON = trophy("head_aethon", false);
+    public static final DeferredBlock<TrophyBlock> HEAD_GIGERALIEN = trophy("head_gigeralien", true);
+    public static final DeferredBlock<ModelPlantBlock> PARADISIAN_GROUND_FERN = fern("paradisian_ground_fern");
+    public static final DeferredBlock<ModelPlantBlock> PARADISIAN_TREE_FERN = fern("paradisian_tree_fern");
+
+    // Slopes etc. that copy the look of another block (ShapeBlock)
+    private static final List<DeferredBlock<? extends Block>> SHAPE_BLOCKS = new ArrayList<>();
+    public static final DeferredBlock<ShapeBlock> SLOPE = shape("slope");
+    public static final DeferredBlock<ShapeBlock> CORNER = shape("corner");
+    public static final DeferredBlock<ShapeBlock> INVERTEDCORNER = shape("invertedcorner");
+    public static final DeferredBlock<ShapeBlock> RIDGE = shape("ridge");
+    public static final DeferredBlock<ShapeBlock> PYRAMID = shape("pyramid");
+    public static final DeferredBlock<ShapeBlock> INVERTEDRIDGE = shape("invertedridge");
+    public static final DeferredBlock<ShapeBlock> INVERTEDPYRAMID = shape("invertedpyramid");
+
+    /** Blocks that use the ModelBlockEntity (for ModBlockEntities). */
+    public static Block[] modelBlocks()
+    {
+        return MODEL_BLOCKS.stream().map(DeferredBlock::get).toArray(Block[]::new);
+    }
+
+    /** Blocks that use the ShapeBlockEntity (for ModBlockEntities). */
+    public static Block[] shapeBlocks()
+    {
+        return SHAPE_BLOCKS.stream().map(DeferredBlock::get).toArray(Block[]::new);
+    }
+
     /** A plain full-cube block that drops itself. */
     private static DeferredBlock<Block> simple(String id, Kind kind, float hardness, float resistance)
     {
@@ -229,6 +279,32 @@ public final class ModBlocks
     {
         DeferredBlock<B> block = BLOCKS.register(id, factory);
         withItem(block, tab);
+        return block;
+    }
+
+    private static DeferredBlock<TrophyBlock> trophy(String id, boolean canTip)
+    {
+        DeferredBlock<TrophyBlock> block = register(id, Tab.MAIN, () -> new TrophyBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.TERRACOTTA_WHITE).sound(SoundType.BONE_BLOCK).strength(1.0F)
+                .noOcclusion().pushReaction(PushReaction.DESTROY), canTip));
+        MODEL_BLOCKS.add(block);
+        return block;
+    }
+
+    private static DeferredBlock<ModelPlantBlock> fern(String id)
+    {
+        DeferredBlock<ModelPlantBlock> block = register(id, Tab.BLOCKS, () -> new ModelPlantBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.PLANT).noCollission().instabreak().sound(SoundType.GRASS)
+                .pushReaction(PushReaction.DESTROY)));
+        MODEL_BLOCKS.add(block);
+        return block;
+    }
+
+    private static DeferredBlock<ShapeBlock> shape(String id)
+    {
+        DeferredBlock<ShapeBlock> block = register(id, Tab.BLOCKS, () -> new ShapeBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL).sound(SoundType.METAL).strength(2.0F, 6.0F).noOcclusion()));
+        SHAPE_BLOCKS.add(block);
         return block;
     }
 

@@ -1,0 +1,57 @@
+{
+  "variants": {
+    "alignment=bottom,facing=north": {
+      "model": "avp:block/slope",
+      "y": 180
+    },
+    "alignment=top,facing=north": {
+      "model": "avp:block/slope",
+      "x": 180
+    },
+    "alignment=side,facing=north": {
+      "model": "avp:block/slope",
+      "x": 270,
+      "y": 180
+    },
+    "alignment=bottom,facing=east": {
+      "model": "avp:block/slope",
+      "y": 270
+    },
+    "alignment=top,facing=east": {
+      "model": "avp:block/slope",
+      "x": 180,
+      "y": 90
+    },
+    "alignment=side,facing=east": {
+      "model": "avp:block/slope",
+      "x": 270,
+      "y": 270
+    },
+    "alignment=bottom,facing=south": {
+      "model": "avp:block/slope"
+    },
+    "alignment=top,facing=south": {
+      "model": "avp:block/slope",
+      "x": 180,
+      "y": 180
+    },
+    "alignment=side,facing=south": {
+      "model": "avp:block/slope",
+      "x": 270
+    },
+    "alignment=bottom,facing=west": {
+      "model": "avp:block/slope",
+      "y": 90
+    },
+    "alignment=top,facing=west": {
+      "model": "avp:block/slope",
+      "x": 180,
+      "y": 270
+    },
+    "alignment=side,facing=west": {
+      "model": "avp:block/slope",
+      "x": 270,
+      "y": 90
+    }
+  }
+}

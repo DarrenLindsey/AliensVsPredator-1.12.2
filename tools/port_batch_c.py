@@ -56,7 +56,8 @@ add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", [f"avp:{i}" for i
 # what the gun locker accepts; AvP guns get added here when they're ported
 add_to_tag(f"{ND}/avp/tags/item/gun_locker_items.json", ["#c:tools/ranged_weapon"])
 
-lang["avp.configuration.openLockersAreWalkThrough"] = "Open Lockers Are Walk-Through"
-lang["avp.configuration.openLockersAreWalkThrough.tooltip"] = "You can step into an open locker to hide inside it, like in 1.12.2."
+lang["avp.configuration.lockersCanHide"] = "Lockers Can Hide Players"
+lang["avp.configuration.lockersCanHide.tooltip"] = "Sneak + right-click a locker with an empty hand to hide inside it; sneak to get out."
+lang["entity.avp.locker_seat"] = "Locker"
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch C1 data written")

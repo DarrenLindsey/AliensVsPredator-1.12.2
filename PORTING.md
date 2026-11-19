@@ -75,6 +75,11 @@ Decided for the creatures phase (1 block = 1 metre, player = 1.8 blocks):
   sizes don't break chasing indoors.
 - Skull/trophy sizes get revisited together with the creatures so they match each other.
 
+## Planned: AI ideas
+
+- Players hiding in a locker (riding a `LockerSeatEntity`) can't be seen by Xenomorphs/Predators;
+  maybe they can still be heard/smelled at close range, or found by Predator thermal vision.
+
 ## Planned: Create and Applied Energistics 2 integration
 
 Both support NeoForge 1.21.1. Two levels:

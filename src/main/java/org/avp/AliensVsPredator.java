@@ -9,6 +9,7 @@ import org.avp.config.AvpConfig;
 import org.avp.registry.ModBlockEntities;
 import org.avp.registry.ModBlocks;
 import org.avp.registry.ModCreativeTabs;
+import org.avp.registry.ModEntities;
 import org.avp.registry.ModItems;
 import org.avp.registry.ModMenus;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ public class AliensVsPredator
         ModItems.ITEMS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModMenus.MENUS.register(modBus);
+        ModEntities.ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
 
         // settings files (config/avp-client.toml and the per-world avp-server.toml)

@@ -58,7 +58,7 @@ public final class AvpConfig
     {
         public final ModConfigSpec.BooleanValue shapesCanCopyBlocks;
         public final ModConfigSpec.BooleanValue trophiesCanBeTipped;
-        public final ModConfigSpec.BooleanValue openLockersAreWalkThrough;
+        public final ModConfigSpec.BooleanValue lockersCanHide;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -69,9 +69,9 @@ public final class AvpConfig
             trophiesCanBeTipped = b
                     .comment("Players can right-click trophy heads that support it (the Giger alien head) to lay them flat or tilt them.")
                     .define("trophiesCanBeTipped", true);
-            openLockersAreWalkThrough = b
-                    .comment("You can walk into an open locker (to hide inside it), like in 1.12.2.")
-                    .define("openLockersAreWalkThrough", true);
+            lockersCanHide = b
+                    .comment("Players can hide inside lockers: sneak + right-click with an empty hand to get in, sneak to get out.")
+                    .define("lockersCanHide", true);
             b.pop();
         }
     }

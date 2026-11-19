@@ -10,10 +10,12 @@ import org.avp.client.render.ModelBlockRenderInfo;
 import org.avp.client.render.ModelBlockRenderer;
 import org.avp.registry.ModBlockEntities;
 import org.avp.registry.ModBlocks;
+import org.avp.registry.ModEntities;
 import org.avp.registry.ModMenus;
 import org.avp.client.screen.StorageScreen;
 
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -52,6 +54,7 @@ public final class ClientSetup
     {
         event.registerBlockEntityRenderer(ModBlockEntities.MODEL_BLOCK.get(), ModelBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.STORAGE.get(), ModelBlockRenderer::new);
+        event.registerEntityRenderer(ModEntities.LOCKER_SEAT.get(), NoopRenderer::new); // invisible
     }
 
     /** Skull/biomask/head/fern items draw their 3D model too. */

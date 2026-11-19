@@ -186,6 +186,7 @@
   "block.avp.supplychuteblock": "Supply Crate (Weyland-Yutani)",
   "block.avp.supplychuteblock_marines": "Supply Crate (USCM)",
   "block.avp.supplychuteblock_seegson": "Supply Crate (Seegson)",
-  "avp.configuration.openLockersAreWalkThrough": "Open Lockers Are Walk-Through",
-  "avp.configuration.openLockersAreWalkThrough.tooltip": "You can step into an open locker to hide inside it, like in 1.12.2."
+  "avp.configuration.lockersCanHide": "Lockers Can Hide Players",
+  "avp.configuration.lockersCanHide.tooltip": "Sneak + right-click a locker with an empty hand to hide inside it; sneak to get out.",
+  "entity.avp.locker_seat": "Locker"
 }

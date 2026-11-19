@@ -6,11 +6,14 @@ import javax.annotation.Nullable;
 
 import org.avp.block.entity.StorageBlockEntity;
 import org.avp.config.AvpConfig;
+import org.avp.entity.LockerSeatEntity;
 
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -41,7 +44,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Lockers, the gun locker and supply crates.
  *
  * - Right-click: open the 64-slot inventory (the door opens while someone is looking inside).
- * - Sneak + right-click: prop the door open / shut. An open locker can be walked into (like 1.12.2).
+ * - Lockers: sneak + right-click with an empty hand to hide inside (LockerSeatEntity);
+ *   sneak again to get out. Supply crates: sneak + right-click props the lid open/shut.
  * - Lockers are two blocks tall: the bottom half holds the inventory, the top half is just
  *   there to take up space (the same "half" system vanilla doors use).
  */
@@ -183,8 +187,18 @@ public class StorageBlock extends BaseEntityBlock
         }
         if (player.isShiftKeyDown())
         {
-            BlockState lower = level.getBlockState(invPos);
-            setOpenState(level, invPos, lower.setValue(PROPPED, !lower.getValue(PROPPED)));
+            if (tall)
+            {
+                if (AvpConfig.server(AvpConfig.SERVER.lockersCanHide) && !LockerSeatEntity.isOccupied(level, invPos))
+                {
+                    LockerSeatEntity.hide(level, invPos, player);
+                }
+            }
+            else
+            {
+                BlockState lower = level.getBlockState(invPos);
+                setOpenState(level, invPos, lower.setValue(PROPPED, !lower.getValue(PROPPED)));
+            }
         }
         else if (level.getBlockEntity(invPos) instanceof StorageBlockEntity storage)
         {
@@ -202,6 +216,34 @@ public class StorageBlock extends BaseEntityBlock
         }
     }
 
+    /** Opens/closes the door of the storage block at lowerPos (used when hiding in a locker). */
+    public static void setDoorOpen(Level level, BlockPos lowerPos, boolean open)
+    {
+        BlockState state = level.getBlockState(lowerPos);
+        if (state.getBlock() instanceof StorageBlock storage && state.getValue(PROPPED) != open)
+        {
+            storage.setOpenState(level, lowerPos, state.setValue(PROPPED, open));
+        }
+    }
+
+    /** Opens the door and closes it again after half a second (someone stepping out). */
+    public static void openDoorBriefly(Level level, BlockPos lowerPos)
+    {
+        setDoorOpen(level, lowerPos, true);
+        BlockState state = level.getBlockState(lowerPos);
+        level.scheduleTick(lowerPos, state.getBlock(), 10);
+    }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random)
+    {
+        // the scheduled tick from openDoorBriefly: close the door again unless someone is still hiding
+        if (state.getValue(PROPPED) && !LockerSeatEntity.isOccupied(level, pos))
+        {
+            setOpenState(level, pos, state.setValue(PROPPED, false));
+        }
+    }
+
     private void setOpenState(Level level, BlockPos lowerPos, BlockState newLower)
     {
         level.setBlock(lowerPos, newLower, Block.UPDATE_ALL);
@@ -214,18 +256,6 @@ public class StorageBlock extends BaseEntityBlock
                 level.setBlock(upper, up.setValue(VIEWED, newLower.getValue(VIEWED)).setValue(PROPPED, newLower.getValue(PROPPED)), Block.UPDATE_ALL);
             }
         }
-    }
-
-    // ---- shape ----
-
-    @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
-    {
-        if (tall && isOpen(state) && AvpConfig.server(AvpConfig.SERVER.openLockersAreWalkThrough))
-        {
-            return Shapes.empty(); // step inside an open locker to hide
-        }
-        return super.getCollisionShape(state, level, pos, context);
     }
 
     // ---- removing ----

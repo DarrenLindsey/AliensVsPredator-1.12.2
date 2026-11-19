@@ -10,8 +10,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * Creative tabs. In 1.20 tabs are registered like blocks and items, and each
@@ -22,12 +22,12 @@ public final class ModCreativeTabs
 {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, AliensVsPredator.MOD_ID);
 
-    public static final RegistryObject<CreativeModeTab> MAIN = tab(Tab.MAIN);
-    public static final RegistryObject<CreativeModeTab> BLOCKS = tab(Tab.BLOCKS);
-    public static final RegistryObject<CreativeModeTab> CRAFTING = tab(Tab.CRAFTING);
-    public static final RegistryObject<CreativeModeTab> GUN_PARTS = tab(Tab.GUN_PARTS);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN = tab(Tab.MAIN);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> BLOCKS = tab(Tab.BLOCKS);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CRAFTING = tab(Tab.CRAFTING);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> GUN_PARTS = tab(Tab.GUN_PARTS);
 
-    private static RegistryObject<CreativeModeTab> tab(Tab tab)
+    private static DeferredHolder<CreativeModeTab, CreativeModeTab> tab(Tab tab)
     {
         return TABS.register(tab.id, () -> CreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.avp." + tab.id))

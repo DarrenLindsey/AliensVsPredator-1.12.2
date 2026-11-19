@@ -1,4 +1,4 @@
-"""Port the simple (plain cube) blocks and simple items from the 1.12.2 AvP mod to 1.20.1.
+"""Port the simple (plain cube) blocks and simple items from the 1.12.2 AvP mod to NeoForge 1.21.1.
 
 Reads the legacy BlockHandler/ItemHandler + assets, writes:
   - Java registration code (ModBlocks / ModItems content lists)
@@ -116,7 +116,7 @@ for b in blocks:
         model["render_type"] = "minecraft:translucent"
     write_json(f"{NA}/models/block/{i}.json", model)
     write_json(f"{NA}/models/item/{i}.json", {"parent": f"avp:block/{i}"})
-    write_json(f"{ND}/avp/loot_tables/blocks/{i}.json", {
+    write_json(f"{ND}/avp/loot_table/blocks/{i}.json", {
         "type": "minecraft:block",
         "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"avp:{i}"}],
                    "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
@@ -133,7 +133,7 @@ for it in items:
 
 for tool, vals in tags.items():
     if vals:
-        write_json(f"{ND}/minecraft/tags/blocks/mineable/{tool}.json", {"replace": False, "values": vals})
+        write_json(f"{ND}/minecraft/tags/block/mineable/{tool}.json", {"replace": False, "values": vals})
 write_json(f"{NA}/lang/en_us.json", lang)
 
 # ---- write Java --------------------------------------------------------

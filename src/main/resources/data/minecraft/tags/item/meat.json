@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "avp:food_doritos",
+    "avp:food_doritos_coolranch",
+    "avp:food_raw_tentacle",
+    "avp:food_trilo_bite"
+  ]
+}

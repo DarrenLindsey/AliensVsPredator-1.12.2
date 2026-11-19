@@ -177,6 +177,14 @@ public final class ModBlocks
     public static final DeferredBlock<Block> OREMONAZITE = ore("oremonazite", 45F, 45F);
     public static final DeferredBlock<Block> ORECOBALT = ore("orecobalt", 50F, 50F);
 
+    // ---- Deepslate versions of the ores (new: 1.18+ worlds have deepslate below y=0) ----
+    public static final DeferredBlock<Block> DEEPSLATE_OREBAUXITE = deepslateOre("deepslate_orebauxite", 4.7F, 4.1F);
+    public static final DeferredBlock<Block> DEEPSLATE_ORECOPPER = deepslateOre("deepslate_orecopper", 4.7F, 4.1F);
+    public static final DeferredBlock<Block> DEEPSLATE_ORESILICON = deepslateOre("deepslate_oresilicon", 3.7F, 2.9F);
+    public static final DeferredBlock<Block> DEEPSLATE_OREMONAZITE = deepslateOre("deepslate_oremonazite", 46.5F, 46.5F);
+    public static final DeferredBlock<Block> DEEPSLATE_ORELITHIUM = deepslateOre("deepslate_orelithium", 5.7F, 6.9F);
+    public static final DeferredBlock<Block> DEEPSLATE_ORECOBALT = deepslateOre("deepslate_orecobalt", 51.5F, 51.5F);
+
     // ---- Natural blocks: dirt, grass, logs, leaves, plants ----
     public static final DeferredBlock<Block> UNIDIRT = dirt("unidirt");
     public static final DeferredBlock<Block> PARADISE_DIRT = dirt("paradise_dirt");
@@ -480,6 +488,14 @@ public final class ModBlocks
     }
 
     /** A stone-like ore that needs a pickaxe. What it drops is set in its loot table. */
+    private static DeferredBlock<Block> deepslateOre(String id, float hardness, float resistance)
+    {
+        DeferredBlock<Block> block = BLOCKS.register(id, () -> new Block(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.DEEPSLATE).sound(SoundType.DEEPSLATE).strength(hardness, resistance).requiresCorrectToolForDrops()));
+        withItem(block, Tab.BLOCKS);
+        return block;
+    }
+
     private static DeferredBlock<Block> ore(String id, float hardness, float resistance)
     {
         DeferredBlock<Block> block = BLOCKS.register(id, () -> new Block(BlockBehaviour.Properties.of()

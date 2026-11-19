@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "avp:deepslate_orelithium"
+  },
+  "result": {
+    "id": "avp:ingot_lithium"
+  },
+  "experience": 1.0,
+  "cookingtime": 200
+}

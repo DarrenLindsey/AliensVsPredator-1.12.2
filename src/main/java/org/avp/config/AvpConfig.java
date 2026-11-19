@@ -21,6 +21,8 @@ public final class AvpConfig
     public static final ModConfigSpec CLIENT_SPEC;
     public static final Server SERVER;
     public static final ModConfigSpec SERVER_SPEC;
+    public static final Common COMMON;
+    public static final ModConfigSpec COMMON_SPEC;
 
     static
     {
@@ -30,6 +32,40 @@ public final class AvpConfig
         var server = new ModConfigSpec.Builder().configure(Server::new);
         SERVER = server.getLeft();
         SERVER_SPEC = server.getRight();
+        var common = new ModConfigSpec.Builder().configure(Common::new);
+        COMMON = common.getLeft();
+        COMMON_SPEC = common.getRight();
+    }
+
+    /**
+     * Settings read before any world exists (avp-common.toml), such as world generation.
+     * Changing them needs a restart; they only affect chunks generated afterwards.
+     */
+    public static final class Common
+    {
+        public final ModConfigSpec.BooleanValue generateOres;
+        /** Per ore, by the name used in data/avp/neoforge/biome_modifier/ore_<name>.json. */
+        public final java.util.Map<String, ModConfigSpec.BooleanValue> ores = new java.util.LinkedHashMap<>();
+
+        Common(ModConfigSpec.Builder b)
+        {
+            b.push("worldgen");
+            generateOres = b
+                    .comment("Generate AvP ores in new chunks. Needs a restart. (Vein size, height and rarity are in the data pack files data/avp/worldgen/.)")
+                    .define("generateOres", true);
+            String[][] list = {
+                    { "bauxite", "Bauxite (aluminum) ore, most overworld biomes." },
+                    { "copper", "AvP copper ore (vanilla copper ingots work in all AvP recipes too)." },
+                    { "silicon", "Silicon ore, deep underground." },
+                    { "monazite", "Monazite ore (neodymium), rare and deep." },
+                    { "lithium", "Lithium ore, under oceans, beaches and rivers." },
+                    { "cobalt", "Cobalt ore, under jungles." } };
+            for (String[] ore : list)
+            {
+                ores.put(ore[0], b.comment(ore[1]).define("ore_" + ore[0], true));
+            }
+            b.pop();
+        }
     }
 
     public static final class Client
@@ -303,6 +339,11 @@ public final class AvpConfig
     public static boolean server(ModConfigSpec.BooleanValue value)
     {
         return get(SERVER_SPEC, value);
+    }
+
+    public static boolean common(ModConfigSpec.BooleanValue value)
+    {
+        return get(COMMON_SPEC, value);
     }
 
     public static boolean client(ModConfigSpec.BooleanValue value)

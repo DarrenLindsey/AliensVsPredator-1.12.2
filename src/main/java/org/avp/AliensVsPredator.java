@@ -45,6 +45,8 @@ public class AliensVsPredator
         // settings files (config/avp-client.toml and the per-world avp-server.toml)
         container.registerConfig(ModConfig.Type.CLIENT, AvpConfig.CLIENT_SPEC);
         container.registerConfig(ModConfig.Type.SERVER, AvpConfig.SERVER_SPEC);
+        container.registerConfig(ModConfig.Type.COMMON, AvpConfig.COMMON_SPEC);
+        org.avp.config.ConfigCondition.CONDITIONS.register(modBus);
 
         LOGGER.info("AliensVsPredator loading - Building Better Worlds");
     }

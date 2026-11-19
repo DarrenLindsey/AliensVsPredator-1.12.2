@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": {
+    "item": "avp:deepslate_orecopper"
+  },
+  "result": {
+    "id": "avp:ingot_copper"
+  },
+  "experience": 1.0,
+  "cookingtime": 100
+}

@@ -64,7 +64,9 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [ ] Batch D3 - Make the power system unique and robust (see "Planned: power system" below)
 - [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
 - [ ] Hive resin, supply crate parachute drop (with the creatures/entities)
-- [ ] Ore generation in the world (ores exist but don't spawn yet)
+- [x] Ore generation: bauxite, copper, silicon, monazite (overworld), lithium (oceans/beaches/rivers),
+      cobalt (jungles), each with a new deepslate version. Data-driven (data/avp/worldgen +
+      neoforge/biome_modifier, made by tools/port_worldgen.py), on/off per ore in avp-common.toml.
 - [ ] Step 3 - One creature end to end (template for the rest)
 - [ ] Step 4 - Other creatures, guns, armour, tile entities
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation

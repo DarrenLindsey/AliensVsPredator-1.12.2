@@ -1,0 +1,45 @@
+package org.avp.config;
+
+import org.avp.AliensVsPredator;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+
+/**
+ * A data-pack condition that reads the mod's common settings, so data files can be switched
+ * on and off from the config, e.g. in a biome modifier:
+ *
+ * <pre>"neoforge:conditions": [ { "type": "avp:ore_enabled", "ore": "bauxite" } ]</pre>
+ */
+public record ConfigCondition(String ore) implements ICondition
+{
+    public static final MapCodec<ConfigCondition> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+            Codec.STRING.fieldOf("ore").forGetter(ConfigCondition::ore)
+    ).apply(i, ConfigCondition::new));
+
+    public static final DeferredRegister<MapCodec<? extends ICondition>> CONDITIONS =
+            DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, AliensVsPredator.MOD_ID);
+
+    static
+    {
+        CONDITIONS.register("ore_enabled", () -> CODEC);
+    }
+
+    @Override
+    public boolean test(IContext context)
+    {
+        var value = AvpConfig.COMMON.ores.get(ore);
+        return AvpConfig.common(AvpConfig.COMMON.generateOres) && value != null && AvpConfig.common(value);
+    }
+
+    @Override
+    public MapCodec<? extends ICondition> codec()
+    {
+        return CODEC;
+    }
+}

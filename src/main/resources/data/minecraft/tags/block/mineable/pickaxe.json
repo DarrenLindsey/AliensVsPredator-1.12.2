@@ -124,6 +124,12 @@
     "avp:redstoneemitter",
     "avp:assembler",
     "avp:terminal",
-    "avp:turret"
+    "avp:turret",
+    "avp:deepslate_orebauxite",
+    "avp:deepslate_orecopper",
+    "avp:deepslate_oresilicon",
+    "avp:deepslate_oremonazite",
+    "avp:deepslate_orelithium",
+    "avp:deepslate_orecobalt"
   ]
 }

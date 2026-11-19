@@ -323,7 +323,8 @@ public final class ModBlocks
     {
         boolean gunsOnly = id.equals("gunlocker");
         DeferredBlock<StorageBlock> block = register(id, Tab.MAIN, () -> new StorageBlock(BlockBehaviour.Properties.of()
-                .mapColor(color).sound(SoundType.METAL).strength(3.0F, 6.0F).noOcclusion().requiresCorrectToolForDrops(),
+                .mapColor(color).sound(SoundType.METAL).strength(3.0F, 6.0F).noOcclusion().requiresCorrectToolForDrops()
+                .dynamicShape(), // collision changes with the open state and a setting, so don't cache it
                 tall, gunsOnly ? stack -> stack.is(GUN_LOCKER_ITEMS) : stack -> true));
         STORAGE_BLOCKS.add(block);
         return block;

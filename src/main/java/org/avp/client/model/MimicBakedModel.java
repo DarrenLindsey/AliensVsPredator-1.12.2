@@ -45,7 +45,7 @@ public class MimicBakedModel extends BakedModelWrapper<BakedModel>
     {
         List<BakedQuad> quads = super.getQuads(state, side, rand, data, renderType);
         BlockState mimic = data.get(ShapeBlockEntity.MIMIC);
-        if (mimic == null || !AvpConfig.CLIENT.showCopiedTextures.get())
+        if (mimic == null || !AvpConfig.client(AvpConfig.CLIENT.showCopiedTextures))
         {
             return quads;
         }

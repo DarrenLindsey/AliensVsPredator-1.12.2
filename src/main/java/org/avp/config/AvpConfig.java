@@ -12,7 +12,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  *
  * To add a setting: add a field in the right section below, give it a name and a
  * tooltip in lang/en_us.json ("avp.configuration.<name>" and "...<name>.tooltip"),
- * then read it with AvpConfig.SERVER.<name>.get() where it's used.
+ * then read it with AvpConfig.server(AvpConfig.SERVER.<name>) (or AvpConfig.client(...)) where it's
+ * used - never call .get() directly, because world settings aren't loaded until a world is open.
  */
 public final class AvpConfig
 {
@@ -73,6 +74,31 @@ public final class AvpConfig
                     .define("openLockersAreWalkThrough", true);
             b.pop();
         }
+    }
+
+    /**
+     * Reads a setting safely. World (SERVER) settings only exist once a world is open, and
+     * Minecraft asks blocks some questions (like their collision shape) earlier than that.
+     * Before the settings are loaded this returns the setting's default instead of crashing.
+     */
+    public static <T> T get(ModConfigSpec spec, ModConfigSpec.ConfigValue<T> value)
+    {
+        return spec.isLoaded() ? value.get() : value.getDefault();
+    }
+
+    public static boolean server(ModConfigSpec.BooleanValue value)
+    {
+        return get(SERVER_SPEC, value);
+    }
+
+    public static boolean client(ModConfigSpec.BooleanValue value)
+    {
+        return get(CLIENT_SPEC, value);
+    }
+
+    public static double client(ModConfigSpec.DoubleValue value)
+    {
+        return get(CLIENT_SPEC, value);
     }
 
     private AvpConfig()

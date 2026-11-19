@@ -221,7 +221,7 @@ public class StorageBlock extends BaseEntityBlock
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
     {
-        if (tall && isOpen(state) && AvpConfig.SERVER.openLockersAreWalkThrough.get())
+        if (tall && isOpen(state) && AvpConfig.server(AvpConfig.SERVER.openLockersAreWalkThrough))
         {
             return Shapes.empty(); // step inside an open locker to hide
         }

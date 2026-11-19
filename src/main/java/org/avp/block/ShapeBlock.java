@@ -85,7 +85,7 @@ public class ShapeBlock extends BaseEntityBlock
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
     {
-        if (AvpConfig.SERVER.shapesCanCopyBlocks.get()
+        if (AvpConfig.server(AvpConfig.SERVER.shapesCanCopyBlocks)
                 && stack.getItem() instanceof BlockItem blockItem
                 && !(blockItem.getBlock() instanceof EntityBlock)
                 && level.getBlockEntity(pos) instanceof ShapeBlockEntity shape)

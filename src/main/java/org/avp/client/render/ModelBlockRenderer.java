@@ -156,7 +156,7 @@ public class ModelBlockRenderer<T extends BlockEntity> implements BlockEntityRen
         {
             return;
         }
-        float scale = info.size() * AvpConfig.CLIENT.trophySize.get().floatValue() / longest;
+        float scale = info.size() * (float) AvpConfig.client(AvpConfig.CLIENT.trophySize) / longest;
         poseStack.translate(0.5F, 0, 0.5F);
         poseStack.scale(scale, scale, scale);
         poseStack.translate(-(b[0] + b[3]) / 2F, -b[1], -(b[2] + b[5]) / 2F);
@@ -203,7 +203,7 @@ public class ModelBlockRenderer<T extends BlockEntity> implements BlockEntityRen
             float offX = pos == null ? 0 : (rand.nextFloat() - 0.5F) * 0.3F;
             float offZ = pos == null ? 0 : (rand.nextFloat() - 0.5F) * 0.3F;
             float turn = pos == null ? 0 : rand.nextInt(4) * 90F;
-            float bright = AvpConfig.CLIENT.fernBrightness.get().floatValue();
+            float bright = (float) AvpConfig.client(AvpConfig.CLIENT.fernBrightness);
             color = FastColor.ARGB32.color(255, channel(c[0] * bright), channel(c[1] * bright), channel(c[2] * bright));
 
             poseStack.translate(0.5F, 0, 0.5F);

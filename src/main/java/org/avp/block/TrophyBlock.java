@@ -83,7 +83,7 @@ public class TrophyBlock extends HorizontalDirectionalBlock implements EntityBlo
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
     {
-        if (!canTip || !AvpConfig.SERVER.trophiesCanBeTipped.get())
+        if (!canTip || !AvpConfig.server(AvpConfig.SERVER.trophiesCanBeTipped))
         {
             return InteractionResult.PASS;
         }

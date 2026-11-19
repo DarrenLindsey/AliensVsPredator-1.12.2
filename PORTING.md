@@ -99,7 +99,14 @@ Currently decorative (as in 1.12.2). Planned, with the black goo fluid (batch E)
   (e.g. worms -> Hammerpedes, people -> goo mutants; both creatures exist in 1.12.2).
 - **Config:** leak chance, mutation rules, or switch it back to decorative only.
 
-## Planned: medpod surgery
+## Planned: medpod surgery and ingredients
+
+- **Ingredients:** the medpod gets a small inventory; items loaded into it are used up during a
+  treatment and give effects based on the item and amount (e.g. golden apple -> full golden
+  apple boost, glistering melon -> extra healing, honey bottle -> cure poison, milk -> clear
+  effects, magma cream -> fire resistance, potions -> their own effects). Data-driven via a
+  NeoForge data map (JSON: item -> effect, strength, duration per amount), so packs/datapacks can
+  change it. Exposed to hoppers / AE2 / Create for restocking.
 
 - With the creatures: a closed, powered medpod removes a Xenomorph embryo (chestburster) from
   whoever is inside, like the surgery pod in Prometheus; configurable cost/time/success chance.

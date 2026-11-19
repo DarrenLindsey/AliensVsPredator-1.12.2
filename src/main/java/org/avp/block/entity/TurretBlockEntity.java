@@ -70,8 +70,11 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
     /** Target categories, in the order of the buttons on the screen. */
     public static final String[] CATEGORIES = { "hostiles", "xenomorphs", "predators", "players", "animals" };
     private static final boolean[] DEFAULT_TARGETS = { true, true, false, false, false };
-    /** Height of the gun's pivot above the block bottom, in blocks (from the 1.12.2 model). */
-    public static final double PIVOT_HEIGHT = 0.23;
+    /**
+     * Height of the gun's pivot above the block bottom, in blocks: the model's feet are at
+     * y = 1.56 and the head turns about y = 11/16, so 1.56 - 0.6875 (measured from TurretModel).
+     */
+    public static final double PIVOT_HEIGHT = 0.8725;
     /** Barrel length from the pivot to the muzzle, in blocks. */
     public static final double BARREL = 1.0;
 

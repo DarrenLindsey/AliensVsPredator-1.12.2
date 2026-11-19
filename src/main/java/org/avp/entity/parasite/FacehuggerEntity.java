@@ -62,6 +62,11 @@ public class FacehuggerEntity extends Monster
 {
     private static final EntityDataAccessor<Boolean> FERTILE = SynchedEntityData.defineId(FacehuggerEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(FacehuggerEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Network id of the creature whose face it's on (-1 = none). Synced, so the client knows too. */
+    private static final EntityDataAccessor<Integer> HOST = SynchedEntityData.defineId(FacehuggerEntity.class, EntityDataSerializers.INT);
+    /** The host's UUID, to find it again after the world is reloaded. */
+    @Nullable
+    private java.util.UUID hostUuid;
 
     private int ticksOnHost;
     private int ticksSpent;
@@ -90,6 +95,7 @@ public class FacehuggerEntity extends Monster
         super.defineSynchedData(builder);
         builder.define(FERTILE, true);
         builder.define(CLIMBING, false);
+        builder.define(HOST, -1);
     }
 
     @Override
@@ -116,16 +122,54 @@ public class FacehuggerEntity extends Monster
         entityData.set(FERTILE, fertile);
     }
 
+    /** The creature whose face it's clamped to, or null. */
+    @Nullable
+    public LivingEntity host()
+    {
+        int id = entityData.get(HOST);
+        return id >= 0 && level().getEntity(id) instanceof LivingEntity host && host.isAlive() ? host : null;
+    }
+
     public boolean isAttached()
     {
-        return getVehicle() instanceof LivingEntity;
+        return entityData.get(HOST) >= 0;
+    }
+
+    /** Is a facehugger already on this creature's face? */
+    public static boolean hasFacehugger(LivingEntity host)
+    {
+        return !host.level().getEntitiesOfClass(FacehuggerEntity.class, host.getBoundingBox().inflate(2),
+                h -> h.entityData.get(HOST) == host.getId()).isEmpty();
+    }
+
+    private void attachTo(LivingEntity host)
+    {
+        entityData.set(HOST, host.getId());
+        hostUuid = host.getUUID();
+        setNoGravity(true);
+        noPhysics = true;
+        setDeltaMovement(Vec3.ZERO);
+    }
+
+    private void detach()
+    {
+        entityData.set(HOST, -1);
+        hostUuid = null;
+        setNoGravity(false);
+        noPhysics = false;
     }
 
     /** Could this creature carry an embryo right now? */
     public boolean canHost(LivingEntity host)
     {
-        if (host == this || !host.isAlive() || host instanceof FacehuggerEntity || host.getType().is(ModTags.CANNOT_HOST)
-                || host.isBaby() || host.hasData(ModAttachments.EMBRYO) || !host.getPassengers().isEmpty())
+        return host != this && isValidHost(host);
+    }
+
+    /** Shared with the Ovamorph (it opens for the same creatures a facehugger would go for). */
+    public static boolean isValidHost(LivingEntity host)
+    {
+        if (!host.isAlive() || host instanceof FacehuggerEntity || host.getType().is(ModTags.CANNOT_HOST)
+                || host.isBaby() || host.hasData(ModAttachments.EMBRYO) || hasFacehugger(host))
         {
             return false;
         }
@@ -143,9 +187,28 @@ public class FacehuggerEntity extends Monster
     public void tick()
     {
         super.tick();
+        LivingEntity host = host();
+        if (host != null)
+        {
+            clampToFace(host);
+        }
         if (level().isClientSide)
         {
             return;
+        }
+        if (isAttached() && host == null)
+        {
+            // host gone (died, unloaded): find it again by UUID after a reload, else let go
+            if (hostUuid != null && level() instanceof net.minecraft.server.level.ServerLevel server
+                    && server.getEntity(hostUuid) instanceof LivingEntity found && found.isAlive())
+            {
+                entityData.set(HOST, found.getId());
+                host = found;
+            }
+            else
+            {
+                detach();
+            }
         }
         setClimbing(horizontalCollision && isFertile() && !isAttached());
         if (attachCooldown > 0)
@@ -156,9 +219,9 @@ public class FacehuggerEntity extends Monster
         {
             setTarget(null);
         }
-        if (isAttached())
+        if (host != null)
         {
-            tickOnHost((LivingEntity) getVehicle());
+            tickOnHost(host);
         }
         else if (!isFertile())
         {
@@ -171,9 +234,9 @@ public class FacehuggerEntity extends Monster
         else if (attachCooldown <= 0)
         {
             // touching a possible host? latch on
-            for (LivingEntity host : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(0.25), this::canHost))
+            for (LivingEntity candidate : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(0.25), this::canHost))
             {
-                tryAttach(host);
+                tryAttach(candidate);
                 break;
             }
         }
@@ -198,10 +261,8 @@ public class FacehuggerEntity extends Monster
                 }
             }
         }
-        if (startRiding(host, true))
-        {
-            implant(host);
-        }
+        attachTo(host);
+        implant(host);
     }
 
     private void implant(LivingEntity host)
@@ -221,7 +282,7 @@ public class FacehuggerEntity extends Monster
             {
                 host.removeData(ModAttachments.EMBRYO);
             }
-            stopRiding();
+            detach();
             return;
         }
         // the host is out cold: can't see, barely moves
@@ -238,24 +299,39 @@ public class FacehuggerEntity extends Monster
         }
         if (++ticksOnHost >= AvpConfig.server(AvpConfig.SERVER.facehuggerAttachTicks))
         {
-            stopRiding();
+            detach();
             setDeltaMovement(host.getLookAngle().scale(0.2).add(0, 0.2, 0));
         }
     }
 
-    /** Sits on the host's face, not on top of their head. */
-    @Override
-    public void rideTick()
+    /** Holds on to the host's face: in front of their eyes, facing them, turning with their head. */
+    private void clampToFace(LivingEntity host)
     {
-        super.rideTick();
-        if (getVehicle() instanceof LivingEntity host)
+        Vec3 look = Vec3.directionFromRotation(0, host.getYHeadRot());
+        double reach = host.getBbWidth() / 2 + 0.05;
+        setPos(host.getX() + look.x * reach, host.getEyeY() - 0.1, host.getZ() + look.z * reach);
+        setYRot(host.getYHeadRot() + 180F);
+        yRotO = getYRot();
+        yBodyRot = getYRot();
+        yBodyRotO = getYRot();
+        yHeadRot = getYRot();
+        yHeadRotO = getYRot();
+        setDeltaMovement(Vec3.ZERO);
+        fallDistance = 0;
+    }
+
+    @Override
+    public boolean isPushable()
+    {
+        return !isAttached() && super.isPushable();
+    }
+
+    @Override
+    protected void doPush(Entity entity)
+    {
+        if (!isAttached())
         {
-            Vec3 look = Vec3.directionFromRotation(0, host.getYHeadRot());
-            double reach = host.getBbWidth() / 2 + 0.05;
-            setPos(host.getX() + look.x * reach, host.getEyeY() - 0.1, host.getZ() + look.z * reach);
-            setYRot(host.getYHeadRot() + 180F);
-            yBodyRot = getYRot();
-            yHeadRot = getYRot();
+            super.doPush(entity);
         }
     }
 
@@ -282,7 +358,8 @@ public class FacehuggerEntity extends Monster
             return false;
         }
         boolean hurt = super.hurt(source, amount);
-        if (hurt && !level().isClientSide && getVehicle() instanceof LivingEntity host)
+        LivingEntity host = host();
+        if (hurt && !level().isClientSide && host != null)
         {
             double acid = AvpConfig.server(AvpConfig.SERVER.acidBloodDamage);
             if (acid > 0)
@@ -371,6 +448,10 @@ public class FacehuggerEntity extends Monster
         tag.putBoolean("Fertile", isFertile());
         tag.putInt("TicksOnHost", ticksOnHost);
         tag.putInt("TicksSpent", ticksSpent);
+        if (hostUuid != null)
+        {
+            tag.putUUID("Host", hostUuid);
+        }
     }
 
     @Override
@@ -383,6 +464,13 @@ public class FacehuggerEntity extends Monster
         }
         ticksOnHost = tag.getInt("TicksOnHost");
         ticksSpent = tag.getInt("TicksSpent");
+        if (tag.hasUUID("Host"))
+        {
+            hostUuid = tag.getUUID("Host");
+            entityData.set(HOST, Integer.MAX_VALUE); // "attached, host to be found" until the host loads
+            setNoGravity(true);
+            noPhysics = true;
+        }
     }
 
     // ------------------------------------------------------------------ AI

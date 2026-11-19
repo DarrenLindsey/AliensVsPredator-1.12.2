@@ -537,5 +537,12 @@
   "subtitles.avp.chestburster.grow": "Chestburster grows",
   "avp.configuration.chestbursterMatureTicks": "Chestburster Growing Time (ticks)",
   "avp.configuration.chestbursterMatureTicks.tooltip": "How long a chestburster takes to grow into a Drone (64 royal jelly does it at once).",
-  "tooltip.avp.chestburster_spawn_egg": "Xenomorph, second stage.\nGrows into a Drone (when the Drone is ported)."
+  "tooltip.avp.chestburster_spawn_egg": "Xenomorph, second stage.\nGrows into a Drone (when the Drone is ported).",
+  "entity.avp.ovamorph": "Ovamorph",
+  "item.avp.ovamorph_spawn_egg": "Ovamorph Spawn Egg",
+  "subtitles.avp.ovamorph.living": "Ovamorph pulses",
+  "subtitles.avp.ovamorph.open": "Ovamorph opens",
+  "avp.configuration.emptyOvamorphLifetime": "Empty Egg Lifetime (ticks)",
+  "avp.configuration.emptyOvamorphLifetime.tooltip": "How long a hatched egg stays before it withers away.",
+  "tooltip.avp.ovamorph_spawn_egg": "Xenomorph egg. Opens when a host comes near.\n\"Kane, don't touch it!\""
 }

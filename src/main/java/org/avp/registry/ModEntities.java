@@ -28,6 +28,10 @@ public final class ModEntities
             () -> EntityType.Builder.<org.avp.entity.xenomorph.ChestbursterEntity>of(org.avp.entity.xenomorph.ChestbursterEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 0.5F).eyeHeight(0.35F).clientTrackingRange(10).build("chestburster"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.xenomorph.OvamorphEntity>> OVAMORPH = ENTITIES.register("ovamorph",
+            () -> EntityType.Builder.<org.avp.entity.xenomorph.OvamorphEntity>of(org.avp.entity.xenomorph.OvamorphEntity::new, MobCategory.MONSTER)
+                    .sized(0.8F, 1.0F).eyeHeight(0.8F).clientTrackingRange(10).build("ovamorph"));
+
     private ModEntities()
     {
     }

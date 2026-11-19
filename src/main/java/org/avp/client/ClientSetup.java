@@ -61,6 +61,7 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.SEAT.get(), NoopRenderer::new); // invisible
         event.registerEntityRenderer(ModEntities.FACEHUGGER.get(), org.avp.client.render.FacehuggerRenderer::new);
         event.registerEntityRenderer(ModEntities.CHESTBURSTER.get(), org.avp.client.render.ChestbursterRenderer::new);
+        event.registerEntityRenderer(ModEntities.OVAMORPH.get(), org.avp.client.render.OvamorphRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.BLAST_DOOR.get(), BlastDoorRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.TURRET.get(), org.avp.client.render.TurretRenderer::new);

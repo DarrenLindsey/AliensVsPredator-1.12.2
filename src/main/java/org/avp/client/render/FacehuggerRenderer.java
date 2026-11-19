@@ -38,7 +38,7 @@ public class FacehuggerRenderer extends MobRenderer<FacehuggerEntity, Facehugger
     public boolean shouldRender(FacehuggerEntity hugger, Frustum frustum, double x, double y, double z)
     {
         Minecraft mc = Minecraft.getInstance();
-        if (hugger.getVehicle() == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson())
+        if (mc.getCameraEntity() != null && hugger.host() == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson())
         {
             return false;
         }

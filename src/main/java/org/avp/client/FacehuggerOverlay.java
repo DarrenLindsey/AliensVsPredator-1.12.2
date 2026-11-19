@@ -26,7 +26,7 @@ public final class FacehuggerOverlay
         {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || !mc.options.getCameraType().isFirstPerson()
-                    || mc.player.getPassengers().stream().noneMatch(e -> e instanceof FacehuggerEntity))
+                    || !FacehuggerEntity.hasFacehugger(mc.player))
             {
                 return;
             }

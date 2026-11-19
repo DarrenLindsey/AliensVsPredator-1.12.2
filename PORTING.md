@@ -71,7 +71,9 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       climbing), face attach + embryo (data attachment, saved on the host), helmet acid, acid blood,
       medpod surgery, animated model, renderer, first-person overlay, sounds, spawn egg, loot,
       natural spawning (biome modifier + avp-common.toml), tags avp:cannot_host / avp:facehugger_proof
-- [ ] Step 3 (part 2) - Chestburster (comes out of the embryo), Ovamorph (egg that releases facehuggers)
+- [x] Step 3 (part 2) - Chestburster (bursts from the embryo, flees, eats jelly, will mature into the Drone)
+      and Ovamorph (egg: opens near hosts, releases a facehugger). XenomorphEntity base class (jelly, maturing).
+      Facehugger attaches with a synced "host" id instead of vanilla riding (riding didn't reach the client).
 - [ ] Step 4 - Other creatures, guns, armour, tile entities
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation
 

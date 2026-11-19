@@ -168,3 +168,24 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("creature data written: chestburster")
+
+# ================================================================ Ovamorph
+lang = read_json(f"{NA}/lang/en_us.json", {})
+copy(f"{LA}/textures/mob/alienegg.png", f"{NA}/textures/entity/ovamorph.png")
+sounds_for("ovamorph", {"living": ["living0", "living1"], "open": ["open"]})
+write_json(f"{NA}/models/item/ovamorph_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+write_json(f"{ND}/avp/loot_table/entities/ovamorph.json", {"type": "minecraft:entity", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:royaljelly",
+                             "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}}]}]}]})
+add_to_tag(f"{ND}/avp/tags/entity_type/xenomorphs.json", ["avp:ovamorph"])
+lang.update({
+    "entity.avp.ovamorph": "Ovamorph",
+    "item.avp.ovamorph_spawn_egg": "Ovamorph Spawn Egg",
+    "subtitles.avp.ovamorph.living": "Ovamorph pulses",
+    "subtitles.avp.ovamorph.open": "Ovamorph opens",
+    "avp.configuration.emptyOvamorphLifetime": "Empty Egg Lifetime (ticks)",
+    "avp.configuration.emptyOvamorphLifetime.tooltip": "How long a hatched egg stays before it withers away.",
+    "tooltip.avp.ovamorph_spawn_egg": "Xenomorph egg. Opens when a host comes near.\n\"Kane, don't touch it!\"",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("creature data written: ovamorph")

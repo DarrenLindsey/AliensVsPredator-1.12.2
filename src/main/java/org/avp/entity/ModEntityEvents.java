@@ -20,6 +20,7 @@ public final class ModEntityEvents
     public static void attributes(EntityAttributeCreationEvent event)
     {
         event.put(ModEntities.FACEHUGGER.get(), FacehuggerEntity.createAttributes().build());
+        event.put(ModEntities.OVAMORPH.get(), org.avp.entity.xenomorph.OvamorphEntity.createAttributes().build());
         event.put(ModEntities.CHESTBURSTER.get(), org.avp.entity.xenomorph.ChestbursterEntity.createAttributes().build());
     }
 

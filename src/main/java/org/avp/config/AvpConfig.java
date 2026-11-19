@@ -167,6 +167,7 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue embryoSymptoms;
         public final ModConfigSpec.BooleanValue medpodRemovesEmbryo;
         public final ModConfigSpec.IntValue chestbursterMatureTicks;
+        public final ModConfigSpec.IntValue emptyOvamorphLifetime;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -321,6 +322,9 @@ public final class AvpConfig
             chestbursterMatureTicks = b
                     .comment("How long a chestburster takes to grow into a Drone on its own (1.12.2: 15 minutes). 64 royal jelly does it at once.")
                     .defineInRange("chestbursterMatureTicks", 18_000, 200, 1_728_000);
+            emptyOvamorphLifetime = b
+                    .comment("How long an empty (hatched) egg stays before it withers away (ticks; 1.12.2: 5 minutes).")
+                    .defineInRange("emptyOvamorphLifetime", 6000, 20, 1_728_000);
             b.pop();
 
             b.push("crafting");

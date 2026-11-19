@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:part_ram",
+      "count": 2
+    },
+    {
+      "item": "avp:part_regulator",
+      "count": 1
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/lithium",
+      "count": 1
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_solidstatedrive",
+    "count": 1
+  }
+}

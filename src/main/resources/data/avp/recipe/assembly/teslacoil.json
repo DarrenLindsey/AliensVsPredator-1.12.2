@@ -1,0 +1,41 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/copper",
+      "count": 9
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 9
+    },
+    {
+      "item": "avp:transformer",
+      "count": 2
+    },
+    {
+      "item": "minecraft:iron_block",
+      "count": 1
+    },
+    {
+      "item": "avp:powerline",
+      "count": 2
+    },
+    {
+      "item": "avp:part_capacitor",
+      "count": 6
+    },
+    {
+      "item": "avp:part_powersupply",
+      "count": 1
+    },
+    {
+      "item": "avp:part_sensor_array",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:teslacoil",
+    "count": 1
+  }
+}

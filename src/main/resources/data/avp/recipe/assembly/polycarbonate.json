@@ -1,0 +1,17 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:carbon",
+      "count": 6
+    },
+    {
+      "item": "avp:silicon",
+      "count": 3
+    }
+  ],
+  "result": {
+    "id": "avp:polycarbonate",
+    "count": 4
+  }
+}

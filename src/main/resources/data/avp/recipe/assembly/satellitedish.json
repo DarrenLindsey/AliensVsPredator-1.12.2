@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 5
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 1
+    },
+    {
+      "item": "avp:part_servo",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_block",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:satellitedish",
+    "count": 1
+  }
+}

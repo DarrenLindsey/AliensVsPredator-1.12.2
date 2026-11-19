@@ -1,0 +1,17 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 4
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:powerline",
+    "count": 4
+  }
+}

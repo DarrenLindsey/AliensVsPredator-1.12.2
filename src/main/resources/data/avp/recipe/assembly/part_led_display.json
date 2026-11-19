@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    },
+    {
+      "item": "avp:part_led",
+      "count": 6
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/lithium",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_led_display",
+    "count": 2
+  }
+}

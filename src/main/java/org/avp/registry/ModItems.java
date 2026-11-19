@@ -64,6 +64,24 @@ public final class ModItems
         Tab.MAIN.add(TOOL_MAINTENANCEJACK);
     }
 
+    // ---- Batch D2: parts the Assembler needs (1.12.2 parts that weren't ported yet + new ones) ----
+    public static final DeferredItem<Item> PART_PROCESSOR = simple("part_processor", Tab.CRAFTING, 64);
+    public static final DeferredItem<Item> PART_LED_DISPLAY = simple("part_led_display", Tab.CRAFTING, 64);
+    public static final DeferredItem<Item> PART_SOLIDSTATEDRIVE = simple("part_solidstatedrive", Tab.CRAFTING, 64);
+    /** Lithium: reacts with water (see LithiumItem). */
+    public static final DeferredItem<Item> INGOT_LITHIUM = ITEMS.register("ingot_lithium",
+            () -> new org.avp.item.LithiumItem(new Item.Properties()));
+    /** New: a small electric motor (turrets, stasis mechanisms, Working Joes). */
+    public static final DeferredItem<Item> PART_SERVO = simple("part_servo", Tab.CRAFTING, 64);
+    /** New: the M314 motion tracker's sensor package (turret targeting, door sensors). */
+    public static final DeferredItem<Item> PART_SENSOR_ARRAY = simple("part_sensor_array", Tab.CRAFTING, 64);
+    /** New: hypersleep coolant canister (cryostasis tubes, stasis mechanisms). */
+    public static final DeferredItem<Item> CRYO_COOLANT = simple("cryo_coolant", Tab.CRAFTING, 16);
+    static
+    {
+        Tab.CRAFTING.add(INGOT_LITHIUM);
+    }
+
     /** A plain item with no special behaviour (crafting parts, ingots, ...). */
     private static DeferredItem<Item> simple(String id, Tab tab, int maxStack)
     {

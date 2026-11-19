@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "abc",
+    "dec",
+    "abc"
+  ],
+  "key": {
+    "a": {
+      "item": "avp:part_diode"
+    },
+    "b": {
+      "item": "avp:part_regulator"
+    },
+    "c": {
+      "tag": "c:ingots/aluminum"
+    },
+    "d": {
+      "item": "avp:part_capacitor"
+    },
+    "e": {
+      "item": "avp:transformer"
+    }
+  },
+  "result": {
+    "id": "avp:part_powersupply"
+  }
+}

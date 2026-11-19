@@ -50,6 +50,8 @@ public class PowerMachineRenderer implements BlockEntityRenderer<PowerMachineBlo
     private static final ResourceLocation POWERCELL_LIQUID = tex("powercellliquid.png");
     private static final ResourceLocation DISH = tex("satellite-dish.png");
     private static final ResourceLocation TESLA = tex("teslacoil.png");
+    private static final ResourceLocation WORKSTATION = tex("workstation.png");
+    private static final ResourceLocation WORKSTATION_ON = tex("workstation-on.png");
 
     private final SolarPanelModel solar;
     private final RedstoneFluxGeneratorModel generator;
@@ -58,6 +60,8 @@ public class PowerMachineRenderer implements BlockEntityRenderer<PowerMachineBlo
     private final PowercellModel powercell;
     private final SatelliteDishModel dish;
     private final TeslaCoilModel tesla;
+    private final org.avp.client.model.geometry.WorkstationModel workstation;
+    private final net.minecraft.client.gui.Font font;
     private final Map<ModelPart, float[]> bounds = new HashMap<>();
 
     public PowerMachineRenderer(BlockEntityRendererProvider.Context context)
@@ -69,6 +73,8 @@ public class PowerMachineRenderer implements BlockEntityRenderer<PowerMachineBlo
         powercell = new PowercellModel(context.bakeLayer(PowercellModel.LAYER));
         dish = new SatelliteDishModel(context.bakeLayer(SatelliteDishModel.LAYER));
         tesla = new TeslaCoilModel(context.bakeLayer(TeslaCoilModel.LAYER));
+        workstation = new org.avp.client.model.geometry.WorkstationModel(context.bakeLayer(org.avp.client.model.geometry.WorkstationModel.LAYER));
+        font = context.getFont();
     }
 
     private static ResourceLocation tex(String name)
@@ -155,6 +161,28 @@ public class PowerMachineRenderer implements BlockEntityRenderer<PowerMachineBlo
             {
                 onFloor(tesla.root(), faceTurn, poseStack);
                 tesla.root().render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(TESLA)), light, overlay);
+            }
+            case TERMINAL ->
+            {
+                // 1.12.2 RenderWorkstation, step for step (the text sits on the monitor)
+                poseStack.translate(0.5F, 1.5F, 0.5F);
+                poseStack.mulPose(Axis.YP.rotationDegrees(faceTurn));
+                poseStack.scale(1F, -1F, 1F);
+                workstation.root().render(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(WORKSTATION)), light, overlay);
+                if (lit)
+                {
+                    workstation.root().render(poseStack, buffers.getBuffer(RenderType.entityTranslucentEmissive(WORKSTATION_ON)), LightTexture.FULL_BRIGHT, overlay);
+                    poseStack.translate(0.45F, -0.58F, 0.254F);
+                    poseStack.mulPose(Axis.XP.rotationDegrees(6.5F));
+                    float textScale = 0.004F;
+                    poseStack.scale(-textScale, textScale, textScale);
+                    int line = 0;
+                    for (net.minecraft.network.chat.Component text : be.terminalLines())
+                    {
+                        font.drawInBatch(text, 0, line++ * 10, 0xFF33FF66, false, poseStack.last().pose(), buffers,
+                                net.minecraft.client.gui.Font.DisplayMode.POLYGON_OFFSET, 0, LightTexture.FULL_BRIGHT);
+                    }
+                }
             }
             default ->
             {

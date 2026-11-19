@@ -1,0 +1,21 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:part_diode",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 1
+    },
+    {
+      "item": "avp:part_resistor",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_regulator",
+    "count": 2
+  }
+}

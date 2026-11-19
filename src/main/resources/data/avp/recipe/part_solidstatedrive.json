@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aaa",
+    "fcf",
+    "beh"
+  ],
+  "key": {
+    "a": {
+      "item": "avp:part_ram"
+    },
+    "b": {
+      "item": "avp:polycarbonate"
+    },
+    "c": {
+      "item": "avp:part_ic"
+    },
+    "e": {
+      "item": "avp:part_regulator"
+    },
+    "f": {
+      "item": "avp:part_transistor"
+    },
+    "h": {
+      "item": "avp:part_capacitor"
+    }
+  },
+  "result": {
+    "id": "avp:part_solidstatedrive"
+  }
+}

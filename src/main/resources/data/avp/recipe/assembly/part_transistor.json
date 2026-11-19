@@ -1,0 +1,17 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 2
+    },
+    {
+      "item": "avp:silicon",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_transistor",
+    "count": 2
+  }
+}

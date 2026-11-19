@@ -1,0 +1,13 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "minecraft:coal",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "avp:carbon",
+    "count": 3
+  }
+}

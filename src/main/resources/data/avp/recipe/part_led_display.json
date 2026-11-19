@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "bdb",
+    "bcb",
+    "bab"
+  ],
+  "key": {
+    "a": {
+      "item": "avp:part_ic"
+    },
+    "b": {
+      "item": "avp:part_led"
+    },
+    "c": {
+      "item": "avp:polycarbonate"
+    },
+    "d": {
+      "tag": "c:ingots/lithium"
+    }
+  },
+  "result": {
+    "id": "avp:part_led_display"
+  }
+}

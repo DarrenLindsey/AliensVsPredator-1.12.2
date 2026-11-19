@@ -1,0 +1,21 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_nugget",
+      "count": 8
+    },
+    {
+      "item": "avp:artifact_tech",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:invertedpyramid",
+    "count": 1
+  }
+}

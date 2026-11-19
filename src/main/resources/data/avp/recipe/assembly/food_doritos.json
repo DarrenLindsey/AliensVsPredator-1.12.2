@@ -1,0 +1,17 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "minecraft:wheat",
+      "count": 4
+    },
+    {
+      "item": "minecraft:baked_potato",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "avp:food_doritos",
+    "count": 4
+  }
+}

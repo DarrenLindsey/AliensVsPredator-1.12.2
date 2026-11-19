@@ -316,6 +316,12 @@ public final class ModBlocks
         return block;
     }
 
+    // ---- Batch D2: Assembler, terminal ----
+    public static final DeferredBlock<org.avp.block.AssemblerBlock> ASSEMBLER = register("assembler", Tab.MAIN, () -> new org.avp.block.AssemblerBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 10.0F).requiresCorrectToolForDrops()));
+    /** MU/TH/UR-style terminal (the 1.12.2 "workstation"): shows the power network it's connected to. */
+    public static final DeferredBlock<PowerMachineBlock> TERMINAL = powerMachine("terminal", PowerMachineBlock.Kind.TERMINAL, 3.2F, 6);
+
     /** Engineer ampule (black goo container): a decorative model block, drawn like the trophies. */
     public static final DeferredBlock<TrophyBlock> ENGINEERSHIP_AMPULE = trophy("engineership_ampule", false);
 

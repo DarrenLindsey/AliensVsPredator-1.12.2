@@ -13,6 +13,11 @@ public final class ClientHooks
         Minecraft.getInstance().setScreen(new BlastDoorScreen(payload));
     }
 
+    public static void openAssembler(net.minecraft.core.BlockPos pos)
+    {
+        Minecraft.getInstance().setScreen(new org.avp.client.screen.AssemblerScreen(pos));
+    }
+
     private ClientHooks()
     {
     }

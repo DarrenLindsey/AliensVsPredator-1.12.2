@@ -1,0 +1,33 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 1
+    },
+    {
+      "item": "avp:silicon",
+      "count": 1
+    },
+    {
+      "item": "avp:part_transistor",
+      "count": 1
+    },
+    {
+      "item": "avp:part_regulator",
+      "count": 1
+    },
+    {
+      "item": "avp:part_diode",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_motherboard",
+    "count": 1
+  }
+}

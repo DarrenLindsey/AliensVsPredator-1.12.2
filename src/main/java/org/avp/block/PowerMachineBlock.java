@@ -66,7 +66,9 @@ public class PowerMachineBlock extends BaseEntityBlock
         REDSTONE_EMITTER(false),
         SATELLITE_DISH(false),
         /** Strikes hostile creatures with lightning arcs. */
-        TESLA_COIL(false);
+        TESLA_COIL(false),
+        /** A MU/TH/UR-style terminal: its screen shows the power network it's connected to. */
+        TERMINAL(false);
 
         /** Transformers point away from the player (power flows the way you face). */
         public final boolean facesAway;

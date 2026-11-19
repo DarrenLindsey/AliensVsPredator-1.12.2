@@ -85,6 +85,13 @@ public class PowerMachineBlockEntity extends BlockEntity
     private int syncedEnergy = -1;
     private int lastComparator = -1;
 
+    /** What a terminal shows: the power network next to it (worked out every 2 seconds). */
+    private int netLines = -1;
+    private int netDevices;
+    private long netStored;
+    private long netCapacity;
+    private int netMaking;
+
     /** Client only. */
     private final List<Arc> arcs = new ArrayList<>();
     private float rotor;
@@ -118,6 +125,7 @@ public class PowerMachineBlockEntity extends BlockEntity
             case POWERCELL -> AvpConfig.server(AvpConfig.SERVER.powercellCapacity);
             case REDSTONE_EMITTER -> Math.max(2, AvpConfig.server(AvpConfig.SERVER.redstoneEmitterEnergyPerTick) * 2);
             case SATELLITE_DISH -> 10_000;
+            case TERMINAL -> 2_000;
             case TESLA_COIL -> Math.max(20_000, AvpConfig.server(AvpConfig.SERVER.teslaCoilEnergyPerZap) * 4);
         };
     }
@@ -203,6 +211,7 @@ public class PowerMachineBlockEntity extends BlockEntity
             case REDSTONE_EMITTER -> be.energy.consume(Math.max(1, AvpConfig.server(AvpConfig.SERVER.redstoneEmitterEnergyPerTick)));
             case SATELLITE_DISH -> be.tickPower(level, pos, AvpConfig.server(AvpConfig.SERVER.satelliteDishEnergyPerTick));
             case TESLA_COIL -> be.teslaTick(level, pos);
+            case TERMINAL -> be.terminalTick(level, pos);
         };
         if (state.getValue(PowerMachineBlock.LIT) != on)
         {
@@ -351,6 +360,77 @@ public class PowerMachineBlockEntity extends BlockEntity
         return on;
     }
 
+    private boolean terminalTick(Level level, BlockPos pos)
+    {
+        boolean on = tickPower(level, pos, AvpConfig.server(AvpConfig.SERVER.terminalEnergyPerTick));
+        if (on && level.getGameTime() % 40 == Math.floorMod(pos.asLong(), 40))
+        {
+            scanNetwork(level, pos);
+        }
+        return on;
+    }
+
+    /** Totals up the network attached to any powerline touching the terminal. */
+    private void scanNetwork(Level level, BlockPos pos)
+    {
+        int lines = -1, devices = 0, making = 0;
+        long stored = 0, capacity = 0;
+        for (Direction dir : Direction.values())
+        {
+            if (!PowerNetwork.isConductor(level.getBlockState(pos.relative(dir))))
+            {
+                continue;
+            }
+            PowerNetwork.Network network = PowerNetwork.network(level, pos.relative(dir));
+            lines = network.conductors().size();
+            for (PowerNetwork.Target target : network.targets())
+            {
+                devices++;
+                IEnergyStorage storage = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK, target.pos(), target.side());
+                if (storage != null)
+                {
+                    stored += storage.getEnergyStored();
+                    capacity += storage.getMaxEnergyStored();
+                }
+                if (level.getBlockEntity(target.pos()) instanceof PowerMachineBlockEntity machine && machine.kind().isGenerator())
+                {
+                    making += machine.lastFlow;
+                }
+            }
+            break;
+        }
+        if (lines != netLines || devices != netDevices || stored != netStored || capacity != netCapacity || making != netMaking)
+        {
+            netLines = lines;
+            netDevices = devices;
+            netStored = stored;
+            netCapacity = capacity;
+            netMaking = making;
+            sync();
+        }
+    }
+
+    /** Lines of text for the terminal screen (client). */
+    public List<Component> terminalLines()
+    {
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.translatable("terminal.avp.header"));
+        lines.add(Component.translatable("terminal.avp.interface"));
+        lines.add(Component.literal("--------------------------"));
+        if (netLines < 0)
+        {
+            lines.add(Component.translatable("terminal.avp.no_network"));
+            return lines;
+        }
+        lines.add(Component.translatable("terminal.avp.network", netLines, netDevices));
+        lines.add(Component.translatable("terminal.avp.stored", String.format("%,d", netStored), String.format("%,d", netCapacity)));
+        lines.add(Component.translatable("terminal.avp.making", netMaking));
+        float fill = netCapacity == 0 ? 0 : (float) netStored / netCapacity;
+        lines.add(Component.translatable(netMaking == 0 && fill < 0.1F ? "terminal.avp.status_low"
+                : netMaking == 0 ? "terminal.avp.status_battery" : "terminal.avp.status_ok"));
+        return lines;
+    }
+
     private static boolean isTarget(LivingEntity entity, boolean hitPlayers)
     {
         if (entity instanceof Player player)
@@ -489,6 +569,11 @@ public class PowerMachineBlockEntity extends BlockEntity
         CompoundTag tag = super.getUpdateTag(registries);
         tag.putInt("Energy", energy.getEnergyStored());
         tag.putInt("Magnets", magnets);
+        tag.putInt("NetLines", netLines);
+        tag.putInt("NetDevices", netDevices);
+        tag.putLong("NetStored", netStored);
+        tag.putLong("NetCapacity", netCapacity);
+        tag.putInt("NetMaking", netMaking);
         return tag;
     }
 
@@ -497,6 +582,11 @@ public class PowerMachineBlockEntity extends BlockEntity
     {
         energy.setStored(tag.getInt("Energy"));
         magnets = tag.getInt("Magnets");
+        netLines = tag.contains("NetLines") ? tag.getInt("NetLines") : -1;
+        netDevices = tag.getInt("NetDevices");
+        netStored = tag.getLong("NetStored");
+        netCapacity = tag.getLong("NetCapacity");
+        netMaking = tag.getInt("NetMaking");
     }
 
     @Override

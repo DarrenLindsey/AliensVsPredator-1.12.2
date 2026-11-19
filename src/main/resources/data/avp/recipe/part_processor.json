@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "AAA",
+    "ABA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:part_ic"
+    },
+    "B": {
+      "item": "avp:silicon"
+    }
+  },
+  "result": {
+    "id": "avp:part_processor"
+  }
+}

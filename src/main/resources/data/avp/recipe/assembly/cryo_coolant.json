@@ -1,0 +1,21 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/lithium",
+      "count": 1
+    },
+    {
+      "item": "minecraft:packed_ice",
+      "count": 4
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:cryo_coolant",
+    "count": 2
+  }
+}

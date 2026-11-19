@@ -34,7 +34,7 @@ public class BlockEntityItemRenderer extends BlockEntityWithoutLevelRenderer
         return Map.of(ModBlocks.CRYOSTASISTUBE.get(), 0.5F, ModBlocks.MEDPOD.get(), 0.35F,
                 ModBlocks.BLASTDOOR.get(), 0.25F, ModBlocks.BLASTDOOR_SEVASTOPOL.get(), 0.33F,
                 ModBlocks.SATELLITEDISH.get(), 0.33F, ModBlocks.TESLACOIL.get(), 0.45F,
-                ModBlocks.GENERATOR.get(), 0.6F).getOrDefault(block, 1F);
+                ModBlocks.GENERATOR.get(), 0.6F, ModBlocks.TERMINAL.get(), 0.4F).getOrDefault(block, 1F);
     }
 
     @Override

@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 4
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "item": "avp:industrialglass",
+      "count": 4
+    },
+    {
+      "item": "avp:lightpanel",
+      "count": 1
+    },
+    {
+      "item": "avp:cryo_coolant",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "avp:cryostasistube",
+    "count": 1
+  }
+}

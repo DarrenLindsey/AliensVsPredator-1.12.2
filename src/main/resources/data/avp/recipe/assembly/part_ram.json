@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:part_ic",
+      "count": 3
+    },
+    {
+      "item": "avp:part_regulator",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 2
+    },
+    {
+      "item": "avp:silicon",
+      "count": 2
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_ram",
+    "count": 2
+  }
+}

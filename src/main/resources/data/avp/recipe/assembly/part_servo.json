@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 1
+    },
+    {
+      "item": "avp:neodymium_magnet",
+      "count": 1
+    },
+    {
+      "item": "avp:part_regulator",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_servo",
+    "count": 2
+  }
+}

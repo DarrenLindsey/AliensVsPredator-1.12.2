@@ -90,6 +90,7 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue maxCableNetworkSize;
         public final ModConfigSpec.IntValue redstoneEmitterEnergyPerTick;
         public final ModConfigSpec.IntValue satelliteDishEnergyPerTick;
+        public final ModConfigSpec.IntValue terminalEnergyPerTick;
         public final ModConfigSpec.IntValue teslaCoilEnergyPerTick;
         public final ModConfigSpec.IntValue teslaCoilEnergyPerZap;
         public final ModConfigSpec.DoubleValue teslaCoilDamage;
@@ -97,6 +98,8 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue teslaCoilCooldown;
         public final ModConfigSpec.BooleanValue teslaCoilTargetsPlayers;
         public final ModConfigSpec.BooleanValue teslaCoilSetsFire;
+        public final ModConfigSpec.IntValue assemblerEnergyPerItem;
+        public final ModConfigSpec.BooleanValue lithiumReactsWithWater;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -137,6 +140,9 @@ public final class AvpConfig
             satelliteDishEnergyPerTick = b
                     .comment("FE a satellite dish uses per tick while powered.")
                     .defineInRange("satelliteDishEnergyPerTick", 8, 0, 10_000);
+            terminalEnergyPerTick = b
+                    .comment("FE a terminal uses per tick while its screen is on.")
+                    .defineInRange("terminalEnergyPerTick", 2, 0, 10_000);
             b.pop();
 
             b.push("powerNetwork");
@@ -191,6 +197,15 @@ public final class AvpConfig
             teslaCoilSetsFire = b
                     .comment("Strikes set the target on fire for a few seconds.")
                     .define("teslaCoilSetsFire", true);
+            b.pop();
+
+            b.push("crafting");
+            assemblerEnergyPerItem = b
+                    .comment("FE the Assembler uses for each item it makes (0 = needs no power). Ignored when \"Machines Need Power\" is off.")
+                    .defineInRange("assemblerEnergyPerItem", 100, 0, 1_000_000);
+            lithiumReactsWithWater = b
+                    .comment("Lithium ingots explode when they touch water (carried or dropped).")
+                    .define("lithiumReactsWithWater", true);
             b.pop();
 
             b.push("blastDoors");

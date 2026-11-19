@@ -51,7 +51,13 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [x] Batch D1 - Power network (first pass, plain FE): powerlines, solar panel, Universal Generator
       (burns fuel), Repulsion Generator (neodymium magnets), transformer + step-down, power cell,
       redstone sensor (powerline switch) / emitter, satellite dish, tesla coil (strikes hostiles)
-- [ ] Batch D2 - Machines: Assembler (schematics), terminal/workstation, network rack, turret, stasis mechanism
+- [x] Batch D2 - Assembler: 1.12.2 schematics are now data-pack recipes (`data/avp/recipe/assembly/*.json`,
+      type `avp:assembly`), built from your inventory, uses FE. Terminal shows its power network.
+      New parts: processor, LED display, SSD, lithium ingot (reacts with water) + lore parts:
+      servo motor, motion sensor array, hypersleep coolant.
+- [ ] Batch D2b - Sentry turret (UA 571-C style) with its own ammo, needs servo + sensor array
+- [ ] Later: network rack (with the Working Joe network), stasis mechanism (with creatures),
+      schematics still waiting for their items (guns, armour, Predator gear - listed by tools/port_batch_d.py)
 - [ ] Batch D3 - Make the power system unique and robust (see "Planned: power system" below)
 - [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
 - [ ] Hive resin, supply crate parachute drop (with the creatures/entities)

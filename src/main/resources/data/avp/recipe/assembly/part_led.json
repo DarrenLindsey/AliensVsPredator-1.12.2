@@ -1,0 +1,21 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    },
+    {
+      "item": "avp:part_diode",
+      "count": 1
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_led",
+    "count": 2
+  }
+}

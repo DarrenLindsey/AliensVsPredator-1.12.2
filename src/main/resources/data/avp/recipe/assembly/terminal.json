@@ -1,0 +1,53 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:part_led_display",
+      "count": 3
+    },
+    {
+      "item": "avp:transformer",
+      "count": 1
+    },
+    {
+      "item": "avp:mainframepanel_shimmer",
+      "count": 3
+    },
+    {
+      "item": "avp:mainframepanel_flicker",
+      "count": 3
+    },
+    {
+      "item": "avp:part_powersupply",
+      "count": 1
+    },
+    {
+      "item": "avp:part_ram",
+      "count": 6
+    },
+    {
+      "item": "avp:part_processor",
+      "count": 6
+    },
+    {
+      "item": "avp:part_solidstatedrive",
+      "count": 2
+    },
+    {
+      "item": "avp:part_motherboard",
+      "count": 1
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 6
+    },
+    {
+      "item": "minecraft:stone_button",
+      "count": 16
+    }
+  ],
+  "result": {
+    "id": "avp:terminal",
+    "count": 1
+  }
+}

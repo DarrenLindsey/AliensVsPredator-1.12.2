@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:part_led_display",
+      "count": 1
+    },
+    {
+      "item": "avp:part_processor",
+      "count": 1
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 5
+    },
+    {
+      "item": "minecraft:stone_button",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "avp:tool_securitytuner",
+    "count": 1
+  }
+}

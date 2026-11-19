@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 4
+    },
+    {
+      "item": "avp:part_capacitor",
+      "count": 4
+    },
+    {
+      "tag": "c:ingots/lithium",
+      "count": 2
+    },
+    {
+      "item": "minecraft:redstone_block",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:powercell",
+    "count": 1
+  }
+}

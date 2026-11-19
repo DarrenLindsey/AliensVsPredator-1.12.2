@@ -44,9 +44,28 @@ public final class ModNetwork
             }
         });
 
+        registrar.playToServer(AssemblePayload.TYPE, AssemblePayload.CODEC, (payload, context) ->
+        {
+            Player player = context.player();
+            if (player.distanceToSqr(payload.pos().getCenter()) > 64
+                    || !(player.level().getBlockEntity(payload.pos()) instanceof org.avp.block.entity.AssemblerBlockEntity assembler))
+            {
+                return;
+            }
+            player.level().getRecipeManager().byKey(payload.recipe())
+                    .filter(holder -> holder.value() instanceof org.avp.crafting.AssemblyRecipe)
+                    .ifPresent(holder -> assembler.assemble(player, castAssembly(holder), Math.max(1, Math.min(64, payload.count()))));
+        });
+
         // the handler body runs only on the client, so the client-only screen class is never loaded on a server
         registrar.playToClient(OpenBlastDoorScreenPayload.TYPE, OpenBlastDoorScreenPayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.openBlastDoorScreen(payload));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static net.minecraft.world.item.crafting.RecipeHolder<org.avp.crafting.AssemblyRecipe> castAssembly(net.minecraft.world.item.crafting.RecipeHolder<?> holder)
+    {
+        return (net.minecraft.world.item.crafting.RecipeHolder<org.avp.crafting.AssemblyRecipe>) holder;
     }
 
     private ModNetwork()

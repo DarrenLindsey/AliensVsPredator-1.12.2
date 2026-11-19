@@ -38,6 +38,8 @@ public class AliensVsPredator
         ModMenus.MENUS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModSounds.SOUNDS.register(modBus);
+        org.avp.registry.ModRecipes.TYPES.register(modBus);
+        org.avp.registry.ModRecipes.SERIALIZERS.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
 
         // settings files (config/avp-client.toml and the per-world avp-server.toml)

@@ -1,0 +1,21 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/copper",
+      "count": 7
+    },
+    {
+      "item": "avp:part_capacitor",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_block",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:transformer",
+    "count": 1
+  }
+}

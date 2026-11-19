@@ -1,0 +1,17 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:food_doritos",
+      "count": 4
+    },
+    {
+      "item": "minecraft:wheat",
+      "count": 3
+    }
+  ],
+  "result": {
+    "id": "avp:food_doritos_coolranch",
+    "count": 4
+  }
+}

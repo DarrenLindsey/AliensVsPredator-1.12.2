@@ -1,0 +1,17 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/copper",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/lithium",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_capacitor",
+    "count": 2
+  }
+}

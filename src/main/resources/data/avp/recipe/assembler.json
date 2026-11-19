@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "aba",
+    "dfh",
+    "ceg"
+  ],
+  "key": {
+    "a": {
+      "item": "avp:part_ram"
+    },
+    "b": {
+      "item": "avp:part_processor"
+    },
+    "c": {
+      "item": "avp:part_powersupply"
+    },
+    "d": {
+      "item": "avp:polycarbonate"
+    },
+    "e": {
+      "item": "avp:part_solidstatedrive"
+    },
+    "f": {
+      "item": "avp:part_led_display"
+    },
+    "g": {
+      "item": "avp:part_motherboard"
+    },
+    "h": {
+      "item": "avp:part_transistor"
+    }
+  },
+  "result": {
+    "id": "avp:assembler"
+  }
+}

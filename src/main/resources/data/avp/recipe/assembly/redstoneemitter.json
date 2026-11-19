@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 2
+    },
+    {
+      "item": "avp:powerline",
+      "count": 2
+    },
+    {
+      "item": "minecraft:redstone_torch",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:redstoneemitter",
+    "count": 1
+  }
+}

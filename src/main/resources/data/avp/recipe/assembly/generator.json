@@ -1,0 +1,33 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 2
+    },
+    {
+      "item": "avp:neodymium",
+      "count": 1
+    },
+    {
+      "item": "avp:transformer",
+      "count": 1
+    },
+    {
+      "item": "avp:part_servo",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:generator",
+    "count": 1
+  }
+}

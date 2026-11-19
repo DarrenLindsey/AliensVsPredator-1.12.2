@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ABA",
+    "CDC",
+    "CCC"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:stone_button"
+    },
+    "B": {
+      "item": "avp:part_led_display"
+    },
+    "C": {
+      "item": "avp:polycarbonate"
+    },
+    "D": {
+      "item": "avp:part_processor"
+    }
+  },
+  "result": {
+    "id": "avp:tool_securitytuner"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": {
+    "item": "avp:orelithium"
+  },
+  "result": {
+    "id": "avp:ingot_lithium"
+  },
+  "experience": 1.0,
+  "cookingtime": 100
+}

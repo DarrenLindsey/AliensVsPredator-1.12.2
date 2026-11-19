@@ -54,6 +54,11 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PowerMachineBlockEntity>> POWER_MACHINE = BLOCK_ENTITIES.register("power_machine",
             () -> BlockEntityType.Builder.of(PowerMachineBlockEntity::new, ModBlocks.powerMachines()).build(null));
 
+    /** The Assembler (FE buffer, last item made). */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.entity.AssemblerBlockEntity>> ASSEMBLER = BLOCK_ENTITIES.register("assembler",
+            () -> BlockEntityType.Builder.of(org.avp.block.entity.AssemblerBlockEntity::new, ModBlocks.ASSEMBLER.get()).build(null));
+
     private ModBlockEntities()
     {
     }

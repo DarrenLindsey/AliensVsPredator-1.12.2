@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 3
+    },
+    {
+      "item": "avp:silicon",
+      "count": 3
+    },
+    {
+      "tag": "c:ingots/lithium",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:solarpanel",
+    "count": 1
+  }
+}

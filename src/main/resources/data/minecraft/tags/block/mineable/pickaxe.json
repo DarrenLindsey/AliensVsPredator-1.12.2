@@ -121,6 +121,8 @@
     "avp:satellitedish",
     "avp:teslacoil",
     "avp:redstonesensor",
-    "avp:redstoneemitter"
+    "avp:redstoneemitter",
+    "avp:assembler",
+    "avp:terminal"
   ]
 }

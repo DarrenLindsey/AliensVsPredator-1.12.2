@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:part_processor",
+      "count": 1
+    },
+    {
+      "item": "avp:part_led_display",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 2
+    },
+    {
+      "item": "avp:part_diode",
+      "count": 2
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:part_sensor_array",
+    "count": 1
+  }
+}

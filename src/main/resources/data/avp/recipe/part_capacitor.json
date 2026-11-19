@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " A ",
+    " B ",
+    " A "
+  ],
+  "key": {
+    "A": {
+      "tag": "c:ingots/copper"
+    },
+    "B": {
+      "tag": "c:ingots/lithium"
+    }
+  },
+  "result": {
+    "id": "avp:part_capacitor",
+    "count": 8
+  }
+}

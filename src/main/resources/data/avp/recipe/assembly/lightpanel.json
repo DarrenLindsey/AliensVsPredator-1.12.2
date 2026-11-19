@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 2
+    },
+    {
+      "item": "avp:industrialglass",
+      "count": 2
+    },
+    {
+      "item": "minecraft:glowstone_dust",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "avp:lightpanel",
+    "count": 1
+  }
+}

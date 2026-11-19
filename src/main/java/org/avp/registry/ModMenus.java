@@ -17,6 +17,9 @@ public final class ModMenus
     public static final DeferredHolder<MenuType<?>, MenuType<StorageMenu>> STORAGE = MENUS.register("storage",
             () -> IMenuTypeExtension.create(StorageMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<org.avp.menu.TurretMenu>> TURRET = MENUS.register("turret",
+            () -> IMenuTypeExtension.create(org.avp.menu.TurretMenu::new));
+
     private ModMenus()
     {
     }

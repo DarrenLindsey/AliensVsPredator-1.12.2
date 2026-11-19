@@ -1,0 +1,37 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:part_servo",
+      "count": 2
+    },
+    {
+      "item": "avp:part_sensor_array",
+      "count": 1
+    },
+    {
+      "item": "avp:part_led_display",
+      "count": 1
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 4
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 4
+    },
+    {
+      "item": "minecraft:iron_block",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:turret",
+    "count": 1
+  }
+}

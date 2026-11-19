@@ -55,7 +55,10 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       type `avp:assembly`), built from your inventory, uses FE. Terminal shows its power network.
       New parts: processor, LED display, SSD, lithium ingot (reacts with water) + lore parts:
       servo motor, motion sensor array, hypersleep coolant.
-- [ ] Batch D2b - Sentry turret (UA 571-C style) with its own ammo, needs servo + sensor array
+- [x] Batch D2b - Sentry turret (UA 571-C style): FE, Sentry Ammo Boxes (hopper-loadable), upgrades
+      (processor = faster turning, sensor array = range, LED display = round counter), IFF target
+      categories, owner/team never targeted, laser sight and tracers. Entity tags avp:xenomorphs and
+      avp:predators are empty until the creatures are ported.
 - [ ] Later: network rack (with the Working Joe network), stasis mechanism (with creatures),
       schematics still waiting for their items (guns, armour, Predator gear - listed by tools/port_batch_d.py)
 - [ ] Batch D3 - Make the power system unique and robust (see "Planned: power system" below)

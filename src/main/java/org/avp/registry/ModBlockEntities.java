@@ -59,6 +59,11 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.entity.AssemblerBlockEntity>> ASSEMBLER = BLOCK_ENTITIES.register("assembler",
             () -> BlockEntityType.Builder.of(org.avp.block.entity.AssemblerBlockEntity::new, ModBlocks.ASSEMBLER.get()).build(null));
 
+    /** Sentry turrets. */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.entity.TurretBlockEntity>> TURRET = BLOCK_ENTITIES.register("turret",
+            () -> BlockEntityType.Builder.of(org.avp.block.entity.TurretBlockEntity::new, ModBlocks.TURRET.get()).build(null));
+
     private ModBlockEntities()
     {
     }

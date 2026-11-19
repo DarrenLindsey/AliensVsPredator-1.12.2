@@ -53,6 +53,9 @@ public final class ModCapabilities
                 ModBlocks.POWERLINE.get(), ModBlocks.REDSTONESENSOR.get());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.POWER_MACHINE.get(), (be, side) -> be.energyFor(side));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ASSEMBLER.get(), (be, side) -> be.energyFor());
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.TURRET.get(), (be, side) -> be.energyFor());
+        // hoppers and pipes can load sentry ammo
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.TURRET.get(), (be, side) -> be.ammoInput());
         // the Universal Generator's fuel slot: hoppers and pipes can feed it
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.POWER_MACHINE.get(),
                 (be, side) -> be.kind() == org.avp.block.PowerMachineBlock.Kind.GENERATOR ? be.getFuel() : null);

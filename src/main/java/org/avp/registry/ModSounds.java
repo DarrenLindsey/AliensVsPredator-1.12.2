@@ -21,6 +21,8 @@ public final class ModSounds
     public static final DeferredHolder<SoundEvent, SoundEvent> BLASTDOOR_SEVASTOPOL_OPEN = sound("blocks.blastdoor.sevastopol.open");
     public static final DeferredHolder<SoundEvent, SoundEvent> BLASTDOOR_SEVASTOPOL_CLOSE = sound("blocks.blastdoor.sevastopol.close");
 
+    public static final DeferredHolder<SoundEvent, SoundEvent> TURRET_FIRE = sound("blocks.turret.fire");
+
     private static DeferredHolder<SoundEvent, SoundEvent> sound(String name)
     {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, name)));

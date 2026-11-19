@@ -322,6 +322,11 @@ public final class ModBlocks
     /** MU/TH/UR-style terminal (the 1.12.2 "workstation"): shows the power network it's connected to. */
     public static final DeferredBlock<PowerMachineBlock> TERMINAL = powerMachine("terminal", PowerMachineBlock.Kind.TERMINAL, 3.2F, 6);
 
+    /** UA 571-C style sentry gun. */
+    public static final DeferredBlock<org.avp.block.TurretBlock> TURRET = register("turret", Tab.MAIN, () -> new org.avp.block.TurretBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(3.2F, 6.0F).noOcclusion()
+                    .requiresCorrectToolForDrops()));
+
     /** Engineer ampule (black goo container): a decorative model block, drawn like the trophies. */
     public static final DeferredBlock<TrophyBlock> ENGINEERSHIP_AMPULE = trophy("engineership_ampule", false);
 

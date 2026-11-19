@@ -77,6 +77,8 @@ public final class ModItems
     public static final DeferredItem<Item> PART_SENSOR_ARRAY = simple("part_sensor_array", Tab.CRAFTING, 64);
     /** New: hypersleep coolant canister (cryostasis tubes, stasis mechanisms). */
     public static final DeferredItem<Item> CRYO_COOLANT = simple("cryo_coolant", Tab.CRAFTING, 16);
+    /** New: ammunition for the sentry turret (10x28mm caseless, as used by the UA 571-C). */
+    public static final DeferredItem<Item> AMMO_SENTRY = simple("ammo_sentry", Tab.MAIN, 16);
     static
     {
         Tab.CRAFTING.add(INGOT_LITHIUM);

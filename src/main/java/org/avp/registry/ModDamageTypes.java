@@ -19,6 +19,15 @@ public final class ModDamageTypes
     public static final ResourceKey<DamageType> ELECTRICITY = ResourceKey.create(Registries.DAMAGE_TYPE,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "electricity"));
 
+    /** Sentry turret rounds. */
+    public static final ResourceKey<DamageType> SENTRY = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "sentry"));
+
+    public static DamageSource sentry(Level level)
+    {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SENTRY));
+    }
+
     public static DamageSource electricity(Level level)
     {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(ELECTRICITY));

@@ -123,6 +123,7 @@
     "avp:redstonesensor",
     "avp:redstoneemitter",
     "avp:assembler",
-    "avp:terminal"
+    "avp:terminal",
+    "avp:turret"
   ]
 }

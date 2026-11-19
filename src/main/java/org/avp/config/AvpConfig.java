@@ -99,6 +99,14 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue teslaCoilTargetsPlayers;
         public final ModConfigSpec.BooleanValue teslaCoilSetsFire;
         public final ModConfigSpec.IntValue assemblerEnergyPerItem;
+        public final ModConfigSpec.IntValue turretEnergyPerTick;
+        public final ModConfigSpec.IntValue turretRange;
+        public final ModConfigSpec.IntValue turretRangePerSensor;
+        public final ModConfigSpec.DoubleValue turretDamage;
+        public final ModConfigSpec.IntValue turretFireInterval;
+        public final ModConfigSpec.IntValue turretRoundsPerBox;
+        public final ModConfigSpec.IntValue turretTurnSpeed;
+        public final ModConfigSpec.BooleanValue turretBypassesInvulnerability;
         public final ModConfigSpec.BooleanValue lithiumReactsWithWater;
 
         Server(ModConfigSpec.Builder b)
@@ -197,6 +205,33 @@ public final class AvpConfig
             teslaCoilSetsFire = b
                     .comment("Strikes set the target on fire for a few seconds.")
                     .define("teslaCoilSetsFire", true);
+            b.pop();
+
+            b.push("turret");
+            turretEnergyPerTick = b
+                    .comment("FE a sentry turret uses per tick while switched on.")
+                    .defineInRange("turretEnergyPerTick", 10, 0, 10_000);
+            turretRange = b
+                    .comment("How far (in blocks) a sentry turret sees and shoots.")
+                    .defineInRange("turretRange", 24, 4, 64);
+            turretRangePerSensor = b
+                    .comment("Extra range for each Motion Sensor Array in a turret's upgrade slots.")
+                    .defineInRange("turretRangePerSensor", 8, 0, 64);
+            turretDamage = b
+                    .comment("Damage per shot (2 = one heart).")
+                    .defineInRange("turretDamage", 2.0, 0.0, 1000.0);
+            turretFireInterval = b
+                    .comment("Ticks between shots (2 = 10 shots a second).")
+                    .defineInRange("turretFireInterval", 2, 1, 100);
+            turretRoundsPerBox = b
+                    .comment("Rounds in one Sentry Ammo Box.")
+                    .defineInRange("turretRoundsPerBox", 100, 1, 10_000);
+            turretTurnSpeed = b
+                    .comment("Degrees per tick the turret turns (each Processor upgrade adds half of this again).")
+                    .defineInRange("turretTurnSpeed", 8, 1, 180);
+            turretBypassesInvulnerability = b
+                    .comment("Every shot lands, even during the short invulnerability after being hit (like 1.12.2).")
+                    .define("turretBypassesInvulnerability", true);
             b.pop();
 
             b.push("crafting");

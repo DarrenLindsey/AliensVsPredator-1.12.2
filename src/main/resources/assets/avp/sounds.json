@@ -33,5 +33,13 @@
     "sounds": [
       "avp:blocks/blastdoor/password_deny"
     ]
+  },
+  "blocks.turret.fire": {
+    "subtitle": "subtitles.avp.turret.fire",
+    "sounds": [
+      "avp:blocks/turret/fire0",
+      "avp:blocks/turret/fire1",
+      "avp:blocks/turret/fire2"
+    ]
   }
 }

@@ -61,6 +61,7 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.SEAT.get(), NoopRenderer::new); // invisible
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.BLAST_DOOR.get(), BlastDoorRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.TURRET.get(), org.avp.client.render.TurretRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ASSEMBLER.get(), org.avp.client.render.AssemblerRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.POWERLINE.get(), org.avp.client.render.PowerlineRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.POWER_MACHINE.get(), org.avp.client.render.PowerMachineRenderer::new);
@@ -105,13 +106,14 @@ public final class ClientSetup
         // power blocks drawn by a renderer (the redstone emitter is a normal cube model)
         event.registerItem(beItems, Arrays.stream(ModBlocks.powerMachines()).filter(b -> b != ModBlocks.REDSTONEEMITTER.get())
                 .map(Block::asItem).toArray(Item[]::new));
-        event.registerItem(beItems, ModBlocks.POWERLINE.get().asItem());
+        event.registerItem(beItems, ModBlocks.POWERLINE.get().asItem(), ModBlocks.TURRET.get().asItem());
     }
 
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event)
     {
         event.register(ModMenus.STORAGE.get(), StorageScreen::new);
+        event.register(ModMenus.TURRET.get(), org.avp.client.screen.TurretScreen::new);
     }
 
     /** Wrap the slope/corner/... models so they can show a copied block's texture. */

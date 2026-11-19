@@ -57,6 +57,16 @@ public final class ModNetwork
                     .ifPresent(holder -> assembler.assemble(player, castAssembly(holder), Math.max(1, Math.min(64, payload.count()))));
         });
 
+        registrar.playToServer(TurretSettingPayload.TYPE, TurretSettingPayload.CODEC, (payload, context) ->
+        {
+            Player player = context.player();
+            if (player.distanceToSqr(payload.pos().getCenter()) <= 64
+                    && player.level().getBlockEntity(payload.pos()) instanceof org.avp.block.entity.TurretBlockEntity turret)
+            {
+                turret.toggleTarget(player, payload.category());
+            }
+        });
+
         // the handler body runs only on the client, so the client-only screen class is never loaded on a server
         registrar.playToClient(OpenBlastDoorScreenPayload.TYPE, OpenBlastDoorScreenPayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.openBlastDoorScreen(payload));

@@ -456,3 +456,94 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("power follow-up data written")
+
+
+# ================================================================ batch D2b: sentry turret
+lang = read_json(f"{NA}/lang/en_us.json", {})
+write_json(f"{NA}/blockstates/turret.json", {"variants": {"": {"model": "avp:block/powered"}}})
+write_json(f"{NA}/models/item/turret.json", {"parent": "minecraft:builtin/entity", "display": BLOCK_DISPLAY,
+                                             "textures": {"particle": "minecraft:block/iron_block"}})
+drop_self("turret")
+add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", ["avp:turret"])
+
+# ammo box texture: an olive-drab USCM crate with a yellow stencil band
+img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+d = ImageDraw.Draw(img)
+d.rectangle([2, 5, 13, 13], fill=(88, 96, 52, 255), outline=(48, 54, 26, 255))
+d.rectangle([3, 6, 12, 7], fill=(112, 122, 68, 255))
+d.rectangle([2, 9, 13, 10], fill=(214, 180, 40, 255))
+d.rectangle([6, 3, 9, 4], fill=(60, 62, 66, 255))      # handle
+d.point((4, 12), fill=(30, 30, 30, 255))
+d.point((11, 12), fill=(30, 30, 30, 255))
+img.save(f"{NA}/textures/item/ammo_sentry.png")
+item_model("ammo_sentry")
+
+# gunfire sound: the 1.12.2 smartgun shots
+os.makedirs(f"{NA}/sounds/blocks/turret", exist_ok=True)
+for n in range(3):
+    shutil.copy(f"{LA}/sounds/items/weapons/smartgun/shoot{n}.ogg", f"{NA}/sounds/blocks/turret/fire{n}.ogg")
+sounds = read_json(f"{NA}/sounds.json", {})
+sounds["blocks.turret.fire"] = {"subtitle": "subtitles.avp.turret.fire",
+                                "sounds": [f"avp:blocks/turret/fire{n}" for n in range(3)]}
+write_json(f"{NA}/sounds.json", sounds)
+
+write_json(f"{ND}/avp/damage_type/sentry.json",
+           {"message_id": "avp.sentry", "exhaustion": 0.1, "scaling": "when_caused_by_living_non_player"})
+for tag in ("xenomorphs", "predators"):
+    add_to_tag(f"{ND}/avp/tags/entity_type/{tag}.json", [])
+
+write_json(f"{ND}/avp/recipe/assembly/turret.json", {"type": "avp:assembly", "ingredients": [
+    ingredient_json("avp:part_servo", 2), ingredient_json("avp:part_sensor_array", 1), ingredient_json("avp:part_led_display", 1),
+    ingredient_json("avp:polycarbonate", 4), ingredient_json("#c:ingots/aluminum", 4), ingredient_json("#c:ingots/copper", 4),
+    ingredient_json("minecraft:iron_block", 1)], "result": {"id": "avp:turret", "count": 1}})
+write_json(f"{ND}/avp/recipe/assembly/ammo_sentry.json", {"type": "avp:assembly", "ingredients": [
+    ingredient_json("#c:ingots/aluminum", 2), ingredient_json("#c:ingots/copper", 1), ingredient_json("minecraft:gunpowder", 2)],
+    "result": {"id": "avp:ammo_sentry", "count": 1}})
+
+lang.update({
+    "block.avp.turret": "Sentry Turret",
+    "item.avp.ammo_sentry": "Sentry Ammo Box",
+    "tooltip.avp.turret": "UA 571-C automated sentry gun.\nIFF: never fires on its owner or the owner's team.",
+    "tooltip.avp.ammo_sentry": "10x28mm caseless rounds for sentry guns.",
+    "subtitles.avp.turret.fire": "Sentry gun fires",
+    "death.attack.avp.sentry": "%1$s was cut down by a sentry gun",
+    "death.attack.avp.sentry.player": "%1$s was cut down by a sentry gun while fighting %2$s",
+    "message.avp.turret.not_owner": "Only %s can change this turret's targets.",
+    "screen.avp.turret.ammo": "Ammo bay",
+    "screen.avp.turret.upgrades": "Upgrades",
+    "screen.avp.turret.iff": "Targets (IFF)",
+    "screen.avp.turret.online": "ONLINE",
+    "screen.avp.turret.offline": "NO POWER",
+    "screen.avp.turret.rounds": "Rounds: %s / %s",
+    "screen.avp.turret.range": "Range: %s blocks",
+    "screen.avp.turret.scanning": "Scanning...",
+    "screen.avp.turret.tracking": "Tracking: %s",
+    "screen.avp.turret.energy": "%s FE",
+    "screen.avp.turret.owner": "Owner: %s",
+    "screen.avp.turret.target.hostiles": "Monsters",
+    "screen.avp.turret.target.xenomorphs": "Xenomorphs",
+    "screen.avp.turret.target.predators": "Yautja",
+    "screen.avp.turret.target.players": "Players",
+    "screen.avp.turret.target.animals": "Animals",
+    "avp.configuration.turret": "Sentry Turret",
+    "avp.configuration.turret.button": "Sentry Turret...",
+    "avp.configuration.turret.tooltip": "Range, damage, rate of fire and ammo",
+    "avp.configuration.turretEnergyPerTick": "Energy Use (FE/tick)",
+    "avp.configuration.turretEnergyPerTick.tooltip": "FE a sentry turret uses per tick while switched on.",
+    "avp.configuration.turretRange": "Range (blocks)",
+    "avp.configuration.turretRange.tooltip": "How far a sentry turret sees and shoots.",
+    "avp.configuration.turretRangePerSensor": "Range per Sensor Upgrade",
+    "avp.configuration.turretRangePerSensor.tooltip": "Extra range for each Motion Sensor Array upgrade.",
+    "avp.configuration.turretDamage": "Damage per Shot",
+    "avp.configuration.turretDamage.tooltip": "Damage per shot (2 = one heart).",
+    "avp.configuration.turretFireInterval": "Time Between Shots (ticks)",
+    "avp.configuration.turretFireInterval.tooltip": "Ticks between shots (2 = 10 shots a second).",
+    "avp.configuration.turretRoundsPerBox": "Rounds per Ammo Box",
+    "avp.configuration.turretRoundsPerBox.tooltip": "Rounds in one Sentry Ammo Box.",
+    "avp.configuration.turretTurnSpeed": "Turn Speed (degrees/tick)",
+    "avp.configuration.turretTurnSpeed.tooltip": "How fast it turns; each Processor upgrade adds half again.",
+    "avp.configuration.turretBypassesInvulnerability": "Every Shot Lands",
+    "avp.configuration.turretBypassesInvulnerability.tooltip": "Shots ignore the short invulnerability after a hit (like 1.12.2).",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("batch D2b (turret) data written")

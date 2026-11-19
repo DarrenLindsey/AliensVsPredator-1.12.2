@@ -14,6 +14,14 @@ public final class ModTags
     public static final TagKey<EntityType<?>> TESLA_COIL_TARGETS = TagKey.create(Registries.ENTITY_TYPE,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "tesla_coil_targets"));
 
+    /** Xenomorphs of every kind (filled in as the creatures are ported). Sentry turrets can target them. */
+    public static final TagKey<EntityType<?>> XENOMORPHS = TagKey.create(Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "xenomorphs"));
+
+    /** Yautja (Predators). */
+    public static final TagKey<EntityType<?>> PREDATORS = TagKey.create(Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "predators"));
+
     private ModTags()
     {
     }

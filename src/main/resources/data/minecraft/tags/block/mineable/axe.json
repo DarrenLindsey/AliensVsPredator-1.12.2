@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "avp:hiveresin_standard"
+    "avp:hiveresin_standard",
+    "avp:unitree_wood",
+    "avp:paradise_log_large",
+    "avp:paradise_log_med",
+    "avp:paradise_log_small"
   ]
 }

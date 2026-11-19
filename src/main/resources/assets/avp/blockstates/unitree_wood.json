@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "avp:block/unitree_wood"
+    },
+    "axis=z": {
+      "model": "avp:block/unitree_wood_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "avp:block/unitree_wood_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

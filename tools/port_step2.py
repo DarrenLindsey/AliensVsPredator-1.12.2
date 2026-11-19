@@ -160,7 +160,7 @@ write_json(f"{NA}/lang/en_us.json", lang)
 
 # ---------------------------------------------------------------- recipes
 java = open("src/main/java/org/avp/registry/ModBlocks.java").read() + open("src/main/java/org/avp/registry/ModItems.java").read()
-AVP = set(re.findall(r'(?:simple|food|stairs|slab|ore)\("([a-z0-9_]+)"', java))
+AVP = set(re.findall(r'(?:\w+)\("([a-z0-9_]+)"', java))
 
 ORE_DICT = {
     "ingotAluminum": {"tag": "c:ingots/aluminum"},
@@ -249,7 +249,7 @@ for src, out, xp in SMELTING:
             "experience": xp, "cookingtime": time})
 
 # blocks fixed categories: anything whose result is a block goes in the "building" recipe-book tab
-blocks = set(re.findall(r'(?:simple|stairs|slab|ore)\("([a-z0-9_]+)"', open("src/main/java/org/avp/registry/ModBlocks.java").read()))
+blocks = set(re.findall(r'(?:\w+)\("([a-z0-9_]+)"', open("src/main/java/org/avp/registry/ModBlocks.java").read()))
 for name in done:
     p = f"{recipe_dir}/{name}.json"
     r = json.load(open(p))

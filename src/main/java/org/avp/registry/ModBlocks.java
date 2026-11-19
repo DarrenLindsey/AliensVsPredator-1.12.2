@@ -1,9 +1,22 @@
 package org.avp.registry;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import org.avp.AliensVsPredator;
+import org.avp.block.ModTreeGrowers;
+import org.avp.block.StalagmiteBlock;
+import org.avp.block.UnidentifiedTreeLeavesBlock;
+import org.avp.block.WheatGrassBlock;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.WebBlock;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -149,6 +162,42 @@ public final class ModBlocks
     public static final DeferredBlock<Block> OREMONAZITE = ore("oremonazite", 45F, 45F);
     public static final DeferredBlock<Block> ORECOBALT = ore("orecobalt", 50F, 50F);
 
+    // ---- Natural blocks: dirt, grass, logs, leaves, plants ----
+    public static final DeferredBlock<Block> UNIDIRT = dirt("unidirt");
+    public static final DeferredBlock<Block> PARADISE_DIRT = dirt("paradise_dirt");
+    public static final DeferredBlock<Block> PARADISE_DIRT_MOSSY = dirt("paradise_dirt_mossy");
+    public static final DeferredBlock<Block> PARADISE_DIRT_PODZOL = dirt("paradise_dirt_podzol");
+    public static final DeferredBlock<Block> PARADISE_GRASS = dirt("paradise_grass");
+
+    public static final DeferredBlock<RotatedPillarBlock> UNITREE_WOOD = log("unitree_wood", 5F);
+    public static final DeferredBlock<RotatedPillarBlock> PARADISE_LOG_LARGE = log("paradise_log_large", 0.5F);
+    public static final DeferredBlock<RotatedPillarBlock> PARADISE_LOG_MED = log("paradise_log_med", 0.5F);
+    public static final DeferredBlock<RotatedPillarBlock> PARADISE_LOG_SMALL = log("paradise_log_small", 0.5F);
+
+    public static final DeferredBlock<LeavesBlock> PARADISE_LEAVES_LARGE = leaves("paradise_leaves_large", 0.5F, LeavesBlock::new);
+    public static final DeferredBlock<LeavesBlock> PARADISE_LEAVES_MED = leaves("paradise_leaves_med", 0.5F, LeavesBlock::new);
+    public static final DeferredBlock<LeavesBlock> PARADISE_LEAVES_SMALL = leaves("paradise_leaves_small", 0.5F, LeavesBlock::new);
+    public static final DeferredBlock<UnidentifiedTreeLeavesBlock> UNITREE_LEAVES = leaves("unitree_leaves", 0.2F,
+            p -> new UnidentifiedTreeLeavesBlock(UnidentifiedTreeLeavesBlock.Part.TOP, p));
+    public static final DeferredBlock<UnidentifiedTreeLeavesBlock> UNITREE_LEAVES_M = leaves("unitree_leaves_m", 0.2F,
+            p -> new UnidentifiedTreeLeavesBlock(UnidentifiedTreeLeavesBlock.Part.MIDDLE, p));
+    public static final DeferredBlock<UnidentifiedTreeLeavesBlock> UNITREE_LEAVES_B = leaves("unitree_leaves_b", 0.2F,
+            p -> new UnidentifiedTreeLeavesBlock(UnidentifiedTreeLeavesBlock.Part.BOTTOM, p));
+
+    /** Sticky like a cobweb; drops sticks (see its loot table). */
+    public static final DeferredBlock<WebBlock> UNITREE_TENDONS = register("unitree_tendons", Tab.BLOCKS, () -> new WebBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_BLACK).sound(SoundType.WOOL).noCollission().strength(1.0F)
+            .pushReaction(PushReaction.DESTROY)));
+    public static final DeferredBlock<SaplingBlock> UNITREE_SAPLING = register("unitree_sapling", Tab.MAIN, () -> new SaplingBlock(ModTreeGrowers.UNIDENTIFIED,
+            BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollission().randomTicks().instabreak()
+                    .sound(SoundType.GRASS).pushReaction(PushReaction.DESTROY)));
+    public static final DeferredBlock<StalagmiteBlock> STALAGMITE = register("stalagmite", Tab.MAIN, () -> new StalagmiteBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.STONE).sound(SoundType.STONE).noCollission().instabreak().noOcclusion()
+            .pushReaction(PushReaction.DESTROY)));
+    public static final DeferredBlock<WheatGrassBlock> PARADISIAN_WHEAT_GRASS = register("paradisian_wheat_grass", Tab.BLOCKS, () -> new WheatGrassBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.PLANT).noCollission().instabreak().sound(SoundType.GRASS)
+            .offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.DESTROY)));
+
     /** A plain full-cube block that drops itself. */
     private static DeferredBlock<Block> simple(String id, Kind kind, float hardness, float resistance)
     {
@@ -173,6 +222,39 @@ public final class ModBlocks
         });
         withItem(block, Tab.BLOCKS);
         return block;
+    }
+
+    /** Registers any block (plus its item) and puts it in a creative tab. */
+    private static <B extends Block> DeferredBlock<B> register(String id, Tab tab, Supplier<B> factory)
+    {
+        DeferredBlock<B> block = BLOCKS.register(id, factory);
+        withItem(block, tab);
+        return block;
+    }
+
+    /** Dirt-like block. Being in the minecraft:dirt tag lets saplings, flowers etc. be planted on it. */
+    private static DeferredBlock<Block> dirt(String id)
+    {
+        return register(id, Tab.BLOCKS, () -> new Block(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.DIRT).sound(SoundType.GRAVEL).strength(0.5F, 2.0F)));
+    }
+
+    /** A log that can be placed sideways (the "axis" block state). */
+    private static DeferredBlock<RotatedPillarBlock> log(String id, float hardness)
+    {
+        return register(id, Tab.BLOCKS, () -> new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_BLACK).instrument(NoteBlockInstrument.BASS).sound(SoundType.WOOD)
+                .strength(hardness, 2.0F).ignitedByLava()));
+    }
+
+    /** Leaves: decay when no log (minecraft:logs tag) is within 6 blocks. */
+    private static <B extends LeavesBlock> DeferredBlock<B> leaves(String id, float hardness, Function<BlockBehaviour.Properties, B> factory)
+    {
+        return register(id, Tab.BLOCKS, () -> factory.apply(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.PLANT).strength(hardness).randomTicks().sound(SoundType.GRASS).noOcclusion()
+                .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)
+                .isRedstoneConductor((state, level, pos) -> false)
+                .ignitedByLava().pushReaction(PushReaction.DESTROY)));
     }
 
     /** Stairs made from another block (same look, sound and hardness). */

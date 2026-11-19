@@ -1,0 +1,9 @@
+{
+  "loader": "neoforge:obj",
+  "model": "avp:models/block/paradisian_wheat_grass.obj",
+  "flip_v": true,
+  "render_type": "minecraft:cutout_mipped",
+  "textures": {
+    "particle": "avp:block/paradisian_wheat_grass"
+  }
+}

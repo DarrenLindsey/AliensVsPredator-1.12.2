@@ -1,0 +1,24 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "avp:block/unitree_tendons_1"
+      },
+      {
+        "model": "avp:block/unitree_tendons_2"
+      },
+      {
+        "model": "avp:block/unitree_tendons_3"
+      },
+      {
+        "model": "avp:block/unitree_tendons_4"
+      },
+      {
+        "model": "avp:block/unitree_tendons_5"
+      },
+      {
+        "model": "avp:block/unitree_tendons_6"
+      }
+    ]
+  }
+}

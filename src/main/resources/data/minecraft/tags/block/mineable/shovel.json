@@ -2,6 +2,11 @@
   "replace": false,
   "values": [
     "avp:unisand",
-    "avp:unigravel"
+    "avp:unigravel",
+    "avp:unidirt",
+    "avp:paradise_dirt",
+    "avp:paradise_dirt_mossy",
+    "avp:paradise_dirt_podzol",
+    "avp:paradise_grass"
   ]
 }

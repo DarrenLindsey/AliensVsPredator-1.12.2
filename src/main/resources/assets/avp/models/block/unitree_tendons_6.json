@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "avp:block/unitree_tendons_6"
+  },
+  "render_type": "minecraft:translucent"
+}

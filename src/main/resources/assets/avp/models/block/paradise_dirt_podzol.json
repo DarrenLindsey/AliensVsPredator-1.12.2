@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "avp:block/paradise_dirt_podzol_top",
+    "bottom": "avp:block/paradise_dirt",
+    "side": "avp:block/paradise_dirt_podzol_side"
+  }
+}

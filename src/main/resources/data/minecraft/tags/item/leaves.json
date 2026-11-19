@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "avp:paradise_leaves_large",
+    "avp:paradise_leaves_med",
+    "avp:paradise_leaves_small",
+    "avp:unitree_leaves",
+    "avp:unitree_leaves_m",
+    "avp:unitree_leaves_b"
+  ]
+}

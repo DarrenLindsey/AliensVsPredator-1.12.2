@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "avp:unitree_wood",
+    "avp:paradise_log_large",
+    "avp:paradise_log_med",
+    "avp:paradise_log_small"
+  ]
+}

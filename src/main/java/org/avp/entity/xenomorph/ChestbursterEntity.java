@@ -107,7 +107,7 @@ public class ChestbursterEntity extends XenomorphEntity
         super.tick();
         if (!level().isClientSide)
         {
-            entityData.set(CLIMBING, horizontalCollision);
+            entityData.set(CLIMBING, wantsToClimb());
         }
     }
 

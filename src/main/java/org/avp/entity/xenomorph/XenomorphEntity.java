@@ -47,6 +47,8 @@ public abstract class XenomorphEntity extends Monster
     private int knownTurretTicks;
     private int calmTicks;
     private int standTicks;
+    /** Ticks before it may switch between crawling and standing again (stops it bobbing). */
+    private int poseHold;
     /** What it's doing (for the debug label). */
     private String state = "LURKING";
     private boolean debugNamed;
@@ -122,6 +124,26 @@ public abstract class XenomorphEntity extends Monster
         refreshDimensions();
     }
 
+    /**
+     * Should it climb the wall it's touching? Only when where it's going is higher up (its
+     * target, or the next step of its path) - not just because it brushed a wall, which made
+     * it bob up and down in small rooms.
+     */
+    public boolean wantsToClimb()
+    {
+        if (!horizontalCollision)
+        {
+            return false;
+        }
+        net.minecraft.world.level.pathfinder.Path path = getNavigation().getPath();
+        if (path != null && !path.isDone() && path.getNextNodePos().getY() > getBlockY())
+        {
+            return true;
+        }
+        net.minecraft.world.phys.Vec3 goal = goalPos();
+        return goal != null && goal.y > getY() + 1.0 && !(getTarget() != null && distanceToSqr(getTarget()) < 4);
+    }
+
     /** Where it's trying to get to: its target, or a noise it's investigating. */
     @Nullable
     private net.minecraft.world.phys.Vec3 goalPos()
@@ -139,6 +161,10 @@ public abstract class XenomorphEntity extends Monster
         {
             return;
         }
+        if (poseHold > 0)
+        {
+            return;
+        }
         if (isCrawling())
         {
             net.minecraft.world.phys.AABB standing = super.getDefaultDimensions(net.minecraft.world.entity.Pose.STANDING)
@@ -148,6 +174,7 @@ public abstract class XenomorphEntity extends Monster
             {
                 setCrawling(false);
                 standTicks = 0;
+                poseHold = 40;
             }
             return;
         }
@@ -169,6 +196,7 @@ public abstract class XenomorphEntity extends Monster
         {
             getNavigation().moveTo(low, 1.1);
             standTicks = 0;
+            poseHold = 40;
         }
         else
         {
@@ -353,6 +381,10 @@ public abstract class XenomorphEntity extends Monster
         if (retreatCooldown > 0)
         {
             retreatCooldown--;
+        }
+        if (poseHold > 0)
+        {
+            poseHold--;
         }
         if (knownTurretTicks > 0 && --knownTurretTicks == 0)
         {

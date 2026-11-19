@@ -41,5 +41,41 @@
       "avp:blocks/turret/fire1",
       "avp:blocks/turret/fire2"
     ]
+  },
+  "mobs.chestburster.burst": {
+    "subtitle": "subtitles.avp.chestburster.burst",
+    "sounds": [
+      "avp:mobs/chestburster/burst"
+    ]
+  },
+  "mobs.facehugger.living": {
+    "subtitle": "subtitles.avp.facehugger.living",
+    "sounds": [
+      "avp:mobs/facehugger/living0",
+      "avp:mobs/facehugger/living1",
+      "avp:mobs/facehugger/living2"
+    ]
+  },
+  "mobs.facehugger.hurt": {
+    "subtitle": "subtitles.avp.facehugger.hurt",
+    "sounds": [
+      "avp:mobs/facehugger/hurt0"
+    ]
+  },
+  "mobs.facehugger.death": {
+    "subtitle": "subtitles.avp.facehugger.death",
+    "sounds": [
+      "avp:mobs/facehugger/death0",
+      "avp:mobs/facehugger/death1",
+      "avp:mobs/facehugger/death2"
+    ]
+  },
+  "mobs.facehugger.implant": {
+    "subtitle": "subtitles.avp.facehugger.implant",
+    "sounds": [
+      "avp:mobs/facehugger/implant0",
+      "avp:mobs/facehugger/implant1",
+      "avp:mobs/facehugger/implant2"
+    ]
   }
 }

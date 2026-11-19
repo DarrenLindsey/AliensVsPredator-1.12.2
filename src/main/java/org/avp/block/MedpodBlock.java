@@ -110,6 +110,24 @@ public class MedpodBlock extends PoweredBlock implements SeatBlock
                 if (passenger instanceof net.minecraft.world.entity.LivingEntity living)
                 {
                     living.heal(AvpConfig.server(AvpConfig.SERVER.medpodHealAmount));
+                    // surgery (Prometheus): take out an embryo - but not one that's nearly grown
+                    if (AvpConfig.server(AvpConfig.SERVER.medpodRemovesEmbryo) && living.hasData(org.avp.registry.ModAttachments.EMBRYO))
+                    {
+                        org.avp.entity.parasite.Embryo embryo = living.getData(org.avp.registry.ModAttachments.EMBRYO);
+                        if (!embryo.isLate())
+                        {
+                            living.removeData(org.avp.registry.ModAttachments.EMBRYO);
+                            living.hurt(level.damageSources().generic(), 2.0F);
+                            if (living instanceof Player player)
+                            {
+                                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.medpod.embryo_removed"), false);
+                            }
+                        }
+                        else if (living instanceof Player player && level.getGameTime() % 200 == 0)
+                        {
+                            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.medpod.embryo_too_late"), true);
+                        }
+                    }
                     if (AvpConfig.server(AvpConfig.SERVER.medpodCuresEffects))
                     {
                         // remove harmful effects only (poison, wither, slowness...)

@@ -22,12 +22,34 @@ public record ConfigCondition(String ore) implements ICondition
             Codec.STRING.fieldOf("ore").forGetter(ConfigCondition::ore)
     ).apply(i, ConfigCondition::new));
 
+    /** "avp:spawn_enabled" with "creature": natural spawning switches. */
+    public record Spawn(String creature) implements ICondition
+    {
+        public static final MapCodec<Spawn> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.STRING.fieldOf("creature").forGetter(Spawn::creature)
+        ).apply(i, Spawn::new));
+
+        @Override
+        public boolean test(IContext context)
+        {
+            var value = AvpConfig.COMMON.spawns.get(creature);
+            return AvpConfig.common(AvpConfig.COMMON.naturalSpawns) && value != null && AvpConfig.common(value);
+        }
+
+        @Override
+        public MapCodec<? extends ICondition> codec()
+        {
+            return CODEC;
+        }
+    }
+
     public static final DeferredRegister<MapCodec<? extends ICondition>> CONDITIONS =
             DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, AliensVsPredator.MOD_ID);
 
     static
     {
         CONDITIONS.register("ore_enabled", () -> CODEC);
+        CONDITIONS.register("spawn_enabled", () -> Spawn.CODEC);
     }
 
     @Override

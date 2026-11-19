@@ -46,6 +46,9 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue generateOres;
         /** Per ore, by the name used in data/avp/neoforge/biome_modifier/ore_<name>.json. */
         public final java.util.Map<String, ModConfigSpec.BooleanValue> ores = new java.util.LinkedHashMap<>();
+        /** Natural spawning per creature, by the name used in data/avp/neoforge/biome_modifier/spawn_<name>.json. */
+        public final java.util.Map<String, ModConfigSpec.BooleanValue> spawns = new java.util.LinkedHashMap<>();
+        public final ModConfigSpec.BooleanValue naturalSpawns;
 
         Common(ModConfigSpec.Builder b)
         {
@@ -63,6 +66,17 @@ public final class AvpConfig
             for (String[] ore : list)
             {
                 ores.put(ore[0], b.comment(ore[1]).define("ore_" + ore[0], true));
+            }
+            b.pop();
+
+            b.push("spawning");
+            naturalSpawns = b
+                    .comment("AvP creatures spawn naturally in the world. Needs a restart. (Biomes and weights: data/avp/neoforge/biome_modifier/spawn_*.json.)")
+                    .define("naturalSpawns", true);
+            String[][] creatures = { { "facehugger", "Facehuggers in jungles, swamps and dark forests (at night / in the dark)." } };
+            for (String[] creature : creatures)
+            {
+                spawns.put(creature[0], b.comment(creature[1]).define("spawn_" + creature[0], true));
             }
             b.pop();
         }
@@ -144,6 +158,14 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue turretTurnSpeed;
         public final ModConfigSpec.BooleanValue turretBypassesInvulnerability;
         public final ModConfigSpec.BooleanValue lithiumReactsWithWater;
+        public final ModConfigSpec.IntValue facehuggerAttachTicks;
+        public final ModConfigSpec.IntValue facehuggerLifetimeAfter;
+        public final ModConfigSpec.IntValue facehuggerHelmetMelt;
+        public final ModConfigSpec.DoubleValue acidBloodDamage;
+        public final ModConfigSpec.BooleanValue facehuggersTargetPlayers;
+        public final ModConfigSpec.IntValue embryoGestationTicks;
+        public final ModConfigSpec.BooleanValue embryoSymptoms;
+        public final ModConfigSpec.BooleanValue medpodRemovesEmbryo;
 
         Server(ModConfigSpec.Builder b)
         {
@@ -268,6 +290,33 @@ public final class AvpConfig
             turretBypassesInvulnerability = b
                     .comment("Every shot lands, even during the short invulnerability after being hit (like 1.12.2).")
                     .define("turretBypassesInvulnerability", true);
+            b.pop();
+
+            b.push("parasites");
+            facehuggerAttachTicks = b
+                    .comment("How long a facehugger stays on its host's face (20 ticks = 1 second; 1.12.2: 2 minutes).")
+                    .defineInRange("facehuggerAttachTicks", 2400, 20, 72_000);
+            facehuggerLifetimeAfter = b
+                    .comment("How long a spent facehugger lies on its back before it dies (ticks).")
+                    .defineInRange("facehuggerLifetimeAfter", 6000, 20, 72_000);
+            facehuggerHelmetMelt = b
+                    .comment("Durability a facehugger's acid takes off a helmet each time it lunges at a player's face. It only latches on once the helmet breaks.")
+                    .defineInRange("facehuggerHelmetMelt", 60, 0, 10_000);
+            acidBloodDamage = b
+                    .comment("Damage to the host when a facehugger attached to their face is hurt (its acid blood splashes). 0 = off.")
+                    .defineInRange("acidBloodDamage", 4.0, 0.0, 1000.0);
+            facehuggersTargetPlayers = b
+                    .comment("Facehuggers go after players (players in creative or spectator mode are never targeted).")
+                    .define("facehuggersTargetPlayers", true);
+            embryoGestationTicks = b
+                    .comment("How long an embryo grows before it bursts out (20 ticks = 1 second; 1.12.2: 5 minutes).")
+                    .defineInRange("embryoGestationTicks", 6000, 200, 1_728_000);
+            embryoSymptoms = b
+                    .comment("Hosts feel the embryo near the end: nausea, weakness and hunger.")
+                    .define("embryoSymptoms", true);
+            medpodRemovesEmbryo = b
+                    .comment("A powered, closed medpod surgically removes an embryo - unless it's nearly fully grown.")
+                    .define("medpodRemovesEmbryo", true);
             b.pop();
 
             b.push("crafting");

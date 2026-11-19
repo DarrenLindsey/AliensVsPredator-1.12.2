@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "avp:sentry_ap"
+    "avp:sentry_ap",
+    "avp:chestburster",
+    "avp:acid"
   ]
 }

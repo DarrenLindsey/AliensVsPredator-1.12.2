@@ -21,6 +21,11 @@ public final class ModSounds
     public static final DeferredHolder<SoundEvent, SoundEvent> BLASTDOOR_SEVASTOPOL_OPEN = sound("blocks.blastdoor.sevastopol.open");
     public static final DeferredHolder<SoundEvent, SoundEvent> BLASTDOOR_SEVASTOPOL_CLOSE = sound("blocks.blastdoor.sevastopol.close");
 
+    public static final DeferredHolder<SoundEvent, SoundEvent> FACEHUGGER_LIVING = sound("mobs.facehugger.living");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FACEHUGGER_HURT = sound("mobs.facehugger.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FACEHUGGER_DEATH = sound("mobs.facehugger.death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FACEHUGGER_IMPLANT = sound("mobs.facehugger.implant");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHESTBURSTER_BURST = sound("mobs.chestburster.burst");
     public static final DeferredHolder<SoundEvent, SoundEvent> TURRET_FIRE = sound("blocks.turret.fire");
 
     private static DeferredHolder<SoundEvent, SoundEvent> sound(String name)

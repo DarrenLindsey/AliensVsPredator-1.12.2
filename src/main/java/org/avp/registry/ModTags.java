@@ -22,6 +22,14 @@ public final class ModTags
     public static final TagKey<EntityType<?>> PREDATORS = TagKey.create(Registries.ENTITY_TYPE,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "predators"));
 
+    /** Creatures a facehugger can't use as a host (undead, golems, small animals, other aliens...). */
+    public static final TagKey<EntityType<?>> CANNOT_HOST = TagKey.create(Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "cannot_host"));
+
+    /** Helmets a facehugger can't get through (sealed masks, later the Predator biomask). */
+    public static final TagKey<net.minecraft.world.item.Item> FACEHUGGER_PROOF = TagKey.create(Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "facehugger_proof"));
+
     private ModTags()
     {
     }

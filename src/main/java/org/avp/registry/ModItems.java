@@ -88,6 +88,14 @@ public final class ModItems
         Tab.CRAFTING.add(INGOT_LITHIUM);
     }
 
+    // ---- Spawn eggs ----
+    public static final DeferredItem<Item> FACEHUGGER_SPAWN_EGG = ITEMS.register("facehugger_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.FACEHUGGER, 0xC9B79C, 0x7A6248, new Item.Properties()));
+    static
+    {
+        Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);
+    }
+
     /** A plain item with no special behaviour (crafting parts, ingots, ...). */
     private static DeferredItem<Item> simple(String id, Tab tab, int maxStack)
     {

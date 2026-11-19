@@ -19,6 +19,11 @@ public final class ModEntities
             () -> EntityType.Builder.<SeatEntity>of(SeatEntity::new, MobCategory.MISC)
                     .sized(0.5F, 0.1F).noSummon().clientTrackingRange(8).build("seat"));
 
+    // ---- Creatures ----
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.parasite.FacehuggerEntity>> FACEHUGGER = ENTITIES.register("facehugger",
+            () -> EntityType.Builder.<org.avp.entity.parasite.FacehuggerEntity>of(org.avp.entity.parasite.FacehuggerEntity::new, MobCategory.MONSTER)
+                    .sized(0.8F, 0.4F).eyeHeight(0.25F).clientTrackingRange(10).build("facehugger"));
+
     private ModEntities()
     {
     }

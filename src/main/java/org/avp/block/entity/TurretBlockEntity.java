@@ -538,7 +538,24 @@ public class TurretBlockEntity extends BlockEntity implements MenuProvider
         {
             return false;
         }
-        return level.clip(new ClipContext(pivot(), aimPoint(living), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, living))
+        return canSee(level, aimPoint(living), living);
+    }
+
+    /**
+     * Clear line of fire? The line starts a block out from the gun's pivot: the pivot is inside
+     * the turret's own block, and a line that starts inside a block always "hits" it.
+     */
+    private boolean canSee(Level level, Vec3 point, Entity target)
+    {
+        Vec3 from = pivot();
+        Vec3 toTarget = point.subtract(from);
+        double distance = toTarget.length();
+        if (distance <= 1.0)
+        {
+            return true;
+        }
+        Vec3 start = from.add(toTarget.scale(1.0 / distance));
+        return level.clip(new ClipContext(start, point, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, target))
                 .getType() == HitResult.Type.MISS;
     }
 

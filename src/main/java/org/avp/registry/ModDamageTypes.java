@@ -37,6 +37,18 @@ public final class ModDamageTypes
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SENTRY_AP));
     }
 
+    /** Xenomorph acid blood. */
+    public static final ResourceKey<DamageType> ACID = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "acid"));
+    /** Something bursting out of your chest. */
+    public static final ResourceKey<DamageType> CHESTBURSTER = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "chestburster"));
+
+    public static DamageSource of(Level level, ResourceKey<DamageType> key)
+    {
+        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key));
+    }
+
     public static DamageSource electricity(Level level)
     {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(ELECTRICITY));

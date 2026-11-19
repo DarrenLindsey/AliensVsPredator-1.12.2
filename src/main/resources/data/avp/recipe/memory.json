@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "AAA",
+    "CEC",
+    "DBD"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:part_ic"
+    },
+    "B": {
+      "item": "avp:polycarbonate"
+    },
+    "C": {
+      "item": "avp:silicon"
+    },
+    "D": {
+      "tag": "c:ingots/copper"
+    },
+    "E": {
+      "item": "avp:part_transistor"
+    }
+  },
+  "result": {
+    "id": "avp:part_ram"
+  }
+}

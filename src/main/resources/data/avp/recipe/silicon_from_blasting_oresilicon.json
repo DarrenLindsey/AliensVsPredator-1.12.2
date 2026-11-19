@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": {
+    "item": "avp:oresilicon"
+  },
+  "result": {
+    "id": "avp:silicon"
+  },
+  "experience": 1.0,
+  "cookingtime": 100
+}

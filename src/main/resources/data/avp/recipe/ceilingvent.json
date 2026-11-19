@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "BAB",
+    "ACA",
+    "BAB"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:iron_nugget"
+    },
+    "B": {
+      "tag": "c:ingots/aluminum"
+    },
+    "C": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "result": {
+    "id": "avp:ceilingvent",
+    "count": 16
+  }
+}

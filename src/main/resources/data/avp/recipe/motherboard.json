@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "AEF",
+    "GBC",
+    "DBH"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:part_ic"
+    },
+    "B": {
+      "item": "avp:polycarbonate"
+    },
+    "C": {
+      "item": "avp:part_transistor"
+    },
+    "D": {
+      "item": "avp:part_capacitor"
+    },
+    "E": {
+      "item": "avp:part_regulator"
+    },
+    "F": {
+      "item": "avp:part_diode"
+    },
+    "G": {
+      "item": "avp:part_resistor"
+    },
+    "H": {
+      "item": "avp:part_led"
+    }
+  },
+  "result": {
+    "id": "avp:part_motherboard"
+  }
+}

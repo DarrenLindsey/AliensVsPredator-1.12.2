@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "avp:block/industrialwall",
+    "top": "avp:block/industrialwall",
+    "side": "avp:block/industrialwall"
+  }
+}

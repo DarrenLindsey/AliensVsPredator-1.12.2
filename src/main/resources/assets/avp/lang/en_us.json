@@ -103,5 +103,18 @@
   "item.avp.blackgoo_item": "Black Goo",
   "item.avp.phial_goo": "Ampule of Goo",
   "item.avp.phial_empty": "Ampule",
-  "item.avp.tool_securitytuner": "Security Access Tuner"
+  "item.avp.tool_securitytuner": "Security Access Tuner",
+  "block.avp.floorgrillstairs": "Floor Grill Stairs",
+  "block.avp.ceilinggrillstairs": "Ceiling Grill Stairs",
+  "block.avp.industrialbrickstairs": "Industrial Brick Stairs",
+  "block.avp.industrialwallstairs": "Industrial Wall Stairs",
+  "block.avp.industrialglassstairs": "Industrial Glass Stairs",
+  "block.avp.floorgrillslab": "Floor Grill Slab",
+  "block.avp.ceilinggrillslab": "Ceiling Grill Slab",
+  "block.avp.industrialslab": "Industrial Slab",
+  "block.avp.industrialbrickslab": "Industrial Brick Slab",
+  "block.avp.industrialglassslab": "Industrial Glass Slab",
+  "block.avp.oresilicon": "Silicon Ore",
+  "block.avp.oremonazite": "Monazite Ore",
+  "block.avp.orecobalt": "Cobalt Ore"
 }

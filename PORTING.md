@@ -31,13 +31,16 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 | `src/main/templates/META-INF/neoforge.mods.toml` | Mod info shown in the Mods screen (filled in from `gradle.properties`) |
 | `tools/port_simple.py` | Script that converted the simple blocks/items from `legacy-1.12.2/` |
 | `PORTING-skipped.txt` | Simple-looking items the script couldn't convert (3D-rendered or special) |
+| `PORTING-skipped-recipes.txt` | Old recipes waiting for an item that isn't ported yet |
 
 ## Progress
 
 - [x] Step 1 - Project skeleton that builds and loads
 - [x] Step 2a - Simple decorative blocks (73) and simple items/foods (28)
-- [ ] Step 2b - Special blocks (stairs, slabs, ores with drops, resin, skulls, fluids)
-- [ ] Step 2c - Recipes
+- [x] Step 2b - Stairs (5), slabs (5), ores with special drops (silicon, monazite, cobalt)
+- [x] Step 2c - Recipes: 45 crafting + 9 smelting/blasting/smoking/campfire (`tools/port_step2.py`)
+- [ ] Step 2d - Remaining special blocks (hive resin, skulls, striped wall, black goo fluid, lithium ingot)
+- [ ] Ore generation in the world (ores exist but don't spawn yet)
 - [ ] Step 3 - One creature end to end (template for the rest)
 - [ ] Step 4 - Other creatures, guns, armour, tile entities
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation

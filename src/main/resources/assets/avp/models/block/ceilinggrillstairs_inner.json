@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "avp:block/ceilinggrill",
+    "top": "avp:block/ceilinggrill",
+    "side": "avp:block/ceilinggrill"
+  },
+  "render_type": "minecraft:translucent"
+}

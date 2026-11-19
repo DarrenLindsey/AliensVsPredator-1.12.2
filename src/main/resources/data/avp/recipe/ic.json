@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "DBE",
+    "CAC",
+    "FBG"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:polycarbonate"
+    },
+    "B": {
+      "tag": "c:ingots/aluminum"
+    },
+    "C": {
+      "tag": "c:ingots/copper"
+    },
+    "D": {
+      "item": "avp:part_transistor"
+    },
+    "E": {
+      "item": "avp:part_resistor"
+    },
+    "F": {
+      "item": "avp:part_regulator"
+    },
+    "G": {
+      "item": "avp:part_diode"
+    }
+  },
+  "result": {
+    "id": "avp:part_ic"
+  }
+}

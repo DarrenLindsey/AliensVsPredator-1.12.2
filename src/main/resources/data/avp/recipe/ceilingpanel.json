@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "AAA",
+    "ABA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:iron_nugget"
+    },
+    "B": {
+      "tag": "c:ingots/aluminum"
+    }
+  },
+  "result": {
+    "id": "avp:ceilingpanel",
+    "count": 16
+  }
+}

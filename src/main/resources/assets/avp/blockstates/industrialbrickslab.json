@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "avp:block/industrialbrickslab"
+    },
+    "type=top": {
+      "model": "avp:block/industrialbrickslab_top"
+    },
+    "type=double": {
+      "model": "avp:block/industrialbricks"
+    }
+  }
+}

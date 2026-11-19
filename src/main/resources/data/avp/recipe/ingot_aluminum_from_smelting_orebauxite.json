@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "avp:orebauxite"
+  },
+  "result": {
+    "id": "avp:ingot_aluminum"
+  },
+  "experience": 1.0,
+  "cookingtime": 200
+}

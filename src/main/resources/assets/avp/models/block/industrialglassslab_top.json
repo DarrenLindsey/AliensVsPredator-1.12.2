@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "avp:block/industrialglass",
+    "top": "avp:block/industrialglass",
+    "side": "avp:block/industrialglass"
+  },
+  "render_type": "minecraft:translucent"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "ingredient": {
+    "item": "avp:food_raw_tentacle"
+  },
+  "result": {
+    "id": "avp:food_trilo_bite"
+  },
+  "experience": 2.0,
+  "cookingtime": 600
+}

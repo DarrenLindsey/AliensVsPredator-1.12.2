@@ -4,6 +4,8 @@ import org.avp.AliensVsPredator;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -128,6 +130,25 @@ public final class ModBlocks
     public static final DeferredBlock<Block> LV426ROCK = simple("lv426rock", Kind.STONE, 1.3F, 2F);
     // </generated>
 
+    // ---- Stairs and slabs (they copy all settings from the block they're made of) ----
+    public static final DeferredBlock<StairBlock> FLOORGRILLSTAIRS = stairs("floorgrillstairs", FLOORGRILL);
+    public static final DeferredBlock<StairBlock> CEILINGGRILLSTAIRS = stairs("ceilinggrillstairs", CEILINGGRILL);
+    public static final DeferredBlock<StairBlock> INDUSTRIALBRICKSTAIRS = stairs("industrialbrickstairs", INDUSTRIALBRICKS);
+    public static final DeferredBlock<StairBlock> INDUSTRIALWALLSTAIRS = stairs("industrialwallstairs", INDUSTRIALWALL);
+    public static final DeferredBlock<StairBlock> INDUSTRIALGLASSSTAIRS = stairs("industrialglassstairs", INDUSTRIALGLASS);
+    public static final DeferredBlock<SlabBlock> FLOORGRILLSLAB = slab("floorgrillslab", FLOORGRILL);
+    public static final DeferredBlock<SlabBlock> CEILINGGRILLSLAB = slab("ceilinggrillslab", CEILINGGRILL);
+    public static final DeferredBlock<SlabBlock> INDUSTRIALSLAB = slab("industrialslab", INDUSTRIALWALL);
+    public static final DeferredBlock<SlabBlock> INDUSTRIALBRICKSLAB = slab("industrialbrickslab", INDUSTRIALBRICKS);
+    public static final DeferredBlock<SlabBlock> INDUSTRIALGLASSSLAB = slab("industrialglassslab", INDUSTRIALGLASS);
+
+    // ---- Ores that drop an item instead of themselves ----
+    // In 1.12.2 the drop was code (getItemDropped/quantityDropped). Now it's data:
+    // see data/avp/loot_table/blocks/oresilicon.json etc. (handles Fortune and Silk Touch too).
+    public static final DeferredBlock<Block> ORESILICON = ore("oresilicon", 2.2F, 1.4F);
+    public static final DeferredBlock<Block> OREMONAZITE = ore("oremonazite", 45F, 45F);
+    public static final DeferredBlock<Block> ORECOBALT = ore("orecobalt", 50F, 50F);
+
     /** A plain full-cube block that drops itself. */
     private static DeferredBlock<Block> simple(String id, Kind kind, float hardness, float resistance)
     {
@@ -154,8 +175,36 @@ public final class ModBlocks
         return block;
     }
 
+    /** Stairs made from another block (same look, sound and hardness). */
+    private static DeferredBlock<StairBlock> stairs(String id, DeferredBlock<Block> base)
+    {
+        DeferredBlock<StairBlock> block = BLOCKS.register(id, () -> new StairBlock(base.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(base.get())));
+        withItem(block, Tab.BLOCKS);
+        return block;
+    }
+
+    /** A slab made from another block. */
+    private static DeferredBlock<SlabBlock> slab(String id, DeferredBlock<Block> base)
+    {
+        DeferredBlock<SlabBlock> block = BLOCKS.register(id, () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(base.get())));
+        withItem(block, Tab.BLOCKS);
+        return block;
+    }
+
+    /** A stone-like ore that needs a pickaxe. What it drops is set in its loot table. */
+    private static DeferredBlock<Block> ore(String id, float hardness, float resistance)
+    {
+        DeferredBlock<Block> block = BLOCKS.register(id, () -> new Block(BlockBehaviour.Properties.of()
+                .mapColor(MapColor.STONE)
+                .sound(SoundType.STONE)
+                .strength(hardness, resistance)
+                .requiresCorrectToolForDrops()));
+        withItem(block, Tab.MAIN);
+        return block;
+    }
+
     /** Registers the inventory item for a block and puts it in a creative tab. */
-    private static void withItem(DeferredBlock<Block> block, Tab tab)
+    private static void withItem(DeferredBlock<?> block, Tab tab)
     {
         DeferredItem<BlockItem> item = ModItems.ITEMS.registerSimpleBlockItem(block);
         tab.add(item);

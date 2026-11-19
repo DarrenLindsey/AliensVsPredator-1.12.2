@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "avp:floorgrillstairs",
+    "avp:ceilinggrillstairs",
+    "avp:industrialbrickstairs",
+    "avp:industrialwallstairs",
+    "avp:industrialglassstairs"
+  ]
+}

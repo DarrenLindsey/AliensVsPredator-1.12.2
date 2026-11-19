@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " A ",
+    "ABA",
+    " A "
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:orange_wool"
+    },
+    "B": {
+      "item": "avp:polycarbonate"
+    }
+  },
+  "result": {
+    "id": "avp:padding_square_orange",
+    "count": 16
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "b  ",
+    "aa ",
+    "bbb"
+  ],
+  "key": {
+    "a": {
+      "item": "avp:polycarbonate"
+    },
+    "b": {
+      "item": "minecraft:glass"
+    }
+  },
+  "result": {
+    "id": "avp:industrialglassstairs",
+    "count": 12
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "A A",
+    " B ",
+    "A A"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:white_wool"
+    },
+    "B": {
+      "item": "avp:polycarbonate"
+    }
+  },
+  "result": {
+    "id": "avp:padding_tiles_white",
+    "count": 16
+  }
+}

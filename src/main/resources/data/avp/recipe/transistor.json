@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  A",
+    "BC ",
+    "  A"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:polycarbonate"
+    },
+    "B": {
+      "tag": "c:ingots/aluminum"
+    },
+    "C": {
+      "item": "minecraft:lever"
+    }
+  },
+  "result": {
+    "id": "avp:part_transistor"
+  }
+}

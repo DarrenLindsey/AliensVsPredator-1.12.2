@@ -62,6 +62,19 @@
     "avp:engineershipmaterial1",
     "avp:engineershipmaterial2",
     "avp:unistone",
-    "avp:lv426rock"
+    "avp:lv426rock",
+    "avp:floorgrillstairs",
+    "avp:ceilinggrillstairs",
+    "avp:industrialbrickstairs",
+    "avp:industrialwallstairs",
+    "avp:industrialglassstairs",
+    "avp:floorgrillslab",
+    "avp:ceilinggrillslab",
+    "avp:industrialslab",
+    "avp:industrialbrickslab",
+    "avp:industrialglassslab",
+    "avp:oresilicon",
+    "avp:oremonazite",
+    "avp:orecobalt"
   ]
 }

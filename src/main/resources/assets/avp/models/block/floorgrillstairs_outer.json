@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "avp:block/floorgrill",
+    "top": "avp:block/floorgrill",
+    "side": "avp:block/floorgrill"
+  },
+  "render_type": "minecraft:translucent"
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "ABA",
+    "BBB",
+    "ABA"
+  ],
+  "key": {
+    "A": {
+      "item": "avp:polycarbonate"
+    },
+    "B": {
+      "item": "avp:silicon"
+    }
+  },
+  "result": {
+    "id": "avp:plastictilecircle",
+    "count": 8
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "avp:oresilicon",
+    "avp:oremonazite",
+    "avp:orecobalt",
+    "avp:orecopper",
+    "avp:orebauxite",
+    "avp:orelithium"
+  ]
+}

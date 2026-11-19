@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "avp:block/floorgrillslab"
+    },
+    "type=top": {
+      "model": "avp:block/floorgrillslab_top"
+    },
+    "type=double": {
+      "model": "avp:block/floorgrill"
+    }
+  }
+}

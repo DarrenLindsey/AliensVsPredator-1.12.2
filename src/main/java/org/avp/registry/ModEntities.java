@@ -36,6 +36,10 @@ public final class ModEntities
             () -> EntityType.Builder.<org.avp.entity.xenomorph.DroneEntity>of(org.avp.entity.xenomorph.DroneEntity::new, MobCategory.MONSTER)
                     .sized(0.95F, 2.0F).eyeHeight(1.7F).clientTrackingRange(10).build("drone"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.pneumatic.CapsuleEntity>> CAPSULE = ENTITIES.register("pneumatic_capsule",
+            () -> EntityType.Builder.<org.avp.pneumatic.CapsuleEntity>of(org.avp.pneumatic.CapsuleEntity::new, MobCategory.MISC)
+                    .sized(0.3F, 0.3F).clientTrackingRange(8).updateInterval(1).noSummon().build("pneumatic_capsule"));
+
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.joe.WorkingJoeEntity>> WORKING_JOE = ENTITIES.register("working_joe",
             () -> EntityType.Builder.<org.avp.entity.joe.WorkingJoeEntity>of(org.avp.entity.joe.WorkingJoeEntity::new, MobCategory.MISC)
                     .sized(0.6F, 1.9F).eyeHeight(1.7F).clientTrackingRange(10).build("working_joe"));

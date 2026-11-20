@@ -145,6 +145,9 @@
     "avp:hydro_washer",
     "avp:acid_leach_vat",
     "avp:electrolytic_refinery",
-    "avp:fusion_refinery"
+    "avp:fusion_refinery",
+    "avp:pneumatic_tube",
+    "avp:pneumatic_station",
+    "avp:pneumatic_compressor"
   ]
 }

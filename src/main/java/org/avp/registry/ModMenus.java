@@ -23,6 +23,9 @@ public final class ModMenus
     public static final DeferredHolder<MenuType<?>, MenuType<org.avp.refining.RefineryMenu>> REFINERY = MENUS.register("refinery",
             () -> IMenuTypeExtension.create(org.avp.refining.RefineryMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<org.avp.pneumatic.PneumaticStationMenu>> PNEUMATIC_STATION = MENUS.register("pneumatic_station",
+            () -> IMenuTypeExtension.create(org.avp.pneumatic.PneumaticStationMenu::new));
+
     private ModMenus()
     {
     }

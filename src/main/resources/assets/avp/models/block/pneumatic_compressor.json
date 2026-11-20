@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "avp:block/pneumatic_compressor_top",
+    "side": "avp:block/pneumatic_compressor_side"
+  }
+}

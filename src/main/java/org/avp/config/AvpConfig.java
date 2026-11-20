@@ -220,6 +220,8 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue xenosIgnoreJoes;
         public final ModConfigSpec.BooleanValue joeChunkLoading;
         public final ModConfigSpec.DoubleValue conveyorSpeed;
+        public final ModConfigSpec.DoubleValue capsuleSpeed;
+        public final ModConfigSpec.IntValue compressorPower;
         public final ModConfigSpec.BooleanValue joeTerminalNeedsPower;
         public final ModConfigSpec.IntValue joeServerPower;
         public final ModConfigSpec.IntValue highVoltageMultiplier;
@@ -539,6 +541,12 @@ public final class AvpConfig
             joeServerPower = b
                     .comment("FE per tick a Seegson Network Server draws.")
                     .defineInRange("joeServerPower", 64, 0, 100_000);
+            capsuleSpeed = b
+                    .comment("PneuPost canister speed (blocks per tick) per powered compressor on the line (up to 4).")
+                    .defineInRange("capsuleSpeed", 0.35, 0.05, 4.0);
+            compressorPower = b
+                    .comment("FE per tick a PneuPost compressor draws.")
+                    .defineInRange("compressorPower", 16, 0, 100_000);
             conveyorSpeed = b
                     .comment("Conveyor belt speed multiplier.")
                     .defineInRange("conveyorSpeed", 1.0, 0.1, 5.0);

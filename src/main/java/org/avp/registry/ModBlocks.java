@@ -281,6 +281,14 @@ public final class ModBlocks
             () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.SORTING,
                     BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
 
+    // ---- Seegson PneuPost (org.avp.pneumatic) ----
+    public static final DeferredBlock<org.avp.pneumatic.TubeBlock> PNEUMATIC_TUBE = register("pneumatic_tube", Tab.BLOCKS,
+            () -> new org.avp.pneumatic.TubeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).sound(SoundType.GLASS).strength(0.6F).noOcclusion()));
+    public static final DeferredBlock<org.avp.pneumatic.PneumaticStationBlock> PNEUMATIC_STATION = register("pneumatic_station", Tab.BLOCKS,
+            () -> new org.avp.pneumatic.PneumaticStationBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE).sound(SoundType.METAL).strength(2.5F, 6.0F)));
+    public static final DeferredBlock<org.avp.pneumatic.CompressorBlock> PNEUMATIC_COMPRESSOR = register("pneumatic_compressor", Tab.BLOCKS,
+            () -> new org.avp.pneumatic.CompressorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(3.0F, 6.0F)));
+
     // ---- Portals to the dimensions (org.avp.world.dimension) ----
     public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
             org.avp.world.dimension.ModDimensions.VARDA);

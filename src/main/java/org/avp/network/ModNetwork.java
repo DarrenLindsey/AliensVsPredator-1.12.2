@@ -106,6 +106,15 @@ public final class ModNetwork
                 });
         registrar.playToClient(org.avp.entity.joe.net.JoeTerminalDataPayload.TYPE, org.avp.entity.joe.net.JoeTerminalDataPayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.joeTerminal(payload.data()));
+        registrar.playToServer(org.avp.pneumatic.StationPayloads.Action.TYPE, org.avp.pneumatic.StationPayloads.Action.CODEC, (payload, context) ->
+        {
+            if (context.player() instanceof net.minecraft.server.level.ServerPlayer player)
+            {
+                org.avp.pneumatic.StationPayloads.handle(player, payload);
+            }
+        });
+        registrar.playToClient(org.avp.pneumatic.StationPayloads.Info.TYPE, org.avp.pneumatic.StationPayloads.Info.CODEC,
+                (payload, context) -> org.avp.client.screen.PneumaticStationScreen.info(payload.data()));
         registrar.playToClient(VisionModePayload.TYPE, VisionModePayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.visionMode(payload.mode()));
     }

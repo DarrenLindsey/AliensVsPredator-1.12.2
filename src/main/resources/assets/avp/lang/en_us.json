@@ -1087,5 +1087,10 @@
   "block.avp.hydro_washer": "Hydro-Washer",
   "block.avp.acid_leach_vat": "Acid Leaching Vat",
   "block.avp.electrolytic_refinery": "Electrolytic Refinery",
-  "block.avp.fusion_refinery": "Nostromo-class Fusion Refinery"
+  "block.avp.fusion_refinery": "Nostromo-class Fusion Refinery",
+  "block.avp.pneumatic_tube": "Seegson PneuPost Tube",
+  "block.avp.pneumatic_station": "Seegson PneuPost Station",
+  "block.avp.pneumatic_compressor": "Seegson PneuPost Compressor",
+  "item.avp.pneumatic_canister": "PneuPost Canister",
+  "entity.avp.pneumatic_capsule": "PneuPost Canister"
 }

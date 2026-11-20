@@ -430,7 +430,36 @@ public abstract class XenomorphEntity extends Monster
     @Nullable
     private net.minecraft.world.phys.Vec3 goalPos()
     {
-        return getTarget() != null ? getTarget().position() : investigatePos;
+        if (getTarget() != null)
+        {
+            return getTarget().position();
+        }
+        if (investigatePos != null)
+        {
+            return investigatePos;
+        }
+        return destination != null && tickCount < destinationUntil ? destination : null;
+    }
+
+    /** Where a hive job is taking it (so it climbs walls to get there, e.g. back out of a pit it fell into). */
+    @Nullable
+    private net.minecraft.world.phys.Vec3 destination;
+    private int destinationUntil;
+
+    /**
+     * Go somewhere for a job. Wall climbers head straight for it when there's no walking path,
+     * and climb whatever wall is in the way if it's higher up.
+     */
+    public void navigateTo(double x, double y, double z, double speed)
+    {
+        destination = new net.minecraft.world.phys.Vec3(x, y, z);
+        destinationUntil = tickCount + 200;
+        getNavigation().moveTo(x, y, z, speed);
+    }
+
+    public void navigateTo(Entity entity, double speed)
+    {
+        navigateTo(entity.getX(), entity.getY(), entity.getZ(), speed);
     }
 
     /**

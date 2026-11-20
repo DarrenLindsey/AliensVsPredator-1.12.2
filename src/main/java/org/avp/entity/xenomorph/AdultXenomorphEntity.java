@@ -528,7 +528,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
         {
             if (guard.tickCount % 10 < 2)
             {
-                guard.getNavigation().moveTo(queen, 1.0);
+                guard.navigateTo(queen, 1.0);
             }
         }
     }

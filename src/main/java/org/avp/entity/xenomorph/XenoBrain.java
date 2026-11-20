@@ -644,7 +644,7 @@ public final class XenoBrain
         public void start()
         {
             xeno.setState("FOLLOWING LEADER");
-            xeno.getNavigation().moveTo(leader, 1.0);
+            xeno.navigateTo(leader, 1.0);
         }
 
         @Override

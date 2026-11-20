@@ -88,7 +88,7 @@ public final class HiveGoals
         @Override
         public void start()
         {
-            xeno.getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 0.9);
+            xeno.navigateTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 0.9);
             xeno.setState("GOING HOME");
         }
     }
@@ -217,7 +217,7 @@ public final class HiveGoals
                 stuck++;
                 if (drone.tickCount % 20 == 0)
                 {
-                    drone.getNavigation().moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.9);
+                    drone.navigateTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.9);
                 }
                 return;
             }
@@ -380,7 +380,7 @@ public final class HiveGoals
         public void start()
         {
             ticks = 0;
-            drone.getNavigation().moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, 0.8);
+            drone.navigateTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, 0.8);
             drone.setState("BUILDING");
         }
 
@@ -510,7 +510,7 @@ public final class HiveGoals
             {
                 if (drone.tickCount % 20 < 2)
                 {
-                    drone.getNavigation().moveTo(core.getX() + 0.5, core.getY(), core.getZ() + 0.5, 0.9);
+                    drone.navigateTo(core.getX() + 0.5, core.getY(), core.getZ() + 0.5, 0.9);
                 }
                 return;
             }
@@ -614,7 +614,7 @@ public final class HiveGoals
         {
             BlockPos stand = org.avp.world.hive.HivePlanner.openSide((ServerLevel) drone.level(), block);
             BlockPos to = stand != null ? stand : block;
-            drone.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0.9);
+            drone.navigateTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0.9);
         }
 
         @Override
@@ -816,7 +816,7 @@ public final class HiveGoals
         {
             ticks = 0;
             drone.setState("BUILDING HIVESTONE");
-            drone.getNavigation().moveTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
+            drone.navigateTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
         }
 
         @Override
@@ -827,7 +827,7 @@ public final class HiveGoals
             {
                 if (job != null && ticks % 20 == 0)
                 {
-                    drone.getNavigation().moveTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
+                    drone.navigateTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
                 }
                 return;
             }
@@ -918,7 +918,7 @@ public final class HiveGoals
         {
             ticks = 0;
             drone.setState("COATING WALLS");
-            drone.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
+            drone.navigateTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
         }
 
         @Override
@@ -933,7 +933,7 @@ public final class HiveGoals
             {
                 if (ticks % 20 == 0)
                 {
-                    drone.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
+                    drone.navigateTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
                 }
                 return;
             }
@@ -969,7 +969,7 @@ public final class HiveGoals
             if (target != null)
             {
                 ticks = 0;
-                drone.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
+                drone.navigateTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
             }
         }
 
@@ -1073,7 +1073,7 @@ public final class HiveGoals
         {
             ticks = 0;
             drone.setState("CARRYING EGG");
-            drone.getNavigation().moveTo(egg, 0.9);
+            drone.navigateTo(egg, 0.9);
         }
 
         @Override
@@ -1090,11 +1090,11 @@ public final class HiveGoals
                 if (drone.distanceToSqr(egg) < 2.5 * 2.5)
                 {
                     egg.startRiding(drone, true);
-                    drone.getNavigation().moveTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
+                    drone.navigateTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
                 }
                 else if (ticks % 20 == 0)
                 {
-                    drone.getNavigation().moveTo(egg, 0.9);
+                    drone.navigateTo(egg, 0.9);
                 }
                 return;
             }
@@ -1102,7 +1102,7 @@ public final class HiveGoals
             {
                 if (ticks % 20 == 0)
                 {
-                    drone.getNavigation().moveTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
+                    drone.navigateTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
                 }
                 return;
             }
@@ -1190,7 +1190,7 @@ public final class HiveGoals
             {
                 if (xeno.tickCount % 20 < 2)
                 {
-                    xeno.getNavigation().moveTo(food, 0.8);
+                    xeno.navigateTo(food, 0.8);
                 }
                 return;
             }

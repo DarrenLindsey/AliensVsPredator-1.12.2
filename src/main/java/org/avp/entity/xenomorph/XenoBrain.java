@@ -525,7 +525,8 @@ public final class XenoBrain
             {
                 return false;
             }
-            Vec3 goal = xeno.getTarget() != null ? xeno.getTarget().position() : xeno.investigatePos();
+            // its prey, a noise, or where a hive job is taking it (so it clears whatever blocks the hive's work)
+            Vec3 goal = xeno.goalPos();
             if (goal == null)
             {
                 return false;
@@ -701,10 +702,15 @@ public final class XenoBrain
             {
                 return false;
             }
-            Vec3 goal = xeno.getTarget() != null ? xeno.getTarget().position() : xeno.investigatePos();
+            // its prey, a noise, or where a hive job is taking it (so it clears whatever blocks the hive's work)
+            Vec3 goal = xeno.goalPos();
             if (goal == null || xeno.distanceToSqr(goal) < 2)
             {
                 return false;
+            }
+            if (xeno.getTarget() == null && xeno.investigatePos() == null && !xeno.isStuck())
+            {
+                return false; // a hive job: climb or walk round if it can; only dig once it's really stuck
             }
             net.minecraft.world.level.pathfinder.Path path = xeno.getNavigation().createPath(BlockPos.containing(goal), 1);
             if (path != null && path.canReach())

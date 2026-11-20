@@ -428,7 +428,7 @@ public abstract class XenomorphEntity extends Monster
 
     /** Where it's trying to get to: its target, or a noise it's investigating. */
     @Nullable
-    private net.minecraft.world.phys.Vec3 goalPos()
+    public net.minecraft.world.phys.Vec3 goalPos()
     {
         if (getTarget() != null)
         {
@@ -455,6 +455,29 @@ public abstract class XenomorphEntity extends Monster
         destination = new net.minecraft.world.phys.Vec3(x, y, z);
         destinationUntil = tickCount + 200;
         getNavigation().moveTo(x, y, z, speed);
+    }
+
+    /** Stuck: on its way somewhere for a job but hasn't got closer in the last 3 seconds. */
+    private int stuckFor;
+    private double lastDistance = Double.MAX_VALUE;
+
+    public boolean isStuck()
+    {
+        return stuckFor >= 3;
+    }
+
+    private void updateStuck()
+    {
+        net.minecraft.world.phys.Vec3 goal = goalPos();
+        if (goal == null)
+        {
+            stuckFor = 0;
+            lastDistance = Double.MAX_VALUE;
+            return;
+        }
+        double distance = position().distanceTo(goal);
+        stuckFor = distance > 2.5 && distance > lastDistance - 0.5 ? stuckFor + 1 : 0;
+        lastDistance = distance;
     }
 
     public void navigateTo(Entity entity, double speed)
@@ -758,6 +781,10 @@ public abstract class XenomorphEntity extends Monster
         if (tickCount % 40 == Math.floorMod(getId(), 40))
         {
             updatePack();
+        }
+        if (tickCount % 20 == 0)
+        {
+            updateStuck();
         }
         if (tickCount % 100 == Math.floorMod(getId(), 100) && level() instanceof ServerLevel server)
         {

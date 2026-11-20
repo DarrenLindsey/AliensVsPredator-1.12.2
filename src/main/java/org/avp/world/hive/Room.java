@@ -53,6 +53,8 @@ public class Room
     /** How far through its dig list the Drones are. */
     private int cursor;
     private int pillars;
+    /** How many times in a row nothing open could be found to dig (not saved). */
+    public int stalls;
 
     public Room(Type type, BlockPos centre, BlockPos from, int radius, int height, boolean done)
     {

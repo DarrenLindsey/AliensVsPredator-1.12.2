@@ -609,13 +609,21 @@ public final class HiveGoals
             return block != null && drone.getTarget() == null && ticks < 300;
         }
 
+        /** Walk to the open side of the block (walking at the solid block itself found no path). */
+        private void approach()
+        {
+            BlockPos stand = org.avp.world.hive.HivePlanner.openSide((ServerLevel) drone.level(), block);
+            BlockPos to = stand != null ? stand : block;
+            drone.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0.9);
+        }
+
         @Override
         public void start()
         {
             progress = 0;
             ticks = 0;
             drone.setState("DIGGING THE HIVE");
-            drone.getNavigation().moveTo(block.getX() + 0.5, block.getY(), block.getZ() + 0.5, 0.9);
+            approach();
         }
 
         @Override
@@ -643,11 +651,11 @@ public final class HiveGoals
                 block = null;
                 return;
             }
-            if (drone.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(block)) > 3.2 * 3.2)
+            if (drone.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(block)) > 4.0 * 4.0)
             {
                 if (ticks % 20 == 0)
                 {
-                    drone.getNavigation().moveTo(block.getX() + 0.5, block.getY(), block.getZ() + 0.5, 0.9);
+                    approach();
                 }
                 return;
             }

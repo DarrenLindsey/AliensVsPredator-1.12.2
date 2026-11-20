@@ -86,7 +86,7 @@ public final class AvpCommands
         source.sendSuccess(() -> Component.literal("  Entrance: ").append(teleport(hive.entrance())), false);
         source.sendSuccess(() -> Component.literal("  Resin: " + hive.resin() + " blocks, building out to " + radius + " blocks"), false);
         source.sendSuccess(() -> Component.literal("  Queen: " + (hive.hasQueen(now) ? "yes" : "none")
-                + (hive.hasQueen(now) ? "" : ", heir: " + (heir == null ? "none" : heir.getName().getString()
+                + (hive.hasQueen(now) ? "" : ", heir: " + (heir == null ? "none" : heir.getType().getDescription().getString()
                         + (heir instanceof XenomorphEntity x ? " (" + x.jelly() + " jelly)" : "")))), false);
         source.sendSuccess(() -> Component.literal("  Members: " + members.size() + " " + summary(members)), false);
         source.sendSuccess(() -> Component.literal("  Dug out: " + hive.dug() + " / " + org.avp.world.hive.HivePlanner.maxDug()
@@ -102,7 +102,7 @@ public final class AvpCommands
         {
             Entity digger = hive.digger() == null ? null : level.getEntity(hive.digger());
             source.sendSuccess(() -> Component.literal("  Digger: " + (digger == null ? "none (the next Drone to come along takes over)"
-                    : digger.getName().getString() + " at " + digger.blockPosition().toShortString())), false);
+                    : digger.getType().getDescription().getString() + " at " + digger.blockPosition().toShortString())), false);
         }
         return 1;
     }
@@ -110,7 +110,7 @@ public final class AvpCommands
     private static String summary(List<XenomorphEntity> members)
     {
         java.util.Map<String, Integer> counts = new java.util.TreeMap<>();
-        members.forEach(m -> counts.merge(m.getName().getString(), 1, Integer::sum));
+        members.forEach(m -> counts.merge(m.getType().getDescription().getString(), 1, Integer::sum));
         return counts.toString();
     }
 

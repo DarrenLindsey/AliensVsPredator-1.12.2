@@ -147,9 +147,14 @@ public final class HivePlanner
             BlockPos p = list.get(i);
             if (diggable(level, p))
             {
-                if (found++ == slot)
+                // only blocks already open to the hive (the face a Drone can stand at), so nobody walks off to a buried one
+                if (openSide(level, p) != null && found++ == slot)
                 {
                     return p;
+                }
+                if (found == 0 && i - room.cursor() > 64)
+                {
+                    break; // nothing open nearby in the list yet: wait for the others to break through
                 }
             }
             else if (found == 0)
@@ -161,10 +166,25 @@ public final class HivePlanner
                 room.setCursor(i + 1); // nothing to do here (already open, or not safe): move on
             }
         }
-        if (found == 0)
+        if (found == 0 && room.cursor() >= list.size())
         {
             room.setDone(true);
             HiveData.get(level).changed();
+        }
+        return null;
+    }
+
+    /** Where a Drone can stand to dig this block: an open space next to it (null if it's still buried). */
+    @Nullable
+    public static BlockPos openSide(ServerLevel level, BlockPos pos)
+    {
+        for (Direction d : new Direction[] { Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN })
+        {
+            BlockPos p = pos.relative(d);
+            if (level.getBlockState(p).isAir())
+            {
+                return p;
+            }
         }
         return null;
     }

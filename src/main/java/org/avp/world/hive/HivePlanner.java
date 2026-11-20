@@ -150,11 +150,19 @@ public final class HivePlanner
                 // only blocks already open to the hive (the face a Drone can stand at), so nobody walks off to a buried one
                 if (openSide(level, p) != null && found++ == slot)
                 {
+                    room.stalls = 0;
                     return p;
                 }
                 if (found == 0 && i - room.cursor() > 64)
                 {
-                    break; // nothing open nearby in the list yet: wait for the others to break through
+                    // nothing open nearby in the list yet: wait for the others to break through - but if the
+                    // way is blocked for good (a gap left beside water, say), skip ahead past the buried block
+                    if (++room.stalls > 120)
+                    {
+                        room.stalls = 0;
+                        room.setCursor(room.cursor() + 1);
+                    }
+                    break;
                 }
             }
             else if (found == 0)

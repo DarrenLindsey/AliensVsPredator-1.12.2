@@ -290,3 +290,26 @@ lang.update({
 write_json(f"{NA}/sounds.json", sounds)
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch F4 (W-Y kit) data written")
+
+# ================================================================ E1: black goo
+lang = read_json(f"{NA}/lang/en_us.json", {})
+for kind in ("still", "flowing"):
+    copy(f"{LA}/textures/blocks/blackgoo.{kind}.png", f"{NA}/textures/block/blackgoo_{kind}.png")
+    write_json(f"{NA}/textures/block/blackgoo_{kind}.png.mcmeta", {"animation": {"frametime": 3}})
+write_json(f"{NA}/blockstates/blackgoo.json", {"variants": {"": {"model": "avp:block/blackgoo"}}})
+write_json(f"{NA}/models/block/blackgoo.json", {"textures": {"particle": "avp:block/blackgoo_still"}})
+copy(f"{LA}/textures/items/bucket.blackgoo.png", f"{NA}/textures/item/bucket_blackgoo.png")
+write_json(f"{NA}/models/item/bucket_blackgoo.json", {"parent": "minecraft:item/generated", "textures": {"layer0": "avp:item/bucket_blackgoo"}})
+lang.update({
+    "block.avp.blackgoo": "Black Goo",
+    "fluid_type.avp.blackgoo": "Black Goo",
+    "item.avp.bucket_blackgoo": "Bucket of Black Goo",
+    "tooltip.avp.phial_empty": "Fill it from a pool of black goo or an Engineer ampule (which might crack).",
+    "tooltip.avp.phial_goo": "Pour it out on a block. Handle with care.",
+    "avp.configuration.blackGooMutation": "Black Goo Mutation",
+    "avp.configuration.blackGooMutation.tooltip": "Black goo mutates creatures in it (villagers -> goo mutants, silverfish -> Hammerpedes, livestock -> babyheads).",
+    "avp.configuration.ampuleLeakChance": "Ampule Leak Chance",
+    "avp.configuration.ampuleLeakChance.tooltip": "Chance an Engineer ampule cracks and leaks each time a phial is filled from it.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("batch E1 (black goo) data written")

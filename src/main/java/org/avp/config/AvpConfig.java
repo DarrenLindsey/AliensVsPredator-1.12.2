@@ -208,6 +208,8 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue yautjaHonourCode;
         public final ModConfigSpec.BooleanValue biomaskNightVision;
         public final ModConfigSpec.BooleanValue grenadesBreakBlocks;
+        public final ModConfigSpec.BooleanValue blackGooMutation;
+        public final ModConfigSpec.DoubleValue ampuleLeakChance;
         public final ModConfigSpec.BooleanValue selfDestruct;
         public final ModConfigSpec.DoubleValue selfDestructPower;
         public final ModConfigSpec.BooleanValue flamethrowerIgnites;
@@ -476,6 +478,12 @@ public final class AvpConfig
             selfDestructPower = b
                     .comment("Size of the self-destruct explosion (TNT is 4). Breaks blocks if mobGriefing is on.")
                     .defineInRange("selfDestructPower", 8.0, 1.0, 30.0);
+            blackGooMutation = b
+                    .comment("Black goo mutates creatures in it (villagers -> goo mutants, silverfish -> Hammerpedes, livestock -> babyheads...).")
+                    .define("blackGooMutation", true);
+            ampuleLeakChance = b
+                    .comment("Chance an Engineer ampule cracks and leaks black goo each time a phial is filled from it (0 = never).")
+                    .defineInRange("ampuleLeakChance", 0.2, 0.0, 1.0);
             grenadesBreakBlocks = b
                     .comment("Grenades blow up blocks (off: they only hurt creatures).")
                     .define("grenadesBreakBlocks", false);

@@ -133,6 +133,36 @@ public final class ClientSetup
         event.registerItem(beItems, Arrays.stream(ModBlocks.powerMachines()).filter(b -> b != ModBlocks.REDSTONEEMITTER.get())
                 .map(Block::asItem).toArray(Item[]::new));
         event.registerItem(beItems, ModBlocks.POWERLINE.get().asItem(), ModBlocks.TURRET.get().asItem());
+        // black goo: its textures, and the murk when you're in it
+        event.registerFluidType(new net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions()
+        {
+            @Override
+            public net.minecraft.resources.ResourceLocation getStillTexture()
+            {
+                return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(org.avp.AliensVsPredator.MOD_ID, "block/blackgoo_still");
+            }
+
+            @Override
+            public net.minecraft.resources.ResourceLocation getFlowingTexture()
+            {
+                return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(org.avp.AliensVsPredator.MOD_ID, "block/blackgoo_flowing");
+            }
+
+            @Override
+            public org.joml.Vector3f modifyFogColor(net.minecraft.client.Camera camera, float partialTick, net.minecraft.client.multiplayer.ClientLevel level,
+                    int renderDistance, float darkenWorldAmount, org.joml.Vector3f fluidFogColor)
+            {
+                return new org.joml.Vector3f(0.02F, 0.02F, 0.03F);
+            }
+
+            @Override
+            public void modifyFogRender(net.minecraft.client.Camera camera, net.minecraft.client.renderer.FogRenderer.FogMode mode, float renderDistance,
+                    float partialTick, float nearDistance, float farDistance, com.mojang.blaze3d.shaders.FogShape shape)
+            {
+                com.mojang.blaze3d.systems.RenderSystem.setShaderFogStart(0F);
+                com.mojang.blaze3d.systems.RenderSystem.setShaderFogEnd(2.5F);
+            }
+        }, org.avp.registry.ModFluids.BLACK_GOO_TYPE.get());
         // guns: their 3D model, held up and aimed in third person
         IClientItemExtensions guns = new IClientItemExtensions()
         {

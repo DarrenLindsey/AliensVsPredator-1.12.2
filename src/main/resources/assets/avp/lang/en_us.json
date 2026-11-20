@@ -993,5 +993,14 @@
   "entity.avp.laser_mine": "Laser Mine",
   "entity.avp.supply_drop": "Supply Drop",
   "entity.avp.grenade": "Grenade",
-  "entity.avp.thrown_weapon": "Thrown Weapon"
+  "entity.avp.thrown_weapon": "Thrown Weapon",
+  "block.avp.blackgoo": "Black Goo",
+  "fluid_type.avp.blackgoo": "Black Goo",
+  "item.avp.bucket_blackgoo": "Bucket of Black Goo",
+  "tooltip.avp.phial_empty": "Fill it from a pool of black goo or an Engineer ampule (which might crack).",
+  "tooltip.avp.phial_goo": "Pour it out on a block. Handle with care.",
+  "avp.configuration.blackGooMutation": "Black Goo Mutation",
+  "avp.configuration.blackGooMutation.tooltip": "Black goo mutates creatures in it (villagers -> goo mutants, silverfish -> Hammerpedes, livestock -> babyheads).",
+  "avp.configuration.ampuleLeakChance": "Ampule Leak Chance",
+  "avp.configuration.ampuleLeakChance.tooltip": "Chance an Engineer ampule cracks and leaks each time a phial is filled from it."
 }

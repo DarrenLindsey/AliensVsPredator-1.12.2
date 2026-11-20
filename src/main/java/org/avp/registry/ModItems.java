@@ -50,8 +50,13 @@ public final class ModItems
     public static final DeferredItem<Item> POLYCARBONATE = simple("polycarbonate", Tab.CRAFTING, 64);
     public static final DeferredItem<Item> ROYALJELLY = simple("royaljelly", Tab.MAIN, 64);
     public static final DeferredItem<Item> BLACKGOO_ITEM = simple("blackgoo_item", Tab.MAIN, 64);
-    public static final DeferredItem<Item> PHIAL_GOO = simple("phial_goo", Tab.MAIN, 64);
-    public static final DeferredItem<Item> PHIAL_EMPTY = simple("phial_empty", Tab.MAIN, 64);
+    public static final DeferredItem<Item> PHIAL_GOO = ITEMS.register("phial_goo", () -> new org.avp.fluid.PhialItem(true, new Item.Properties()));
+    public static final DeferredItem<Item> PHIAL_EMPTY = ITEMS.register("phial_empty", () -> new org.avp.fluid.PhialItem(false, new Item.Properties()));
+    static
+    {
+        Tab.MAIN.add(PHIAL_GOO);
+        Tab.MAIN.add(PHIAL_EMPTY);
+    }
     public static final DeferredItem<Item> TOOL_SECURITYTUNER = simple("tool_securitytuner", Tab.MAIN, 1);
     // </generated>
 

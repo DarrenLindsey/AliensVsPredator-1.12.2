@@ -63,7 +63,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       schematics still waiting for their items (guns, armour, Predator gear - listed by tools/port_batch_d.py)
 - [ ] Batch D3 - Make the power system unique and robust (see "Planned: power system" below)
 - [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
-- [ ] Hive resin, supply crate parachute drop (with the creatures/entities)
+- [x] Hive resin, supply crate parachute drop (with the creatures/entities)
 - [x] Ore generation: bauxite, copper, silicon, monazite (overworld), lithium (oceans/beaches/rivers),
       cobalt (jungles), each with a new deepslate version. Data-driven (data/avp/worldgen +
       neoforge/biome_modifier, made by tools/port_worldgen.py), on/off per ore in avp-common.toml.
@@ -139,7 +139,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [ ] Model continuity pass (at the very end): check every creature's hitbox vs. model size and
       centre the model on its hitbox (the Drone needed this: its head stuck out 1.3 blocks). The catalog
       renderer auto-centres on the model bounds (tail excluded) as a first pass; animations are generic.
-- [ ] Step 4 - Other creatures, guns, armour, tile entities
+- [x] Step 4 - Other creatures, guns, armour, tile entities
   - [x] F1 firearms (org.avp.item.firearm): 88 Mod 4 pistol, M4, AK-47, M41A pulse rifle, M56 Smartgun (aim assist),
         sniper rifle; magazines (pistol, rifle, smartgun drum, sniper); hold-use automatic fire at the 1.12.2 rate,
         recoil, sneak-use / automatic reload, hitscan rounds (shatter glass, tear resin), ammo bar + red HUD counter,

@@ -441,6 +441,17 @@ public abstract class XenomorphEntity extends Monster
         return destination != null && tickCount < destinationUntil ? destination : null;
     }
 
+    /**
+     * Whatever a Xenomorph carries (a captured host, an egg) never steers it - in vanilla a mob riding
+     * another mob controls it (chicken jockeys), which left Drones carrying a bat frozen.
+     */
+    @javax.annotation.Nullable
+    @Override
+    public net.minecraft.world.entity.LivingEntity getControllingPassenger()
+    {
+        return null;
+    }
+
     /** Currents don't push Xenomorphs around - they're far too strong (they still swim and sink as usual). */
     @Override
     public boolean isPushedByFluid()

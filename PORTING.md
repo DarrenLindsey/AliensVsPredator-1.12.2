@@ -127,7 +127,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       springs are filled up to their source (a hivestone pillar), lakes get a hivestone skin. Currents don't
       push Xenomorphs.
 - [ ] Hive pass 2 (later): tuning from play-testing (digging pace, worker count vs castes, room layouts).
-      Bug: a Drone carrying a captured bat (host) stands still - check CarryHostGoal pathing while carrying.
+      Fixed: a Drone carrying a captured mob stood still (the passenger was steering it, like a chicken jockey).
       Builder Drones: lay hivestone (new block) over holes in room floors, under
       galleries that cross open space, over water/lava leaking in, roof rooms open to the sky, pave floors.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.

@@ -586,6 +586,7 @@ write_json(f"{NA}/models/item/hivestone.json", {"parent": "avp:block/hivestone"}
 write_json(f"{ND}/avp/loot_table/blocks/hivestone.json", {"type": "minecraft:block", "pools": [{
     "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:hivestone"}], "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
 add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", ["avp:hivestone"])
+add_to_tag(f"{ND}/avp/tags/block/resin_coverable.json", ["avp:hivestone"])  # resin coats the hive's own floors too
 add_to_tag(f"{ND}/avp/tags/item/facehugger_proof.json", ["avp:biomask_classic", "avp:biomask_berserker", "avp:biomask_falconer", "avp:biomask_tracker"])
 lang.update({
     "block.avp.hivestone": "Hivestone",

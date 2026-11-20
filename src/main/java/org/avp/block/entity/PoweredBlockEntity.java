@@ -210,6 +210,12 @@ public class PoweredBlockEntity extends BlockEntity
         {
             be.setChanged();
         }
+        // brownout: a light running on its last dregs of power flickers
+        if (on && block.energyPerTick() > 0 && be.energy.getEnergyStored() < block.energyPerTick() * 60
+                && state.setValue(PoweredBlock.LIT, true).getLightEmission() > 0 && level.random.nextInt(5) == 0)
+        {
+            on = false;
+        }
         if (state.getValue(PoweredBlock.LIT) != on)
         {
             state = state.setValue(PoweredBlock.LIT, on);

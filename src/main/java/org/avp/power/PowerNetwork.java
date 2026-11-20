@@ -66,6 +66,96 @@ public final class PowerNetwork
     {
         final Map<BlockPos, Network> byConductor = new HashMap<>();
         final Map<BlockPos, SolarArray> solar = new HashMap<>();
+        /** Per network: [game tick, FE carried this tick, overload strain] */
+        final Map<Network, long[]> load = new java.util.IdentityHashMap<>();
+    }
+
+    /** How much a network can carry per tick (it's limited by its weakest link: a network is one line). */
+    public static int capacity()
+    {
+        return AvpConfig.server(AvpConfig.SERVER.powerlineCapacity);
+    }
+
+    /** FE carried through this network in the last tick, for terminals. */
+    public static int lastLoad(Level level, Network network)
+    {
+        LevelCache cache;
+        synchronized (CACHE)
+        {
+            cache = CACHE.get(level);
+        }
+        long[] l = cache == null ? null : cache.load.get(network);
+        return l == null || level.getGameTime() - l[0] > 2 ? 0 : (int) l[1];
+    }
+
+    public static boolean isOverloaded(Level level, Network network)
+    {
+        LevelCache cache;
+        synchronized (CACHE)
+        {
+            cache = CACHE.get(level);
+        }
+        long[] l = cache == null ? null : cache.load.get(network);
+        return l != null && l[2] > 20;
+    }
+
+    private static long[] loadOf(Level level, Network network)
+    {
+        LevelCache cache;
+        synchronized (CACHE)
+        {
+            cache = CACHE.computeIfAbsent(level, l -> new LevelCache());
+        }
+        long[] l = cache.load.computeIfAbsent(network, n -> new long[3]);
+        long now = level.getGameTime();
+        if (l[0] != now)
+        {
+            l[0] = now;
+            l[1] = 0;
+            l[2] = Math.max(0, l[2] - 1); // strain eases off when it's not pushed too hard
+        }
+        return l;
+    }
+
+    /**
+     * More power is being forced through the line than it can carry. A breaker on the network trips
+     * (cutting it off); without one the line sparks, arcs to anyone close and may burn out.
+     */
+    private static void overload(Level level, Network network, long[] load)
+    {
+        load[2] += 3;
+        if (load[2] < 60 || !(level instanceof net.minecraft.server.level.ServerLevel server))
+        {
+            return;
+        }
+        load[2] = 30;
+        List<BlockPos> lines = new ArrayList<>(network.conductors());
+        for (BlockPos pos : lines)
+        {
+            BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof org.avp.block.BreakerBlock && state.getValue(org.avp.block.BreakerBlock.CLOSED))
+            {
+                org.avp.block.BreakerBlock.trip(level, pos, state);
+                return;
+            }
+        }
+        BlockPos spot = lines.get(level.random.nextInt(lines.size()));
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, spot.getX() + 0.5, spot.getY() + 0.5, spot.getZ() + 0.5,
+                20, 0.3, 0.3, 0.3, 0.2);
+        server.playSound(null, spot, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT, net.minecraft.sounds.SoundSource.BLOCKS, 0.4F, 1.8F);
+        for (net.minecraft.world.entity.LivingEntity victim : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                new net.minecraft.world.phys.AABB(spot).inflate(3)))
+        {
+            victim.hurt(org.avp.registry.ModDamageTypes.of(level, org.avp.registry.ModDamageTypes.ELECTRICITY), 4.0F);
+        }
+        if (AvpConfig.server(AvpConfig.SERVER.powerlinesBurnOut) && level.getBlockState(spot).getBlock() instanceof PowerlineBlock
+                && level.random.nextInt(3) == 0)
+        {
+            level.destroyBlock(spot, false);
+            server.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, spot.getX() + 0.5, spot.getY() + 0.5, spot.getZ() + 0.5,
+                    10, 0.2, 0.2, 0.2, 0.02);
+            invalidate(level);
+        }
     }
 
     private static final Map<Level, LevelCache> CACHE = new WeakHashMap<>();
@@ -80,7 +170,8 @@ public final class PowerNetwork
     public static boolean isConductor(BlockState state)
     {
         return state.getBlock() instanceof PowerlineBlock
-                || state.getBlock() instanceof RedstoneSensorBlock && state.getValue(RedstoneSensorBlock.POWERED);
+                || state.getBlock() instanceof RedstoneSensorBlock && state.getValue(RedstoneSensorBlock.POWERED)
+                || state.getBlock() instanceof org.avp.block.BreakerBlock && state.getValue(org.avp.block.BreakerBlock.CLOSED);
     }
 
     /** Something next to a powerline changed: forget the cached networks of this world. */
@@ -294,12 +385,31 @@ public final class PowerNetwork
                 receivers.add(storage);
             }
         }
+        // the line carries only so much per tick; trying to force more through strains it
+        long[] load = loadOf(level, network);
+        int room = (int) Math.max(0, capacity() - load[1]);
+        if (amount > room)
+        {
+            if (!simulate)
+            {
+                overload(level, network, load);
+            }
+            amount = room;
+            if (amount <= 0)
+            {
+                return 0;
+            }
+        }
         // share evenly; whatever one block can't take is offered to the ones after it
         int remaining = amount;
         for (int i = 0; i < receivers.size() && remaining > 0; i++)
         {
             int share = (remaining + (receivers.size() - i) - 1) / (receivers.size() - i);
             remaining -= receivers.get(i).receiveEnergy(share, simulate);
+        }
+        if (!simulate)
+        {
+            load[1] += amount - remaining;
         }
         return amount - remaining;
     }

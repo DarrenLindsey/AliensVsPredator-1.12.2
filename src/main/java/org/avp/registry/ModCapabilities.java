@@ -50,7 +50,9 @@ public final class ModCapabilities
     {
         event.registerBlock(Capabilities.EnergyStorage.BLOCK, (level, pos, state, be, side) ->
                         org.avp.power.PowerNetwork.isConductor(state) ? new org.avp.power.PowerNetwork.ConductorEnergy(level, pos, side) : null,
-                ModBlocks.POWERLINE.get(), ModBlocks.REDSTONESENSOR.get());
+                ModBlocks.POWERLINE.get(), ModBlocks.REDSTONESENSOR.get(), ModBlocks.BREAKER.get());
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.FUSION_REACTOR.get(), (be, side) -> be.energyFor());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.FUSION_REACTOR.get(), (be, side) -> be.fuelInput);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.POWER_MACHINE.get(), (be, side) -> be.energyFor(side));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ASSEMBLER.get(), (be, side) -> be.energyFor());
         // automation (AE2 pattern providers, Create, hoppers): materials in, results out

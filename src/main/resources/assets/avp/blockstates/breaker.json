@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "closed=true": {
+      "model": "avp:block/breaker"
+    },
+    "closed=false": {
+      "model": "avp:block/breaker_open"
+    }
+  }
+}

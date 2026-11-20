@@ -208,6 +208,11 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue yautjaHonourCode;
         public final ModConfigSpec.BooleanValue biomaskNightVision;
         public final ModConfigSpec.BooleanValue grenadesBreakBlocks;
+        public final ModConfigSpec.IntValue powerlineCapacity;
+        public final ModConfigSpec.BooleanValue powerlinesBurnOut;
+        public final ModConfigSpec.BooleanValue xenosCutPower;
+        public final ModConfigSpec.IntValue reactorOutput;
+        public final ModConfigSpec.BooleanValue reactorMeltdown;
         public final ModConfigSpec.BooleanValue blackGooMutation;
         public final ModConfigSpec.DoubleValue ampuleLeakChance;
         public final ModConfigSpec.BooleanValue selfDestruct;
@@ -484,6 +489,21 @@ public final class AvpConfig
             ampuleLeakChance = b
                     .comment("Chance an Engineer ampule cracks and leaks black goo each time a phial is filled from it (0 = never).")
                     .defineInRange("ampuleLeakChance", 0.2, 0.0, 1.0);
+            powerlineCapacity = b
+                    .comment("FE per tick one powerline network can carry. Forcing more through it overloads it: it sparks, arcs, and may burn out (a breaker trips instead).")
+                    .defineInRange("powerlineCapacity", 4096, 64, 1_000_000);
+            powerlinesBurnOut = b
+                    .comment("Overloaded powerlines can burn out (a section breaks).")
+                    .define("powerlinesBurnOut", true);
+            xenosCutPower = b
+                    .comment("Xenomorphs tear out powerlines near them to kill the power, as in Aliens.")
+                    .define("xenosCutPower", true);
+            reactorOutput = b
+                    .comment("FE per tick a compact fusion reactor makes.")
+                    .defineInRange("reactorOutput", 2048, 1, 1_000_000);
+            reactorMeltdown = b
+                    .comment("A fusion reactor whose power has nowhere to go overheats - and at 100% it melts down (explodes). Off: it just shuts down.")
+                    .define("reactorMeltdown", true);
             grenadesBreakBlocks = b
                     .comment("Grenades blow up blocks (off: they only hurt creatures).")
                     .define("grenadesBreakBlocks", false);

@@ -80,7 +80,8 @@ public class PowerlineBlock extends BaseEntityBlock
         BlockState state = level.getBlockState(next);
         if (state.getBlock() instanceof PowerlineBlock || state.getBlock() instanceof RedstoneSensorBlock
                 || state.getBlock() instanceof PowerMachineBlock || state.getBlock() instanceof PoweredBlock
-                || state.getBlock() instanceof BlastDoorBlock)
+                || state.getBlock() instanceof BlastDoorBlock || state.getBlock() instanceof BreakerBlock
+                || state.getBlock() instanceof FusionReactorBlock)
         {
             return true;
         }

@@ -1011,5 +1011,12 @@
   "tooltip.avp.portal_acheron": "Engineer technology. Step in to travel to Acheron (LV-426) - and back.",
   "biome.avp.varda_forest": "Varda Forest",
   "biome.avp.varda_badlands": "Varda Badlands",
-  "message.avp.portal_arrived": "You arrive on %s."
+  "message.avp.portal_arrived": "You arrive on %s.",
+  "block.avp.breaker": "Circuit Breaker",
+  "block.avp.fusion_reactor": "Compact Fusion Reactor",
+  "message.avp.breaker_closed": "Breaker closed - line live",
+  "message.avp.breaker_open": "Breaker open - line cut",
+  "message.avp.reactor_status": "Lithium: %s | Burn: %ss | Stored: %s FE | Core heat: %s%%",
+  "terminal.avp.load": "LINE LOAD: %s / %s FE/t",
+  "terminal.avp.overload": "!! LINE OVERLOAD !!"
 }

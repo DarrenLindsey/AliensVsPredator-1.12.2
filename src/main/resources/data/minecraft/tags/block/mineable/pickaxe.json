@@ -131,6 +131,8 @@
     "avp:deepslate_oremonazite",
     "avp:deepslate_orelithium",
     "avp:deepslate_orecobalt",
-    "avp:hivestone"
+    "avp:hivestone",
+    "avp:breaker",
+    "avp:fusion_reactor"
   ]
 }

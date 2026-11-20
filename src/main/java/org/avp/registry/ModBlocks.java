@@ -248,6 +248,13 @@ public final class ModBlocks
     /** Hardened resin mixed with digested rock: what builder Drones lay hive floors, bridges and seals with. */
     public static final DeferredBlock<Block> HIVESTONE = simple("hivestone", Kind.STONE, 3.0F, 9.0F);
 
+    // ---- Power (batch D3) ----
+    public static final DeferredBlock<org.avp.block.BreakerBlock> BREAKER = register("breaker", Tab.BLOCKS, () -> new org.avp.block.BreakerBlock(
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(2.0F, 6.0F)));
+    public static final DeferredBlock<org.avp.block.FusionReactorBlock> FUSION_REACTOR = register("fusion_reactor", Tab.BLOCKS,
+            () -> new org.avp.block.FusionReactorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
+                    .strength(8.0F, 20.0F).requiresCorrectToolForDrops().lightLevel(s -> 9)));
+
     // ---- Portals to the dimensions (org.avp.world.dimension) ----
     public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
             org.avp.world.dimension.ModDimensions.VARDA);

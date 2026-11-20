@@ -407,7 +407,7 @@ for cid, family, tex, lore in catalog:
             "conditions": [{"condition": "minecraft:killed_by_player"}]}]})
     if family in ("XENOMORPH", "BURSTER", "PARASITE", "EGG"):
         add_to_tag(f"{ND}/avp/tags/entity_type/xenomorphs.json", [f"avp:{cid}"])
-    if family == "YAUTJA" or cid in ("predator_hound", "yautja_mutant"):
+    if family == "YAUTJA" or cid == "predator_hound":  # the Mutant Yautja is their enemy, not one of them
         add_to_tag(f"{ND}/avp/tags/entity_type/predators.json", [f"avp:{cid}"])
 write_json(f"{ND}/avp/loot_table/entities/ursuidae.json", {"type": "minecraft:entity", "pools": [{
     "rolls": 1, "entries": [{"type": "minecraft:item", "name": "minecraft:leather",

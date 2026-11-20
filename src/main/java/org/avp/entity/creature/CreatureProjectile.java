@@ -134,8 +134,16 @@ public class CreatureProjectile extends ThrowableProjectile
                 case ACID -> server.sendParticles(ParticleTypes.ITEM_SLIME, getX(), getY(), getZ(), 8, 0.2, 0.2, 0.2, 0.05);
                 case PLASMA ->
                 {
-                    // a plasma bolt bursts, but it doesn't wreck the terrain
-                    server.explode(this, getX(), getY(), getZ(), 1.2F, Level.ExplosionInteraction.NONE);
+                    // a plasma bolt bursts (sparing the shooter's own side), but it doesn't wreck the terrain
+                    server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
+                    server.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(),
+                            net.minecraft.sounds.SoundSource.HOSTILE, 0.7F, 1.4F);
+                    Entity owner = getOwner();
+                    for (LivingEntity near : server.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(1.8),
+                            e -> e != owner && (owner == null || !owner.isAlliedTo(e) && !e.isAlliedTo(owner))))
+                    {
+                        near.hurt(damageSources().explosion(this, owner), damage * 0.5F);
+                    }
                 }
                 case BULLET -> server.sendParticles(ParticleTypes.SMOKE, getX(), getY(), getZ(), 2, 0.05, 0.05, 0.05, 0.01);
             }

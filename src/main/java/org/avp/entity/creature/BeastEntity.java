@@ -82,6 +82,21 @@ public class BeastEntity extends Monster
         return spec() != null && spec().has(ability);
     }
 
+    public boolean isPredatorHound()
+    {
+        return is("predator_hound");
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity other)
+    {
+        if (isPredatorHound() && org.avp.entity.yautja.YautjaEntity.isHuntingPack(other))
+        {
+            return true;
+        }
+        return super.isAlliedTo(other);
+    }
+
     private boolean is(String id)
     {
         return spec().id().equals(id);
@@ -115,7 +130,9 @@ public class BeastEntity extends Monster
         if (is("predator_hound"))
         {
             targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
-                    e -> e.getType().is(ModTags.XENOMORPHS) || e instanceof Enemy && !(e instanceof Creeper) && !(e instanceof BeastEntity)));
+                    e -> !org.avp.entity.yautja.YautjaEntity.isHuntingPack(e)
+                            && (e.getType().is(ModTags.XENOMORPHS) || e instanceof Enemy && !(e instanceof Creeper))));
+            goalSelector.addGoal(5, new HeelGoal(this));
         }
         else if (spec().hostile())
         {
@@ -181,6 +198,10 @@ public class BeastEntity extends Monster
         super.tick();
         if (!level().isClientSide)
         {
+            if (isPredatorHound() && tickCount % 10 == 0)
+            {
+                assistMaster();
+            }
             entityData.set(CLIMBING, has(Ability.CLIMB) && horizontalCollision && getTarget() != null && getTarget().getY() > getY() + 0.5);
             if (bossBar != null)
             {
@@ -256,5 +277,64 @@ public class BeastEntity extends Monster
     {
         SoundEvent s = ModSounds.creature(spec().sounds(), "death");
         return s != null ? s : super.getDeathSound();
+    }
+
+    /** The nearest Yautja within 32 blocks: a hound's master. */
+    @Nullable
+    private org.avp.entity.yautja.YautjaEntity master()
+    {
+        return level().getEntitiesOfClass(org.avp.entity.yautja.YautjaEntity.class, getBoundingBox().inflate(32), LivingEntity::isAlive)
+                .stream().min(java.util.Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
+    }
+
+    /** A hound goes for whatever its master is hunting. */
+    private void assistMaster()
+    {
+        org.avp.entity.yautja.YautjaEntity master = master();
+        if (master != null && master.getTarget() != null && master.getTarget() != getTarget()
+                && !org.avp.entity.yautja.YautjaEntity.isHuntingPack(master.getTarget()))
+        {
+            setTarget(master.getTarget());
+        }
+    }
+
+    /** Hounds stay at their master's heel when there's nothing to hunt. */
+    static class HeelGoal extends net.minecraft.world.entity.ai.goal.Goal
+    {
+        private final BeastEntity hound;
+        @Nullable
+        private org.avp.entity.yautja.YautjaEntity master;
+
+        HeelGoal(BeastEntity hound)
+        {
+            this.hound = hound;
+            setFlags(java.util.EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (hound.getTarget() != null || hound.tickCount % 20 != 0)
+            {
+                return false;
+            }
+            master = hound.master();
+            return master != null && hound.distanceTo(master) > 8;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return master != null && master.isAlive() && hound.getTarget() == null && hound.distanceTo(master) > 4;
+        }
+
+        @Override
+        public void tick()
+        {
+            if (hound.tickCount % 10 == 0)
+            {
+                hound.getNavigation().moveTo(master, 1.2);
+            }
+        }
     }
 }

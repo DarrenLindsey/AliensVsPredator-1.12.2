@@ -195,6 +195,15 @@ public class YautjaEntity extends Monster
         if (hurt && !level().isClientSide)
         {
             reveal(30);
+            // the pack answers: hounds and other Yautja nearby go for whoever did it
+            if (source.getEntity() instanceof LivingEntity attacker && !isHuntingPack(attacker))
+            {
+                for (net.minecraft.world.entity.Mob ally : level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+                        getBoundingBox().inflate(32), e -> e != this && isHuntingPack(e) && e.getTarget() == null))
+                {
+                    ally.setTarget(attacker);
+                }
+            }
             if (level() instanceof ServerLevel server)
             {
                 // glowing green blood
@@ -207,6 +216,18 @@ public class YautjaEntity extends Monster
             }
         }
         return hurt;
+    }
+
+    /** Yautja hunt together with each other and with their hounds. */
+    public static boolean isHuntingPack(Entity e)
+    {
+        return e instanceof YautjaEntity || e instanceof org.avp.entity.creature.BeastEntity beast && beast.isPredatorHound();
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity other)
+    {
+        return isHuntingPack(other) || super.isAlliedTo(other);
     }
 
     @Override

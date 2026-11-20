@@ -166,15 +166,18 @@ public final class JoeCommands
     public static ItemStack manualBook()
     {
         String[] pages = {
-                "SEEGSON\nWORKING JOE\nProgramming Manual\n\nWrite a program in a book and quill, one instruction per line, then use the book on your Joe.\n\nRuns top to bottom, then starts over.",
-                "PLACES\nX Y Z, or ~ for where the Joe was when you loaded it: ~ ~ ~5 is 5 blocks south of it.\n\nname Joe-Lab\nhome ~ ~ ~\ngoto X Y Z\ngoto home|alarm|owner\npatrol X Y Z ; X Y Z",
-                "TALKING\nsay \"Hello.\"\nreport \"Done.\"\n(report messages you over the network)\n\nwait 10  (seconds)\nalarm\nsecurity on|off\n(security: fights hostile mobs and strangers)",
-                "WORK\nhaul A -> B [item] [count]\nfarm A B [-> store]\nmaintain A B [<- store]\n(A, B, store are X Y Z)\nmaintain remembers powerlines and lights in the box A-B and puts back any that go missing.",
-                "SWITCHES\nlever X Y Z on|off\npress X Y Z\nopen X Y Z\nclose X Y Z\n\nguard X Y Z [radius] [seconds]\nfollow [seconds]\ncharge",
-                "FLOW\nlabel top\njump top\nstop\nif night: say \"Lights.\"\nunless has wheat 10: jump top\n\nConditions: night day lowpower full empty alarm hurt raining player hostile, powered X Y Z, has ITEM N, chance %",
-                "RESPONSES\nwhen EVENT: instruction\nRuns when it happens, then the program carries on.\n\nEvents: night day alarm hurt lowpower hostile player, redstone X Y Z\n\nwhen alarm: goto alarm\nwhen night: lever ~ ~ ~2 on",
-                "NETWORK\n/joes list\n/joes recall\n/joes lockdown\n/joes resume\n/joes stop\n/joes run avp:farmer\n/joes example avp:farmer\n\nSneak-use a Joe empty-handed to pack it up.",
-                "POWER\nJoes run on a battery. Wire a Joe Charger to the power network; low Joes go and charge.\nRedstone block: emergency charge.\n\nFAULTS\nBadly damaged Joes can malfunction. Use a processor on it to repair it." };
+                "SEEGSON\nWORKING JOE\nJOE-SCRIPT v2\n\nWrite a program in a book and quill (or a Seegson Terminal), one statement per line. Use the book on your Joe.\n\nPrograms loop from the top.",
+                "PLACES\nX Y Z, or ~ = where the Joe was when loaded: ~ ~ ~5\n\nname Joe-Lab\nhome ~ ~ ~\ngoto X Y Z\ngoto home|alarm|owner\npatrol A ; B ; C\nface X Y Z\nfollow [secs]",
+                "VARIABLES\nset n = 5\nset n = n * 2 + 1\nset s = \"Hi \" + name\n$n puts a value in any line:\ndig $fx $fy $fz\nsay \"I have $n\"\n\nmaths: + - * / %\n== != < > <= >=\nand or not",
+                "BLOCKS\nif count(wheat) > 9\n  ...\nelif night\n  ...\nelse\n  ...\nend\nwhile not full\nrepeat 4\nfor i = 1 to 10 step 2\nforever\nbreak  continue",
+                "FUNCTIONS\nfunc restock\n  take ~2 ~ ~ iron_ingot 16\n  return\nend\ncall restock\n\nOne-liners:\nif night: say \"Hi\"\nunless full: wait 5\nlabel / jump / stop",
+                "HANDS\ndig X Y Z\nplace ITEM X Y Z\nuse X Y Z [ITEM]\ntake X Y Z [ITEM] [N]\nput X Y Z [ITEM] [N]\ndrop [ITEM] [N]\npickup [radius]\nequip ITEM|nothing\ncraft ITEM [N]\nattack [radius]",
+                "SENSES\nscan iron_ore 16\nfind hostile 12\n(sets found, fx fy fz)\ninspect X Y Z\n(sets block)\n\nValues: x y z charge health time night day full empty items alarm hostile player msg sender",
+                "BUILT-IN\ncount(item) items(X,Y,Z,item)\nblock(X,Y,Z) ripe(X,Y,Z)\npowered(X,Y,Z) dist(X,Y,Z)\nisair light random(n)\nchance(%) min max abs\nfloor round sqrt len\ncontains word upgrade(id)",
+                "WORK\nhaul A -> B [item] [n]\nfarm A B [-> store]\nmaintain A B [<- store]\nlever X Y Z on|off\npress open close\nguard X Y Z [r] [secs]\ncharge\nsecurity on|off",
+                "TALK\nsay \"...\"  report \"...\"\nprint \"...\" (terminal log)\nalarm\nsend CHANNEL \"text\"\n(to all your Joes)\n\nRESPONSES\nwhen EVENT: statement\nwhen message ops: call f",
+                "EVENTS\nnight day alarm hurt lowpower hostile player\nredstone X Y Z\nmessage [channel]\n\nMODULES (4 bays)\ncargo battery drill fabricator sensor plating servos anchor\nShears + sneak: remove",
+                "NETWORK\nSeegson Terminal: edit, upload, watch, drive.\nNetwork Server: library, control at any distance, any dimension.\nTablet: the terminal in your pocket.\n/joes list recall lockdown resume stop run example" };
         List<Filterable<Component>> list = new ArrayList<>();
         for (String p : pages)
         {

@@ -65,3 +65,15 @@ neoForge.ideSyncTask generateModMetadata
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+// Optional JEI integration (gradle.properties: with_jei=true). Off by default so the build never depends on it.
+if (project.findProperty('with_jei') == 'true') {
+    repositories {
+        maven { url = 'https://maven.blamejared.com' }
+    }
+    dependencies {
+        compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+        runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    }
+    sourceSets.main.java.srcDir 'src/jei/java'
+}

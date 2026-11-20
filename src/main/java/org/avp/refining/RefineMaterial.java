@@ -58,6 +58,15 @@ public enum RefineMaterial
         return items.contains(key);
     }
 
+    /** Every ore of this metal, as one ingredient (for recipe viewers). */
+    public net.minecraft.world.item.crafting.Ingredient ingredient()
+    {
+        java.util.List<net.minecraft.world.item.crafting.Ingredient.Value> values = new java.util.ArrayList<>();
+        tags.forEach(t -> values.add(new net.minecraft.world.item.crafting.Ingredient.TagValue(t)));
+        items.forEach(id -> BuiltInRegistries.ITEM.getOptional(id).ifPresent(i -> values.add(new net.minecraft.world.item.crafting.Ingredient.ItemValue(new ItemStack(i)))));
+        return net.minecraft.world.item.crafting.Ingredient.fromValues(values.stream());
+    }
+
     public static RefineMaterial ofOre(ItemStack stack)
     {
         for (RefineMaterial m : values())

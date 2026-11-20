@@ -15,6 +15,8 @@ import net.minecraft.resources.ResourceLocation;
 public class DroneRenderer extends MobRenderer<DroneEntity, DroneEntityModel>
 {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "textures/entity/drone.png");
+    private static final ResourceLocation BUILDER = ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "textures/entity/builder_drone.png");
+    private static final ResourceLocation COATER = ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "textures/entity/coater_drone.png");
 
     public DroneRenderer(EntityRendererProvider.Context context)
     {
@@ -24,7 +26,8 @@ public class DroneRenderer extends MobRenderer<DroneEntity, DroneEntityModel>
     @Override
     public ResourceLocation getTextureLocation(DroneEntity drone)
     {
-        return TEXTURE;
+        return drone instanceof org.avp.entity.xenomorph.BuilderDroneEntity ? BUILDER
+                : drone instanceof org.avp.entity.xenomorph.CoaterDroneEntity ? COATER : TEXTURE;
     }
 
     /**
@@ -36,6 +39,14 @@ public class DroneRenderer extends MobRenderer<DroneEntity, DroneEntityModel>
     {
         poseStack.translate(0F, 0F, 0.5F);
         poseStack.scale(0.9F, 0.9F, 0.9F);
+        if (drone instanceof org.avp.entity.xenomorph.BuilderDroneEntity)
+        {
+            poseStack.scale(1.1F, 1.0F, 1.1F); // stockier
+        }
+        else if (drone instanceof org.avp.entity.xenomorph.CoaterDroneEntity)
+        {
+            poseStack.scale(0.92F, 0.95F, 0.92F); // leaner
+        }
         if (drone.isCrawling())
         {
             // flattened and stretched out, belly to the floor (fits a 1-block gap); the feet stay on the ground

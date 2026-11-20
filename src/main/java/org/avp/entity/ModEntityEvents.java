@@ -22,6 +22,8 @@ public final class ModEntityEvents
     {
         event.put(ModEntities.FACEHUGGER.get(), FacehuggerEntity.createAttributes().build());
         event.put(ModEntities.DRONE.get(), org.avp.entity.xenomorph.DroneEntity.createAttributes().build());
+        event.put(ModEntities.BUILDER_DRONE.get(), org.avp.entity.xenomorph.BuilderDroneEntity.createAttributes().build());
+        event.put(ModEntities.COATER_DRONE.get(), org.avp.entity.xenomorph.CoaterDroneEntity.createAttributes().build());
         event.put(ModEntities.OVAMORPH.get(), org.avp.entity.xenomorph.OvamorphEntity.createAttributes().build());
         event.put(ModEntities.CHESTBURSTER.get(), org.avp.entity.xenomorph.ChestbursterEntity.createAttributes().build());
         ModEntities.CATALOG.forEach((id, type) -> event.put(type.get(),

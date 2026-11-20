@@ -31,6 +31,8 @@
     "avp:ovamorph_giger",
     "avp:chestburster_queen",
     "avp:chestburster_predalien",
-    "avp:chestburster_runner"
+    "avp:chestburster_runner",
+    "avp:builder_drone",
+    "avp:coater_drone"
   ]
 }

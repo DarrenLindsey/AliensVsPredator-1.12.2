@@ -608,3 +608,30 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("coater lang written")
+
+# ================================================================ Builder and Coater Drones (castes of the hive)
+lang = read_json(f"{NA}/lang/en_us.json", {})
+drone_tex = Image.open(f"{NA}/textures/entity/drone.png").convert("RGBA")
+def tinted(tint, strength, bright):
+    out = Image.new("RGBA", drone_tex.size)
+    px = []
+    for r, g, b, a in drone_tex.getdata():
+        lum = (r * 0.3 + g * 0.59 + b * 0.11) * bright
+        px.append((int(min(255, r * (1 - strength) + lum * tint[0] * strength)), int(min(255, g * (1 - strength) + lum * tint[1] * strength)),
+                   int(min(255, b * (1 - strength) + lum * tint[2] * strength)), a))
+    out.putdata(px)
+    return out
+tinted((1.25, 1.05, 0.8), 0.6, 1.05).save(f"{NA}/textures/entity/builder_drone.png")   # dusty, hivestone-brown
+tinted((0.8, 1.3, 0.95), 0.55, 1.15).save(f"{NA}/textures/entity/coater_drone.png")    # wet, greenish resin sheen
+for cid, name, lore in [("builder_drone", "Builder Drone", "A Drone that took up building for its hive: stocky and slow, it lays hivestone floors, bridges and seals."),
+                        ("coater_drone", "Coater Drone", "A Drone that took up coating the hive: lean and quick, always on the walls and ceilings spraying resin.")]:
+    write_json(f"{NA}/models/item/{cid}_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+    write_json(f"{ND}/avp/loot_table/entities/{cid}.json", read_json(f"{ND}/avp/loot_table/entities/drone.json", {}))
+    add_to_tag(f"{ND}/avp/tags/entity_type/xenomorphs.json", [f"avp:{cid}"])
+    lang[f"entity.avp.{cid}"] = name
+    lang[f"item.avp.{cid}_spawn_egg"] = f"{name} Spawn Egg"
+    lang[f"tooltip.avp.{cid}_spawn_egg"] = lore
+lang["avp.configuration.hiveBuilders.tooltip"] = "Builder Drones a founded hive keeps: worker Drones change into them when it's short."
+lang["avp.configuration.hiveCoaters.tooltip"] = "Coater Drones a founded hive keeps: worker Drones change into them when it's short."
+write_json(f"{NA}/lang/en_us.json", lang)
+print("builder/coater drones written")

@@ -115,8 +115,9 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       ambush tunnels), natural caves broken into are taken over. Resin columns in the chambers. Max 6 rooms
       with a Queen (2 without), a dug-block cap, never digs next to water/lava. Founding: an urge - the
       digger ignores prey and hunger and digs 3x faster; if it dies the nearest Drone takes over at once.
-      Hive jobs (fixed quotas once founded, refilled when a holder dies): builders (2), wall coaters (2,
-      climb walls/ceilings spraying resin, big caves first), the rest workers. Resin creep: resin in a living
+      Castes (once founded the hive keeps fixed numbers; a worker Drone changes into one when it's short):
+      Builder Drone (2: stocky, slow, armoured; hivestone) and Coater Drone (2: lean, quick; climbs walls and
+      ceilings spraying resin, big caves first). They don't mature further; the rest are workers. Resin creep: resin in a living
       hive slowly spreads to neighbouring surfaces. Captured caves are measured (flood fill) and claimed whole.
       Builder Drones: lay hivestone (new block) over holes in room floors, under
       galleries that cross open space, over water/lava leaking in, roof rooms open to the sky, pave floors.

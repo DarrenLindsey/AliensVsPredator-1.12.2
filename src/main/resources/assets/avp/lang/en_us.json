@@ -849,7 +849,13 @@
   "avp.configuration.resinCreepRate": "Resin Creep",
   "avp.configuration.resinCreepRate.tooltip": "How fast resin in a living hive spreads by itself to neighbouring blocks (0 = never).",
   "avp.configuration.hiveBuilders": "Builder Drones per Hive",
-  "avp.configuration.hiveBuilders.tooltip": "Drones kept as builders: hivestone floors, bridges, seals and roofs.",
+  "avp.configuration.hiveBuilders.tooltip": "Builder Drones a founded hive keeps: worker Drones change into them when it's short.",
   "avp.configuration.hiveCoaters": "Coater Drones per Hive",
-  "avp.configuration.hiveCoaters.tooltip": "Drones kept as wall coaters: they climb walls and ceilings spraying resin."
+  "avp.configuration.hiveCoaters.tooltip": "Coater Drones a founded hive keeps: worker Drones change into them when it's short.",
+  "entity.avp.builder_drone": "Builder Drone",
+  "item.avp.builder_drone_spawn_egg": "Builder Drone Spawn Egg",
+  "tooltip.avp.builder_drone_spawn_egg": "A Drone that took up building for its hive: stocky and slow, it lays hivestone floors, bridges and seals.",
+  "entity.avp.coater_drone": "Coater Drone",
+  "item.avp.coater_drone_spawn_egg": "Coater Drone Spawn Egg",
+  "tooltip.avp.coater_drone_spawn_egg": "A Drone that took up coating the hive: lean and quick, always on the walls and ceilings spraying resin."
 }

@@ -106,6 +106,14 @@ public class DroneEntity extends XenomorphEntity
     public void tick()
     {
         super.tick();
+        if (!level().isClientSide && tickCount % 100 == 37 && level() instanceof net.minecraft.server.level.ServerLevel server)
+        {
+            takeUpCaste(server);
+            if (isRemoved())
+            {
+                return;
+            }
+        }
         if (!level().isClientSide)
         {
             entityData.set(CLIMBING, wantsToClimb());
@@ -166,27 +174,65 @@ public class DroneEntity extends XenomorphEntity
         return force;
     }
 
-    /** Its job in its (founded) hive: the hive keeps a fixed number of builders and coaters; the rest are workers. */
+    /** Its job in its hive: a plain Drone is a worker; Builder and Coater Drones are their own castes. */
     public String job()
     {
+        return hive() == null ? "" : "WORKER";
+    }
+
+    /**
+     * A founded hive keeps a fixed number of Builder and Coater Drones. When it's short of one, a
+     * plain worker Drone (not the heir) changes into it - for good.
+     */
+    private void takeUpCaste(net.minecraft.server.level.ServerLevel level)
+    {
         org.avp.world.hive.Hive hive = hive();
-        if (hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE)
+        if (getClass() != DroneEntity.class || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
+                || getUUID().equals(hive.heir()) || getTarget() != null || isVehicle())
         {
-            return "";
+            return;
         }
-        return hive.job(getUUID(), level().getGameTime(), AvpConfig.server(AvpConfig.SERVER.hiveBuilders), AvpConfig.server(AvpConfig.SERVER.hiveCoaters));
+        java.util.List<DroneEntity> castes = level.getEntitiesOfClass(DroneEntity.class,
+                new net.minecraft.world.phys.AABB(hive.core()).inflate(org.avp.world.hive.HiveData.maxRadius() + 32),
+                d -> d.isAlive() && hive.id().equals(d.hiveId()) && d.getClass() != DroneEntity.class);
+        long builders = castes.stream().filter(d -> d instanceof BuilderDroneEntity).count();
+        long coaters = castes.stream().filter(d -> d instanceof CoaterDroneEntity).count();
+        net.minecraft.world.entity.EntityType<? extends DroneEntity> next =
+                builders < AvpConfig.server(AvpConfig.SERVER.hiveBuilders) ? org.avp.registry.ModEntities.BUILDER_DRONE.get()
+                : coaters < AvpConfig.server(AvpConfig.SERVER.hiveCoaters) ? org.avp.registry.ModEntities.COATER_DRONE.get() : null;
+        if (next == null)
+        {
+            return;
+        }
+        DroneEntity morph = next.create(level);
+        if (morph == null)
+        {
+            return;
+        }
+        morph.moveTo(getX(), getY(), getZ(), getYRot(), getXRot());
+        morph.setHiveId(hiveId());
+        morph.feed(hunger() - morph.hunger());
+        morph.setHealth(morph.getMaxHealth() * getHealth() / getMaxHealth());
+        if (hasCustomName() && !isCustomNameVisible())
+        {
+            morph.setCustomName(getCustomName());
+        }
+        level.addFreshEntity(morph);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.ITEM_SLIME, getX(), getY() + 1, getZ(), 30, 0.4, 0.6, 0.4, 0.05);
+        level.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.SLIME_SQUISH, net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, 0.5F);
+        discard();
     }
 
     /** Builders lay hivestone floors, bridges and seals. */
     public boolean isBuilder()
     {
-        return "BUILDER".equals(job());
+        return this instanceof BuilderDroneEntity && hive() != null;
     }
 
     /** Coaters climb the walls and ceilings and spray resin over them. */
     public boolean isCoater()
     {
-        return "COATER".equals(job());
+        return this instanceof CoaterDroneEntity && hive() != null;
     }
 
     @Override

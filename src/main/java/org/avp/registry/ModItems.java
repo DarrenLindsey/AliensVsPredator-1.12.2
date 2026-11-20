@@ -108,9 +108,15 @@ public final class ModItems
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.OVAMORPH, 0x5A4E3C, 0x2B2620, new Item.Properties()));
     public static final DeferredItem<Item> DRONE_SPAWN_EGG = ITEMS.register("drone_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.DRONE, 0x1A1C20, 0x3B4048, new Item.Properties()));
+    public static final DeferredItem<Item> BUILDER_DRONE_SPAWN_EGG = ITEMS.register("builder_drone_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.BUILDER_DRONE, 0x1A1C20, 0x5A5048, new Item.Properties()));
+    public static final DeferredItem<Item> COATER_DRONE_SPAWN_EGG = ITEMS.register("coater_drone_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.COATER_DRONE, 0x1A1C20, 0x3F6A4A, new Item.Properties()));
     static
     {
         Tab.MAIN.add(DRONE_SPAWN_EGG);
+        Tab.MAIN.add(BUILDER_DRONE_SPAWN_EGG);
+        Tab.MAIN.add(COATER_DRONE_SPAWN_EGG);
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);
         Tab.MAIN.add(CHESTBURSTER_SPAWN_EGG);
         Tab.MAIN.add(OVAMORPH_SPAWN_EGG);

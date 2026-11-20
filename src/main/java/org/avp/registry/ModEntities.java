@@ -36,6 +36,14 @@ public final class ModEntities
             () -> EntityType.Builder.<org.avp.entity.xenomorph.DroneEntity>of(org.avp.entity.xenomorph.DroneEntity::new, MobCategory.MONSTER)
                     .sized(0.95F, 2.0F).eyeHeight(1.7F).clientTrackingRange(10).build("drone"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.xenomorph.BuilderDroneEntity>> BUILDER_DRONE = ENTITIES.register("builder_drone",
+            () -> EntityType.Builder.<org.avp.entity.xenomorph.BuilderDroneEntity>of(org.avp.entity.xenomorph.BuilderDroneEntity::new, MobCategory.MONSTER)
+                    .sized(0.95F, 2.0F).eyeHeight(1.7F).clientTrackingRange(10).build("builder_drone"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.xenomorph.CoaterDroneEntity>> COATER_DRONE = ENTITIES.register("coater_drone",
+            () -> EntityType.Builder.<org.avp.entity.xenomorph.CoaterDroneEntity>of(org.avp.entity.xenomorph.CoaterDroneEntity::new, MobCategory.MONSTER)
+                    .sized(0.9F, 1.9F).eyeHeight(1.6F).clientTrackingRange(10).build("coater_drone"));
+
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.creature.CreatureProjectile>> CREATURE_PROJECTILE = ENTITIES.register("creature_projectile",
             () -> EntityType.Builder.<org.avp.entity.creature.CreatureProjectile>of(org.avp.entity.creature.CreatureProjectile::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(5).noSummon().build("creature_projectile"));

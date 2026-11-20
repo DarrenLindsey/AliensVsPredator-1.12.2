@@ -77,6 +77,8 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.CHESTBURSTER.get(), org.avp.client.render.ChestbursterRenderer::new);
         event.registerEntityRenderer(ModEntities.OVAMORPH.get(), org.avp.client.render.OvamorphRenderer::new);
         event.registerEntityRenderer(ModEntities.DRONE.get(), org.avp.client.render.DroneRenderer::new);
+        event.registerEntityRenderer(ModEntities.BUILDER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
+        event.registerEntityRenderer(ModEntities.COATER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
         event.registerEntityRenderer(ModEntities.CREATURE_PROJECTILE.get(), NoopRenderer::new); // particles only
         ModEntities.CATALOG.forEach((id, type) -> registerCreature(event, type.get(), id));
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);

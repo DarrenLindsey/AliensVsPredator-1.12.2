@@ -521,7 +521,8 @@ public abstract class XenomorphEntity extends Monster
                 int pack = packmates().size() + 1;
                 org.avp.world.hive.Hive hive = hive();
                 String role = hive == null ? "" : getUUID().equals(hive.heir()) ? " | HEIR" : getUUID().equals(hive.digger()) ? " | DIGGER"
-                        : this instanceof DroneEntity drone && drone.isBuilder() ? " | BUILDER" : " | hive";
+                        : this instanceof DroneEntity drone && drone.isBuilder() ? " | BUILDER"
+                        : this instanceof DroneEntity drone && drone.isCoater() ? " | COATER" : " | hive";
                 // the kind of Xenomorph first (the name is translated on each player's side)
                 setCustomName(net.minecraft.network.chat.Component.empty().append(getType().getDescription()).append(": ")
                         .append(net.minecraft.network.chat.Component.literal(now + (isCrawling() ? " (crawling)" : "")

@@ -206,7 +206,40 @@ public final class HivePlanner
         }
         if (air >= 70 && Math.sqrt(at.distSqr(hive.core())) < hive.maxReach(level.getGameTime(), HiveData.maxRadius()) + 8)
         {
-            hive.rooms().add(new Room(Room.Type.CAVE, at, at, Room.Type.CAVE.radius, Room.Type.CAVE.height, true));
+            // measure the cave (a bounded flood fill of its air) so a big one is claimed whole, up to 16 blocks out
+            java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
+            java.util.Set<BlockPos> seen = new java.util.HashSet<>();
+            queue.add(at.immutable());
+            seen.add(at.immutable());
+            int minY = at.getY(), maxY = at.getY();
+            double sumX = 0, sumZ = 0;
+            while (!queue.isEmpty() && seen.size() < 6000)
+            {
+                BlockPos p = queue.poll();
+                sumX += p.getX();
+                sumZ += p.getZ();
+                minY = Math.min(minY, p.getY());
+                maxY = Math.max(maxY, p.getY());
+                for (Direction d : Direction.values())
+                {
+                    BlockPos n = p.relative(d);
+                    if (Math.abs(n.getX() - at.getX()) <= 16 && Math.abs(n.getZ() - at.getZ()) <= 16 && Math.abs(n.getY() - at.getY()) <= 12
+                            && !seen.contains(n) && level.getBlockState(n).isAir())
+                    {
+                        seen.add(n);
+                        queue.add(n);
+                    }
+                }
+            }
+            BlockPos centre = new BlockPos((int) Math.round(sumX / seen.size()), minY, (int) Math.round(sumZ / seen.size()));
+            int radius = 0;
+            for (BlockPos p : seen)
+            {
+                radius = (int) Math.max(radius, Math.sqrt(Math.pow(p.getX() - centre.getX(), 2) + Math.pow(p.getZ() - centre.getZ(), 2)));
+            }
+            radius = Math.max(Room.Type.CAVE.radius, Math.min(16, radius));
+            int height = Math.max(Room.Type.CAVE.height, Math.min(24, maxY - minY + 1));
+            hive.rooms().add(new Room(Room.Type.CAVE, centre, at, radius, height, true));
             HiveData.get(level).changed();
         }
     }

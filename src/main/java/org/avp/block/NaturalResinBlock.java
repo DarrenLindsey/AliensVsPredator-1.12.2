@@ -102,6 +102,54 @@ public class NaturalResinBlock extends BaseEntityBlock
         return level.setBlock(pos, under != null ? under : fluid.createLegacyBlock(), level.isClientSide ? Block.UPDATE_ALL_IMMEDIATE : Block.UPDATE_ALL);
     }
 
+    /**
+     * Resin creep: in a living hive, resin slowly spreads onto the blocks next to it (only within
+     * the hive's reach, only onto bare surfaces), so even a huge cave ends up coated in time.
+     */
+    @Override
+    protected boolean isRandomlyTicking(BlockState state)
+    {
+        return true;
+    }
+
+    @Override
+    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random)
+    {
+        double rate = AvpConfig.server(AvpConfig.SERVER.resinCreepRate);
+        if (rate <= 0 || random.nextDouble() >= rate * 0.25 || !AvpConfig.server(AvpConfig.SERVER.hives))
+        {
+            return;
+        }
+        HiveData data = HiveData.get(level);
+        long now = level.getGameTime();
+        data.containing(pos, now).filter(h -> h.state() == org.avp.world.hive.Hive.State.ACTIVE && now - h.lastActive() < 6000).ifPresent(hive ->
+        {
+            BlockPos next = pos.offset(random.nextInt(3) - 1, random.nextInt(3) - 1, random.nextInt(3) - 1);
+            if (next.distSqr(hive.core()) <= sq(hive.buildRadius(now, HiveData.maxRadius()) + 4) && exposed(level, next) && cover(level, next))
+            {
+                hive.addResin(1);
+                data.changed();
+            }
+        });
+    }
+
+    private static double sq(double d)
+    {
+        return d * d;
+    }
+
+    private static boolean exposed(Level level, BlockPos pos)
+    {
+        for (Direction d : Direction.values())
+        {
+            if (level.getBlockState(pos.relative(d)).isAir())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
     {

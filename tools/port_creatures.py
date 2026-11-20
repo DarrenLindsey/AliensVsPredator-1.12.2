@@ -595,3 +595,16 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("hivestone + biomask data written")
+
+# ================================================================ coaters, resin creep, hive jobs
+lang = read_json(f"{NA}/lang/en_us.json", {})
+lang.update({
+    "avp.configuration.resinCreepRate": "Resin Creep",
+    "avp.configuration.resinCreepRate.tooltip": "How fast resin in a living hive spreads by itself to neighbouring blocks (0 = never).",
+    "avp.configuration.hiveBuilders": "Builder Drones per Hive",
+    "avp.configuration.hiveBuilders.tooltip": "Drones kept as builders: hivestone floors, bridges, seals and roofs.",
+    "avp.configuration.hiveCoaters": "Coater Drones per Hive",
+    "avp.configuration.hiveCoaters.tooltip": "Drones kept as wall coaters: they climb walls and ceilings spraying resin.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("coater lang written")

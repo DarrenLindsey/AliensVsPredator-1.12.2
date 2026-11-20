@@ -193,6 +193,9 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue hiveRadius;
         public final ModConfigSpec.DoubleValue resinBuildSpeed;
         public final ModConfigSpec.IntValue hiveMaxDugBlocks;
+        public final ModConfigSpec.DoubleValue resinCreepRate;
+        public final ModConfigSpec.IntValue hiveBuilders;
+        public final ModConfigSpec.IntValue hiveCoaters;
         public final ModConfigSpec.DoubleValue foundingDigSpeed;
         public final ModConfigSpec.BooleanValue resinCoversBuiltBlocks;
         public final ModConfigSpec.BooleanValue xenosCocoonHosts;
@@ -420,6 +423,15 @@ public final class AvpConfig
             hiveRadius = b
                     .comment("How far from its core a hive with a Queen digs its rooms and galleries (a hive without a Queen stays a small nest, up to 16).")
                     .defineInRange("hiveRadius", 24, 6, 64);
+            hiveBuilders = b
+                    .comment("Drones a founded hive keeps as builders (hivestone floors, bridges, seals, roofs).")
+                    .defineInRange("hiveBuilders", 2, 0, 32);
+            hiveCoaters = b
+                    .comment("Drones a founded hive keeps as wall coaters (climb walls and ceilings spraying resin). The rest are workers: digging rooms, resin, hunting.")
+                    .defineInRange("hiveCoaters", 2, 0, 32);
+            resinCreepRate = b
+                    .comment("How fast resin in a living hive spreads by itself onto the blocks next to it (0 = never, 1 = normal).")
+                    .defineInRange("resinCreepRate", 1.0, 0.0, 20.0);
             hiveMaxDugBlocks = b
                     .comment("Most blocks one hive may dig out for its rooms and galleries (the founding tunnel and chamber don't count).")
                     .defineInRange("hiveMaxDugBlocks", 6_000, 0, 1_000_000);

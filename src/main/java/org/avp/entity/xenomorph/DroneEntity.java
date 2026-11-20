@@ -68,6 +68,7 @@ public class DroneEntity extends XenomorphEntity
         goalSelector.addGoal(5, new HiveGoals.BuildResinGoal(this));
         goalSelector.addGoal(5, new HiveGoals.DigHiveGoal(this));
         goalSelector.addGoal(4, new HiveGoals.BuildHiveGoal(this));
+        goalSelector.addGoal(4, new HiveGoals.CoatWallsGoal(this));
     }
 
     @Override
@@ -165,10 +166,27 @@ public class DroneEntity extends XenomorphEntity
         return force;
     }
 
-    /** About one in three of a hive's Drones are builders: they lay hivestone floors, bridges and seals. */
+    /** Its job in its (founded) hive: the hive keeps a fixed number of builders and coaters; the rest are workers. */
+    public String job()
+    {
+        org.avp.world.hive.Hive hive = hive();
+        if (hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE)
+        {
+            return "";
+        }
+        return hive.job(getUUID(), level().getGameTime(), AvpConfig.server(AvpConfig.SERVER.hiveBuilders), AvpConfig.server(AvpConfig.SERVER.hiveCoaters));
+    }
+
+    /** Builders lay hivestone floors, bridges and seals. */
     public boolean isBuilder()
     {
-        return hive() != null && Math.floorMod(getUUID().getLeastSignificantBits(), 3) == 0;
+        return "BUILDER".equals(job());
+    }
+
+    /** Coaters climb the walls and ceilings and spray resin over them. */
+    public boolean isCoater()
+    {
+        return "COATER".equals(job());
     }
 
     @Override

@@ -829,6 +829,151 @@ public final class HiveGoals
     }
 
     /**
+     * Coater Drones: they climb the hive's walls and ceilings - big captured caves above all - and
+     * spray resin over everything within reach, working their way across the surface.
+     */
+    public static class CoatWallsGoal extends Goal
+    {
+        private final DroneEntity drone;
+        @Nullable
+        private BlockPos target;
+        private int ticks, sprays;
+
+        public CoatWallsGoal(DroneEntity drone)
+        {
+            this.drone = drone;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!enabled() || AvpConfig.server(AvpConfig.SERVER.resinBuildSpeed) <= 0 || drone.getTarget() != null || drone.isVehicle()
+                    || drone.tickCount % 20 >= 2 || !drone.isCoater() || !(drone.level() instanceof ServerLevel level))
+            {
+                return false;
+            }
+            Hive hive = drone.hive();
+            if (hive == null || hive.state() != Hive.State.ACTIVE)
+            {
+                return false;
+            }
+            java.util.List<org.avp.world.hive.Room> rooms = hive.rooms().stream().filter(r -> r.done() && r.type().isChamber()).toList();
+            if (rooms.isEmpty())
+            {
+                return false;
+            }
+            // caves are the big job: look there more often
+            org.avp.world.hive.Room room = rooms.stream().filter(r -> r.type() == org.avp.world.hive.Room.Type.CAVE).findAny()
+                    .filter(r -> drone.getRandom().nextInt(3) > 0).orElse(rooms.get(drone.getRandom().nextInt(rooms.size())));
+            target = findSurface(level, room.centre(), room.radius() + 4, room.height() + 6);
+            sprays = 0;
+            return target != null;
+        }
+
+        /** An uncoated wall or ceiling block near here, with open hive space in front of it. */
+        @Nullable
+        private BlockPos findSurface(ServerLevel level, BlockPos around, int radius, int height)
+        {
+            net.minecraft.util.RandomSource random = drone.getRandom();
+            for (int tries = 0; tries < 40; tries++)
+            {
+                BlockPos p = around.offset(random.nextInt(radius * 2 + 1) - radius, random.nextInt(height + 2) - 1, random.nextInt(radius * 2 + 1) - radius);
+                BlockState s = level.getBlockState(p);
+                if (!s.isAir() && NaturalResinBlock.canCover(level, p, s))
+                {
+                    for (Direction d : Direction.values())
+                    {
+                        if (d != Direction.UP && level.getBlockState(p.relative(d)).isAir()) // walls and ceilings (floors are the builders')
+                        {
+                            return p.relative(d).immutable();
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return target != null && ticks < 240 && drone.getTarget() == null;
+        }
+
+        @Override
+        public void start()
+        {
+            ticks = 0;
+            drone.setState("COATING WALLS");
+            drone.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
+        }
+
+        @Override
+        public void tick()
+        {
+            ticks += 2;
+            if (target == null)
+            {
+                return;
+            }
+            if (drone.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(target)) > 3.0 * 3.0)
+            {
+                if (ticks % 20 == 0)
+                {
+                    drone.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
+                }
+                return;
+            }
+            ServerLevel level = (ServerLevel) drone.level();
+            // spray everything exposed within reach
+            int coated = 0;
+            int limit = Math.max(2, (int) Math.round(8 * AvpConfig.server(AvpConfig.SERVER.resinBuildSpeed)));
+            BlockPos at = drone.blockPosition();
+            for (BlockPos p : BlockPos.betweenClosed(at.offset(-3, -2, -3), at.offset(3, 4, 3)))
+            {
+                if (coated >= limit)
+                {
+                    break;
+                }
+                if (drone.getRandom().nextInt(3) == 0 && exposedNotFloor(level, p) && NaturalResinBlock.cover(level, p))
+                {
+                    coated++;
+                }
+            }
+            if (coated > 0)
+            {
+                drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                level.playSound(null, at, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.HOSTILE, 0.7F, 0.5F);
+                Hive hive = drone.hive();
+                if (hive != null)
+                {
+                    hive.addResin(coated);
+                    HiveData.get(level).changed();
+                }
+            }
+            // and on across the wall
+            target = ++sprays < 8 ? findSurface(level, at, 5, 5) : null;
+            if (target != null)
+            {
+                ticks = 0;
+                drone.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
+            }
+        }
+
+        private static boolean exposedNotFloor(ServerLevel level, BlockPos pos)
+        {
+            for (Direction d : Direction.values())
+            {
+                if (d != Direction.UP && level.getBlockState(pos.relative(d)).isAir())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
      * The larder: a hungry member feeds on cocooned prey that can't carry an embryo instead of
      * going out to hunt. Hosts (waiting for an egg, or already carrying an embryo) are left alone.
      */

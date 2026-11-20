@@ -46,6 +46,45 @@ public class Hive
     /** The Drone digging the founding tunnel. */
     @Nullable
     private UUID digger;
+    /** Special jobs held by Drones: Drone -> (job, game time last seen). */
+    private final java.util.Map<UUID, String> jobs = new java.util.HashMap<>();
+    private final java.util.Map<UUID, Long> jobSeen = new java.util.HashMap<>();
+
+    /**
+     * The job of this Drone ("BUILDER", "COATER" or "WORKER"), handing out the special jobs until
+     * each has its quota; a job whose holder hasn't been seen for 20 seconds (dead, or far away)
+     * goes to the next Drone that asks.
+     */
+    public String job(UUID drone, long now, int builders, int coaters)
+    {
+        java.util.Iterator<java.util.Map.Entry<UUID, Long>> it = jobSeen.entrySet().iterator();
+        while (it.hasNext())
+        {
+            java.util.Map.Entry<UUID, Long> e = it.next();
+            if (now - e.getValue() > 400 && !e.getKey().equals(drone))
+            {
+                jobs.remove(e.getKey()); // gone: its job is free
+                it.remove();
+            }
+        }
+        jobSeen.put(drone, now);
+        String job = jobs.get(drone);
+        if (job == null)
+        {
+            long b = jobs.values().stream().filter("BUILDER"::equals).count();
+            long c = jobs.values().stream().filter("COATER"::equals).count();
+            job = b < builders ? "BUILDER" : c < coaters ? "COATER" : "WORKER";
+            jobs.put(drone, job);
+        }
+        return job;
+    }
+
+    @Nullable
+    public String jobOf(UUID drone)
+    {
+        return jobs.get(drone);
+    }
+
     /** Royal succession: the member being fed royal jelly to become the next Queen. */
     @Nullable
     private UUID heir;

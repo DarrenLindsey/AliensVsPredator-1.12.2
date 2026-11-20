@@ -845,5 +845,11 @@
   "block.avp.hivestone": "Hivestone",
   "tooltip.avp.hivestone": "Hardened resin and digested rock. Builder Drones lay hive floors, bridges and seals with it.",
   "avp.configuration.biomaskNightVision": "Biomask Night Vision",
-  "avp.configuration.biomaskNightVision.tooltip": "Wearing a Yautja biomask lets you see in the dark."
+  "avp.configuration.biomaskNightVision.tooltip": "Wearing a Yautja biomask lets you see in the dark.",
+  "avp.configuration.resinCreepRate": "Resin Creep",
+  "avp.configuration.resinCreepRate.tooltip": "How fast resin in a living hive spreads by itself to neighbouring blocks (0 = never).",
+  "avp.configuration.hiveBuilders": "Builder Drones per Hive",
+  "avp.configuration.hiveBuilders.tooltip": "Drones kept as builders: hivestone floors, bridges, seals and roofs.",
+  "avp.configuration.hiveCoaters": "Coater Drones per Hive",
+  "avp.configuration.hiveCoaters.tooltip": "Drones kept as wall coaters: they climb walls and ceilings spraying resin."
 }

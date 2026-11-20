@@ -101,7 +101,9 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       hollows out a chamber and founds the hive; members join the hive whose area they're in and drift
       home when idle. Drones coat the hive in resin from the core outwards (natural_resin: the block
       underneath still shows, comes back when scraped off; burns; natural ground only unless configured).
-      Drones subdue animals/villagers, carry them home and cocoon them; the Queen lays eggs next to them;
+      Drones subdue animals/villagers, carry them home and cocoon them (hosts in the Queen's chamber while she
+      lives, else the hatchery); the Queen lays only where she is - up to 12 unhatched eggs around her, but
+      only 3 while eggs of the hive are still waiting near the way out;
       cocoons turn into eggs over time (eggmorphing). A Queen's hive grows to the full radius, a queenless
       one stays a small nest. Royal succession: a queenless hive picks its biggest royal-line member as
       heir and feeds it royal jelly from every kill until it becomes a Queen. Breaking resin, hurting

@@ -498,8 +498,12 @@ public final class HiveGoals
                 return;
             }
             boolean isHost = org.avp.entity.parasite.FacehuggerEntity.isValidHost(host) || host instanceof net.minecraft.world.entity.player.Player;
-            org.avp.world.hive.Room room = hive.rooms(isHost ? org.avp.world.hive.Room.Type.HATCHERY : org.avp.world.hive.Room.Type.LARDER)
-                    .stream().filter(org.avp.world.hive.Room::done).findFirst().orElse(null);
+            // hosts go where the eggs are: the Queen's chamber when she's alive (she lays where she is), else the hatchery
+            org.avp.world.hive.Room.Type roomType = !isHost ? org.avp.world.hive.Room.Type.LARDER
+                    : hive.hasQueen(drone.level().getGameTime()) ? org.avp.world.hive.Room.Type.QUEEN : org.avp.world.hive.Room.Type.HATCHERY;
+            org.avp.world.hive.Room room = hive.rooms(roomType).stream().filter(org.avp.world.hive.Room::done).findFirst()
+                    .or(() -> hive.rooms(org.avp.world.hive.Room.Type.HATCHERY).stream().filter(org.avp.world.hive.Room::done).findFirst())
+                    .orElse(null);
             BlockPos core = room != null ? room.centre() : hive.core();
             if (drone.blockPosition().distSqr(core) > (room != null ? Math.max(9, room.radius() * room.radius()) : 16))
             {

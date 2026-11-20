@@ -281,37 +281,40 @@ public class AdultXenomorphEntity extends XenomorphEntity
             return;
         }
         eggTimer = 0;
-        if (level().getEntitiesOfClass(OvamorphEntity.class, getBoundingBox().inflate(16)).size() >= 12)
+        // she lays where she is (as in Aliens). Her clutch: up to 12 unhatched eggs around her - but only 3
+        // while eggs of her hive are still waiting near the way out
+        java.util.List<OvamorphEntity> clutch = level().getEntitiesOfClass(OvamorphEntity.class, getBoundingBox().inflate(6));
+        org.avp.world.hive.Hive hive = hive();
+        boolean eggsAtExit = hive != null && !level().getEntitiesOfClass(OvamorphEntity.class,
+                new net.minecraft.world.phys.AABB(hive.entrance()).inflate(12), e -> e.distanceToSqr(this) > 12 * 12).isEmpty();
+        if (clutch.size() >= (eggsAtExit ? 3 : 12))
         {
             return;
+        }
+        BlockPos spot = null;
+        for (int tries = 0; tries < 16 && spot == null; tries++)
+        {
+            double angle = random.nextDouble() * Math.PI * 2;
+            double distance = getBbWidth() / 2 + 1.5 + random.nextDouble() * 2.0;
+            BlockPos p = BlockPos.containing(getX() + Math.cos(angle) * distance, getY(), getZ() + Math.sin(angle) * distance);
+            for (int dy = 1; dy >= -2 && spot == null; dy--)
+            {
+                BlockPos q = p.above(dy);
+                if (level().getBlockState(q).isAir() && level().getBlockState(q.above()).isAir() && level().getBlockState(q.below()).isSolid()
+                        && level().getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(q).inflate(0.4)).isEmpty())
+                {
+                    spot = q;
+                }
+            }
+        }
+        if (spot == null)
+        {
+            return; // no room around her right now
         }
         OvamorphEntity egg = ModEntities.OVAMORPH.get().create(level());
         if (egg != null)
         {
-            // next to a cocooned host if the hive has one (the egg opens for it), else in the hatchery, else behind her
-            Vec3 at = position().add(Vec3.directionFromRotation(0, yBodyRot).scale(-2.5));
-            org.avp.world.hive.Hive hive = hive();
-            net.minecraft.world.phys.AABB area = hive == null ? getBoundingBox().inflate(16)
-                    : new net.minecraft.world.phys.AABB(hive.core()).inflate(hive.buildRadius(level().getGameTime(), org.avp.world.hive.HiveData.maxRadius()) + 2);
-            java.util.List<LivingEntity> cocooned = level().getEntitiesOfClass(LivingEntity.class, area,
-                    m -> m.hasData(org.avp.registry.ModAttachments.COCOONED) && org.avp.entity.parasite.FacehuggerEntity.isValidHost(m)
-                            && level().getEntitiesOfClass(OvamorphEntity.class, m.getBoundingBox().inflate(2)).isEmpty());
-            if (!cocooned.isEmpty())
-            {
-                LivingEntity host = cocooned.get(random.nextInt(cocooned.size()));
-                at = host.position().add(random.nextInt(3) - 1, 0, random.nextInt(3) - 1);
-            }
-            else if (hive != null && level() instanceof ServerLevel server)
-            {
-                org.avp.world.hive.Room hatchery = hive.rooms(org.avp.world.hive.Room.Type.HATCHERY).stream()
-                        .filter(org.avp.world.hive.Room::done).findFirst().orElse(null);
-                BlockPos spot = hatchery == null ? null : org.avp.world.hive.HivePlanner.floorSpot(server, hatchery, false);
-                if (spot != null)
-                {
-                    at = Vec3.atBottomCenterOf(spot);
-                }
-            }
-            egg.moveTo(at.x, at.y, at.z, random.nextFloat() * 360F, 0);
+            egg.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360F, 0);
             level().addFreshEntity(egg);
             setHunger(hunger() - 15);
             playSound(net.minecraft.sounds.SoundEvents.SLIME_SQUISH, 1.0F, 0.5F);

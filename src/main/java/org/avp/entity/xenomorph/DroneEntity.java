@@ -121,6 +121,23 @@ public class DroneEntity extends XenomorphEntity
         return entityData.get(CLIMBING);
     }
 
+    private boolean forceFound;
+
+    /** Debug (/avp hive found): start founding a new hive right now, ignoring the hive spacing. */
+    public void forceFoundHive()
+    {
+        forceFound = true;
+        setHiveId(null);
+        setTarget(null);
+    }
+
+    boolean takeForceFound()
+    {
+        boolean force = forceFound;
+        forceFound = false;
+        return force;
+    }
+
     @Override
     public boolean isRoyalLine()
     {

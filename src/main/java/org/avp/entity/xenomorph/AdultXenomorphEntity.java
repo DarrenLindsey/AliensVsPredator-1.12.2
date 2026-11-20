@@ -386,7 +386,26 @@ public class AdultXenomorphEntity extends XenomorphEntity
         {
             return;
         }
+        // a Queen grows in the hive chamber (there's no room for her in the tunnels)
+        org.avp.world.hive.Hive hive = hive();
+        if (next != null && next.has(Ability.QUEEN) && hive != null && hive.state() == org.avp.world.hive.Hive.State.ACTIVE
+                && blockPosition().distSqr(hive.core()) > 36)
+        {
+            return;
+        }
         super.mature();
+    }
+
+    /** Queens (and boss forms) never spawn naturally: they're raised by a hive (royal jelly / succession) or a Royal Facehugger. */
+    @Override
+    public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level, MobSpawnType reason)
+    {
+        if ((has(Ability.QUEEN) || has(Ability.BOSS)) && (reason == MobSpawnType.NATURAL || reason == MobSpawnType.CHUNK_GENERATION
+                || reason == MobSpawnType.STRUCTURE || reason == MobSpawnType.PATROL || reason == MobSpawnType.REINFORCEMENT))
+        {
+            return false;
+        }
+        return super.checkSpawnRules(level, reason);
     }
 
     // ---------------------------------------------------------------- boss bar, sounds

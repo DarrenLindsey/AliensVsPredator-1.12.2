@@ -47,6 +47,11 @@ public class HiveData extends SavedData
         return AvpConfig.server(AvpConfig.SERVER.hiveRadius);
     }
 
+    public java.util.Collection<Hive> all()
+    {
+        return hives.values();
+    }
+
     @Nullable
     public Hive get(@Nullable UUID id)
     {

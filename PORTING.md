@@ -106,6 +106,9 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       one stays a small nest. Royal succession: a queenless hive picks its biggest royal-line member as
       heir and feeds it royal jelly from every kill until it becomes a Queen. Breaking resin, hurting
       eggs or cutting a cocoon free (sneak-use, empty hand) alerts the hive.
+      Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.
+      Tunnel 2 wide x 4 high; founding chamber a dome 15 wide x 8 high; a Queen only grows in the chamber
+      and never spawns naturally (nor do boss forms).
 - [ ] Later: resin deterrent, Octohuggers hanging from ceilings,
       Marines/Yautja holding their weapons (once the guns are ported), Yautja trophies.
 - [ ] Model continuity pass (at the very end): check every creature's hitbox vs. model size and

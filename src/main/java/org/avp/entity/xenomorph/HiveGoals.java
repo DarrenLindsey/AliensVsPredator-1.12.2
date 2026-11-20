@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -61,7 +62,8 @@ public final class HiveGoals
             {
                 return false;
             }
-            int range = xeno.isQueen() ? 4 : hive.buildRadius(level.getGameTime(), HiveData.maxRadius()) + 8;
+            boolean heir = xeno.getUUID().equals(hive.heir());
+            int range = xeno.isQueen() || heir ? 4 : hive.buildRadius(level.getGameTime(), HiveData.maxRadius()) + 8;
             home = hive.core();
             return xeno.blockPosition().distSqr(home) > range * range;
         }
@@ -102,7 +104,12 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            if (!enabled() || drone.getTarget() != null || drone.tickCount % 100 >= 2 || !(drone.level() instanceof ServerLevel level))
+            if (!enabled() || !(drone.level() instanceof ServerLevel level))
+            {
+                return false;
+            }
+            boolean forced = drone.takeForceFound();
+            if (!forced && (drone.getTarget() != null || drone.tickCount % 100 >= 2))
             {
                 return false;
             }
@@ -118,7 +125,7 @@ public final class HiveGoals
                 }
                 return false;
             }
-            if (data.nearest(drone.blockPosition(), HiveData.spacing()).isPresent() || !drone.onGround())
+            if (!forced && (data.nearest(drone.blockPosition(), HiveData.spacing()).isPresent() || !drone.onGround()))
             {
                 return false;
             }
@@ -190,8 +197,21 @@ public final class HiveGoals
                 }
                 return;
             }
-            // the floor of the next step must hold, and nothing in the way may be a fluid or unbreakable
-            for (BlockPos p : new BlockPos[] { next, next.above(), next.above(2), next.below() })
+            // the tunnel is 2 wide and 4 high, so a Praetorian can use it too
+            Direction side = dir.getClockWise();
+            java.util.List<BlockPos> clear = new java.util.ArrayList<>();
+            java.util.List<BlockPos> check = new java.util.ArrayList<>();
+            for (BlockPos lane : new BlockPos[] { next, next.relative(side) })
+            {
+                for (int up = 3; up >= 0; up--)
+                {
+                    clear.add(lane.above(up));
+                }
+                check.add(lane.below());
+            }
+            check.addAll(clear);
+            // nothing in the way may be a fluid or unbreakable, and the floor must hold
+            for (BlockPos p : check)
             {
                 BlockState s = level.getBlockState(p);
                 if (!s.getFluidState().isEmpty() || s.is(ModTags.XENO_UNBREAKABLE) || s.getDestroySpeed(level, p) < 0)
@@ -201,7 +221,7 @@ public final class HiveGoals
                     return;
                 }
             }
-            for (BlockPos p : new BlockPos[] { next.above(2), next.above(), next })
+            for (BlockPos p : clear)
             {
                 BlockState s = level.getBlockState(p);
                 if (!s.isAir())
@@ -213,7 +233,7 @@ public final class HiveGoals
                         level.destroyBlockProgress(drone.getId(), p, (int) Math.min(9, digTicks * speed / (hardness * 6)));
                         drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                     }
-                    if (digTicks * speed >= hardness * 60)
+                    if (digTicks * speed >= hardness * 40)
                     {
                         level.destroyBlock(p, false, drone);
                         level.destroyBlockProgress(drone.getId(), p, -1);
@@ -229,19 +249,26 @@ public final class HiveGoals
             stuck = 0;
         }
 
-        /** At the deepslate: hollow out the hive's first chamber and open it. */
+        /**
+         * At the deepslate: hollow out the hive's first chamber and open it. A dome 15 wide and 8 high,
+         * so a Queen (2 x 5 blocks) has room to move.
+         */
         private void carveChamber(ServerLevel level, BlockPos centre)
         {
-            for (BlockPos p : BlockPos.betweenClosed(centre.offset(-3, 0, -3), centre.offset(3, 3, 3)))
+            int r = 7, height = 8;
+            for (BlockPos p : BlockPos.betweenClosed(centre.offset(-r, 0, -r), centre.offset(r, height - 1, r)))
             {
-                double dx = p.getX() - centre.getX(), dy = (p.getY() - centre.getY()) * 1.3, dz = p.getZ() - centre.getZ();
+                double dx = (p.getX() - centre.getX()) / (double) r, dz = (p.getZ() - centre.getZ()) / (double) r;
+                double dy = (p.getY() - centre.getY()) / (double) height; // 0 at the floor, ~1 at the top of the dome
                 BlockState s = level.getBlockState(p);
-                if (dx * dx + dy * dy + dz * dz <= 11 && !s.isAir() && s.getFluidState().isEmpty() && !s.is(ModTags.XENO_UNBREAKABLE)
+                if (dx * dx + dz * dz + dy * dy <= 1.0 && !s.isAir() && s.getFluidState().isEmpty() && !s.is(ModTags.XENO_UNBREAKABLE)
                         && s.getDestroySpeed(level, p) >= 0 && !s.hasBlockEntity())
                 {
-                    level.destroyBlock(p, false, drone);
+                    level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                 }
             }
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, centre.getX() + 0.5, centre.getY() + 2, centre.getZ() + 0.5,
+                    40, 3, 1.5, 3, 0.02);
             hive.setCore(centre.above());
             hive.setDig(null, Direction.NORTH);
             hive.setState(Hive.State.ACTIVE);

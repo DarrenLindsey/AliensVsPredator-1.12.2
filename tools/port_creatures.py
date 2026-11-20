@@ -539,3 +539,20 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("hive data written")
+
+# ================================================================ cocooned players, larder
+lang = read_json(f"{NA}/lang/en_us.json", {})
+lang.update({
+    "message.avp.captured": "A Drone has you! It's dragging you away...",
+    "message.avp.cocooned": "You're cocooned in the hive wall. Mash SNEAK to struggle free - they'll hear you.",
+    "message.avp.struggle": "Cocooned - mash SNEAK to struggle free: %s%%",
+    "message.avp.broke_free": "You tore free of the resin!",
+    "avp.configuration.xenosCocoonPlayers": "Cocoon Players",
+    "avp.configuration.xenosCocoonPlayers.tooltip": "Drones capture worn-down players: carried to the hive and held on the wall until they struggle free, are cut free or an egg opens.",
+    "avp.configuration.cocoonStruggles": "Struggles to Break Free",
+    "avp.configuration.cocoonStruggles.tooltip": "How many sneak presses a cocooned player needs to tear free.",
+    "avp.configuration.hiveLarder": "Larder",
+    "avp.configuration.hiveLarder.tooltip": "Drones bring back prey that can't host as food; hungry members feed on it instead of hunting.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("cocoon/larder lang written")

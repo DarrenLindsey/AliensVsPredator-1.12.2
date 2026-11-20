@@ -290,12 +290,12 @@ public class AdultXenomorphEntity extends XenomorphEntity
         {
             // next to a cocooned host if the hive has one (the egg opens for it), else behind her
             Vec3 at = position().add(Vec3.directionFromRotation(0, yBodyRot).scale(-2.5));
-            java.util.List<net.minecraft.world.entity.Mob> cocooned = level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+            java.util.List<LivingEntity> cocooned = level().getEntitiesOfClass(LivingEntity.class,
                     getBoundingBox().inflate(16), m -> m.hasData(org.avp.registry.ModAttachments.COCOONED)
-                            && !m.hasData(org.avp.registry.ModAttachments.EMBRYO));
+                            && org.avp.entity.parasite.FacehuggerEntity.isValidHost(m));
             if (!cocooned.isEmpty())
             {
-                net.minecraft.world.entity.Mob host = cocooned.get(random.nextInt(cocooned.size()));
+                LivingEntity host = cocooned.get(random.nextInt(cocooned.size()));
                 at = host.position().add(random.nextInt(3) - 1, 0, random.nextInt(3) - 1);
             }
             egg.moveTo(at.x, at.y, at.z, random.nextFloat() * 360F, 0);

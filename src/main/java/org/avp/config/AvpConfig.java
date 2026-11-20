@@ -194,6 +194,9 @@ public final class AvpConfig
         public final ModConfigSpec.DoubleValue resinBuildSpeed;
         public final ModConfigSpec.BooleanValue resinCoversBuiltBlocks;
         public final ModConfigSpec.BooleanValue xenosCocoonHosts;
+        public final ModConfigSpec.BooleanValue xenosCocoonPlayers;
+        public final ModConfigSpec.IntValue cocoonStruggles;
+        public final ModConfigSpec.BooleanValue hiveLarder;
         public final ModConfigSpec.BooleanValue royalSuccession;
         public final ModConfigSpec.BooleanValue eggmorphing;
         public final ModConfigSpec.IntValue eggmorphTicks;
@@ -423,6 +426,15 @@ public final class AvpConfig
             xenosCocoonHosts = b
                     .comment("Drones subdue animals and villagers instead of killing them, carry them back and cocoon them in the hive for the eggs.")
                     .define("xenosCocoonHosts", true);
+            xenosCocoonPlayers = b
+                    .comment("Drones capture worn-down players too: carried to the hive and held in resin on the wall until they struggle free, are cut free, or an egg opens.")
+                    .define("xenosCocoonPlayers", true);
+            cocoonStruggles = b
+                    .comment("How many times a cocooned player must press sneak to break free.")
+                    .defineInRange("cocoonStruggles", 30, 1, 1000);
+            hiveLarder = b
+                    .comment("Drones also bring back prey that can't carry an embryo, as food: hungry hive members feed on it instead of going out to hunt.")
+                    .define("hiveLarder", true);
             royalSuccession = b
                     .comment("A hive without a Queen picks an heir and feeds it royal jelly from every kill, until it grows into a Queen.")
                     .define("royalSuccession", true);

@@ -144,22 +144,43 @@ public class DroneEntity extends XenomorphEntity
         return true;
     }
 
+    /** Set while it lets go of what it carried (so a carried player's dismount isn't blocked). */
+    public boolean releasing;
+
     /**
-     * A Drone from a hive doesn't kill a host it has worn down: it subdues it and carries it home
-     * to be cocooned for the eggs (players are always fought).
+     * A Drone from a hive doesn't kill prey it has worn down: it subdues it and carries it home -
+     * hosts to be cocooned for the eggs, and (with the larder on) other prey as food. Players too,
+     * with "Cocoon Players". A starving Drone just kills and eats.
      */
     private boolean trySubdue(Entity target)
     {
         org.avp.world.hive.Hive hive = hive();
-        if (!(target instanceof net.minecraft.world.entity.Mob host) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
-                || !AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts) || isVehicle() || host.isVehicle() || host.isPassenger()
-                || !org.avp.entity.parasite.FacehuggerEntity.isValidHost(host) || host.getBbWidth() > 1.5F || host.getBbHeight() > 2.3F
-                || host.getHealth() - getAttributeValue(Attributes.ATTACK_DAMAGE) > host.getMaxHealth() * 0.4F)
+        if (!(target instanceof net.minecraft.world.entity.LivingEntity prey) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
+                || hunger() < 20 || isVehicle() || prey.isVehicle() || prey.isPassenger()
+                || prey.hasData(org.avp.registry.ModAttachments.COCOONED) || prey.getBbWidth() > 1.5F || prey.getBbHeight() > 2.3F
+                || prey.getHealth() - getAttributeValue(Attributes.ATTACK_DAMAGE) > prey.getMaxHealth() * 0.4F)
         {
             return false;
         }
-        host.setHealth(Math.max(1.0F, host.getMaxHealth() * 0.2F));
-        host.startRiding(this, true);
+        boolean host = org.avp.entity.parasite.FacehuggerEntity.isValidHost(prey);
+        if (prey instanceof net.minecraft.world.entity.player.Player player)
+        {
+            if (!AvpConfig.server(AvpConfig.SERVER.xenosCocoonPlayers) || player.isCreative() || player.isSpectator())
+            {
+                return false;
+            }
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.captured"), true);
+        }
+        else if (!(prey instanceof net.minecraft.world.entity.Mob) || !(host ? AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts)
+                : AvpConfig.server(AvpConfig.SERVER.hiveLarder)) || prey.getType().is(org.avp.registry.ModTags.XENOMORPHS))
+        {
+            return false;
+        }
+        prey.setHealth(Math.max(1.0F, prey.getMaxHealth() * 0.2F));
+        // too weak to fight back while carried
+        prey.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 600, 4, false, false));
+        prey.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DIG_SLOWDOWN, 600, 4, false, false));
+        prey.startRiding(this, true);
         playSound(ModSounds.ALIEN_ATTACK.get(), 0.8F, 0.7F);
         setTarget(null);
         return true;

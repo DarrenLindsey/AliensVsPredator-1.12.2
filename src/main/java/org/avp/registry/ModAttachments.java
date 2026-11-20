@@ -24,6 +24,14 @@ public final class ModAttachments
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> COCOONED = ATTACHMENTS.register("cocooned",
             () -> AttachmentType.builder(() -> 0).serialize(com.mojang.serialization.Codec.INT).build());
 
+    /** Where a cocooned player is held (they can't move off it until they struggle free). */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<net.minecraft.core.BlockPos>> COCOON_POS = ATTACHMENTS.register("cocoon_pos",
+            () -> AttachmentType.builder(() -> net.minecraft.core.BlockPos.ZERO).serialize(net.minecraft.core.BlockPos.CODEC).build());
+
+    /** How far a cocooned player has struggled (0..100). Not saved: logging out doesn't loosen the resin. */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> STRUGGLE = ATTACHMENTS.register("struggle",
+            () -> AttachmentType.builder(() -> 0).build());
+
     private ModAttachments()
     {
     }

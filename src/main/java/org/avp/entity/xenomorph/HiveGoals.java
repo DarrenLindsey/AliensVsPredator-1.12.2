@@ -178,7 +178,11 @@ public final class HiveGoals
         public void tick()
         {
             ServerLevel level = (ServerLevel) drone.level();
-            BlockPos at = hive.digPos();
+            BlockPos at = hive == null || hive.state() != Hive.State.FOUNDING ? null : hive.digPos();
+            if (at == null)
+            {
+                return; // finished (or forgotten): the goal stops on the next check
+            }
             Direction dir = hive.digDir();
             if (at.getY() <= hive.core().getY())
             {
@@ -351,7 +355,7 @@ public final class HiveGoals
         public void tick()
         {
             ticks++;
-            if (drone.blockPosition().distSqr(spot) > 9)
+            if (spot == null || drone.blockPosition().distSqr(spot) > 9)
             {
                 return;
             }
@@ -410,7 +414,7 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            return drone.getFirstPassenger() instanceof Mob && drone.hive() != null;
+            return drone.getFirstPassenger() instanceof net.minecraft.world.entity.LivingEntity && drone.hive() != null;
         }
 
         @Override
@@ -424,7 +428,7 @@ public final class HiveGoals
         public void tick()
         {
             Hive hive = drone.hive();
-            if (hive == null || !(drone.getFirstPassenger() instanceof Mob host))
+            if (hive == null || !(drone.getFirstPassenger() instanceof net.minecraft.world.entity.LivingEntity host))
             {
                 return;
             }
@@ -441,7 +445,7 @@ public final class HiveGoals
         }
 
         /** Puts the host against a wall near the core and seals it in. */
-        private void cocoon(ServerLevel level, Mob host, BlockPos core)
+        private void cocoon(ServerLevel level, net.minecraft.world.entity.LivingEntity host, BlockPos core)
         {
             BlockPos spot = null;
             for (int tries = 0; tries < 30 && spot == null; tries++)
@@ -463,12 +467,23 @@ public final class HiveGoals
             {
                 spot = drone.blockPosition();
             }
+            drone.releasing = true;
             host.stopRiding();
-            host.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, host.getYRot(), 0);
+            drone.releasing = false;
+            host.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
             host.setData(ModAttachments.COCOONED, 0);
-            host.setNoAi(true);
-            host.setPersistenceRequired();
-            host.setTarget(null);
+            host.setData(ModAttachments.COCOON_POS, spot);
+            if (host instanceof Mob mob)
+            {
+                mob.setNoAi(true);
+                mob.setPersistenceRequired();
+                mob.setTarget(null);
+            }
+            else if (host instanceof net.minecraft.world.entity.player.Player player)
+            {
+                player.setData(ModAttachments.STRUGGLE, 0);
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.cocooned"), false);
+            }
             // resin around it
             for (Direction d : Direction.Plane.HORIZONTAL)
             {
@@ -477,6 +492,88 @@ public final class HiveGoals
             }
             level.playSound(null, spot, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.HOSTILE, 1.0F, 0.5F);
             drone.setState("COCOONED HOST");
+        }
+    }
+
+    /**
+     * The larder: a hungry member feeds on cocooned prey that can't carry an embryo instead of
+     * going out to hunt. Hosts (waiting for an egg, or already carrying an embryo) are left alone.
+     */
+    public static class FeedFromLarderGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        @Nullable
+        private net.minecraft.world.entity.LivingEntity food;
+        private int biteCooldown;
+
+        public FeedFromLarderGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        public static boolean isFood(net.minecraft.world.entity.LivingEntity e)
+        {
+            return e.isAlive() && e.hasData(ModAttachments.COCOONED) && !(e instanceof net.minecraft.world.entity.player.Player)
+                    && !e.hasData(ModAttachments.EMBRYO) && !org.avp.entity.parasite.FacehuggerEntity.isValidHost(e);
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!enabled() || !AvpConfig.server(AvpConfig.SERVER.hiveLarder) || xeno.getTarget() != null || !xeno.isHungry()
+                    || xeno.isVehicle() || xeno.tickCount % 20 >= 2 || xeno.hive() == null)
+            {
+                return false;
+            }
+            food = xeno.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, xeno.getBoundingBox().inflate(24), FeedFromLarderGoal::isFood)
+                    .stream().min(java.util.Comparator.comparingDouble(xeno::distanceToSqr)).orElse(null);
+            return food != null;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return food != null && food.isAlive() && xeno.getTarget() == null && xeno.isHungry();
+        }
+
+        @Override
+        public void start()
+        {
+            biteCooldown = 0;
+            xeno.setState("FEEDING");
+        }
+
+        @Override
+        public void tick()
+        {
+            if (food == null)
+            {
+                return;
+            }
+            xeno.getLookControl().setLookAt(food, 30F, 30F);
+            if (xeno.distanceToSqr(food) > 6.25)
+            {
+                if (xeno.tickCount % 20 < 2)
+                {
+                    xeno.getNavigation().moveTo(food, 0.8);
+                }
+                return;
+            }
+            xeno.getNavigation().stop();
+            biteCooldown -= 2; // ticked every other tick
+            if (biteCooldown <= 0)
+            {
+                biteCooldown = 20;
+                xeno.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                xeno.doHurtTarget(food); // a kill feeds it (XenomorphEntity.killedEntity)
+            }
+        }
+
+        @Override
+        public void stop()
+        {
+            food = null;
         }
     }
 

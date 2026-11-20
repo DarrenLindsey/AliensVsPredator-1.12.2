@@ -749,6 +749,7 @@ public abstract class XenomorphEntity extends Monster
             goalSelector.addGoal(6, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, speed * 0.8));
         }
         goalSelector.addGoal(5, new HiveGoals.ReturnToHiveGoal(this));
+        goalSelector.addGoal(4, new HiveGoals.FeedFromLarderGoal(this));
         goalSelector.addGoal(7, new net.minecraft.world.entity.ai.goal.LookAtPlayerGoal(this, net.minecraft.world.entity.player.Player.class, 16F));
         goalSelector.addGoal(8, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));
 

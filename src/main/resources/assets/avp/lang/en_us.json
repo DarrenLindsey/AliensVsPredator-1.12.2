@@ -827,5 +827,15 @@
   "avp.configuration.eggmorphing": "Eggmorphing",
   "avp.configuration.eggmorphing.tooltip": "Cocooned hosts slowly turn into eggs, so a hive can spread without a Queen.",
   "avp.configuration.eggmorphTicks": "Eggmorphing Time (ticks)",
-  "avp.configuration.eggmorphTicks.tooltip": "How long a cocooned host takes to become an egg (24000 = one day)."
+  "avp.configuration.eggmorphTicks.tooltip": "How long a cocooned host takes to become an egg (24000 = one day).",
+  "message.avp.captured": "A Drone has you! It's dragging you away...",
+  "message.avp.cocooned": "You're cocooned in the hive wall. Mash SNEAK to struggle free - they'll hear you.",
+  "message.avp.struggle": "Cocooned - mash SNEAK to struggle free: %s%%",
+  "message.avp.broke_free": "You tore free of the resin!",
+  "avp.configuration.xenosCocoonPlayers": "Cocoon Players",
+  "avp.configuration.xenosCocoonPlayers.tooltip": "Drones capture worn-down players: carried to the hive and held on the wall until they struggle free, are cut free or an egg opens.",
+  "avp.configuration.cocoonStruggles": "Struggles to Break Free",
+  "avp.configuration.cocoonStruggles.tooltip": "How many sneak presses a cocooned player needs to tear free.",
+  "avp.configuration.hiveLarder": "Larder",
+  "avp.configuration.hiveLarder.tooltip": "Drones bring back prey that can't host as food; hungry members feed on it instead of hunting."
 }

@@ -106,6 +106,8 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       one stays a small nest. Royal succession: a queenless hive picks its biggest royal-line member as
       heir and feeds it royal jelly from every kill until it becomes a Queen. Breaking resin, hurting
       eggs or cutting a cocoon free (sneak-use, empty hand) alerts the hive.
+      Players can be captured and cocooned too (held on the wall, mash sneak to struggle free, a friend can
+      cut them free); the larder: non-host prey is cocooned as food and hungry members feed on it.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.
       Tunnel 2 wide x 4 high; founding chamber a dome 15 wide x 8 high; a Queen only grows in the chamber
       and never spawns naturally (nor do boss forms).

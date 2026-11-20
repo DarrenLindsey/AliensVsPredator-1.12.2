@@ -220,6 +220,11 @@ public final class CreatureAbilities
         {
             ticks++;
             LivingEntity target = mob.getTarget();
+            if (target == null)
+            {
+                ticks = 40;
+                return;
+            }
             if (ticks < 10)
             {
                 mob.getLookControl().setLookAt(target, 30F, 30F); // winding up

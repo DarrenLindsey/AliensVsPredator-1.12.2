@@ -754,6 +754,10 @@ public final class XenoBrain
         @Override
         public void tick()
         {
+            if (block == null)
+            {
+                return; // just broke through: the goal stops on the next check
+            }
             xeno.getLookControl().setLookAt(Vec3.atCenterOf(block));
             BlockState state = xeno.level().getBlockState(block);
             float hardness = Math.max(0.2F, state.getDestroySpeed(xeno.level(), block));

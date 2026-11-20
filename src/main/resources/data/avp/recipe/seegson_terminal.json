@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IGI",
+    "IMI",
+    "IKI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "M": {
+      "item": "avp:part_motherboard"
+    },
+    "K": {
+      "item": "avp:part_ram"
+    }
+  },
+  "result": {
+    "id": "avp:seegson_terminal",
+    "count": 1
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IPI",
+    "RMR",
+    "ISI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "P": {
+      "item": "avp:part_processor"
+    },
+    "R": {
+      "item": "avp:part_ram"
+    },
+    "M": {
+      "item": "avp:part_motherboard"
+    },
+    "S": {
+      "item": "avp:part_solidstatedrive"
+    }
+  },
+  "result": {
+    "id": "avp:seegson_server",
+    "count": 1
+  }
+}

@@ -123,6 +123,11 @@ public class WorkingJoeEntity extends PathfinderMob
     private final java.util.Deque<String[]> inbox = new java.util.ArrayDeque<>();
     final JoeContext context = new JoeContext(this);
     private int taskPc;
+    /** Being driven from a terminal. */
+    private boolean remote;
+    private long remoteUntil;
+    @Nullable
+    private Task remoteTask;
     private long lastFault = -1000;
     private long anchoredChunk = Long.MIN_VALUE;
     /** What "maintain" remembers, per program line. */
@@ -366,6 +371,7 @@ public class WorkingJoeEntity extends PathfinderMob
         goalSelector.addGoal(2, new ChargeGoal());
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.15, true));
         goalSelector.addGoal(4, new ProgramGoal());
+        goalSelector.addGoal(4, new RemoteGoal());
         goalSelector.addGoal(5, new OpenDoorGoal(this, true));
         goalSelector.addGoal(6, new IdleGoal());
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8F));
@@ -491,7 +497,7 @@ public class WorkingJoeEntity extends PathfinderMob
         @Override
         public boolean canUse()
         {
-            return isActive() && !isRogue() && program != null && !halted && getTarget() == null;
+            return isActive() && !isRogue() && program != null && !halted && getTarget() == null && !remote;
         }
 
         @Override
@@ -513,6 +519,154 @@ public class WorkingJoeEntity extends PathfinderMob
         }
     }
 
+    /** Driven from a terminal: runs one remote command at a time. */
+    private class RemoteGoal extends Goal
+    {
+        RemoteGoal()
+        {
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            return remote && isActive() && !isRogue();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick()
+        {
+            return true;
+        }
+
+        @Override
+        public void tick()
+        {
+            if (level().getGameTime() > remoteUntil)
+            {
+                endRemote();
+                return;
+            }
+            if (remoteTask != null && remoteTask.tick())
+            {
+                remoteTask = null;
+            }
+        }
+    }
+
+    public boolean isRemote()
+    {
+        return remote;
+    }
+
+    public void endRemote()
+    {
+        if (remote)
+        {
+            remote = false;
+            remoteTask = null;
+            getNavigation().stop();
+            say("Remote control released.");
+        }
+    }
+
+    public String source()
+    {
+        return source;
+    }
+
+    /** A remote-control command from a terminal: fwd back left right jump stop dig digup digdown use place ITEM attack pickup drop release. */
+    public void drive(String command)
+    {
+        if (!remote)
+        {
+            say("Remote control engaged.");
+        }
+        remote = true;
+        remoteUntil = level().getGameTime() + 1200;
+        String[] parts = command.trim().split("\\s+");
+        Direction facing = getDirection();
+        BlockPos ahead = blockPosition().relative(facing);
+        BlockPos front = !level().getBlockState(ahead.above()).isAir() ? ahead.above() : ahead;
+        switch (parts[0].toLowerCase(java.util.Locale.ROOT))
+        {
+            case "fwd", "forward" -> remoteTask = new GotoTask(ahead, 0.5);
+            case "back" -> remoteTask = new GotoTask(blockPosition().relative(facing.getOpposite()), 0.5);
+            case "left", "right" ->
+            {
+                float yaw = Direction.fromYRot(getYRot()).toYRot() + (parts[0].equalsIgnoreCase("left") ? -90 : 90);
+                setYRot(yaw);
+                setYHeadRot(yaw);
+                setYBodyRot(yaw);
+                getNavigation().stop();
+                remoteTask = null;
+            }
+            case "jump", "up" -> getJumpControl().jump();
+            case "stop" ->
+            {
+                remoteTask = null;
+                getNavigation().stop();
+            }
+            case "release" -> endRemote();
+            default ->
+            {
+                JoeProgram.Instr instr;
+                switch (parts[0].toLowerCase(java.util.Locale.ROOT))
+                {
+                    case "dig" -> instr = at(JoeProgram.Op.DIG, front);
+                    case "digup" -> instr = at(JoeProgram.Op.DIG, blockPosition().above(2));
+                    case "digdown" -> instr = at(JoeProgram.Op.DIG, blockPosition().below());
+                    case "use" -> instr = at(JoeProgram.Op.USE, front);
+                    case "place" ->
+                    {
+                        instr = at(JoeProgram.Op.PLACE, ahead);
+                        try
+                        {
+                            instr.item = parts.length > 1 ? JoeProgram.item(parts[1]) : null;
+                        }
+                        catch (Exception e)
+                        {
+                            instr.item = null;
+                        }
+                        if (instr.item == null)
+                        {
+                            say("Place what?");
+                            return;
+                        }
+                    }
+                    case "attack" ->
+                    {
+                        instr = at(JoeProgram.Op.ATTACK, ahead);
+                        instr.n = 4;
+                    }
+                    case "pickup" ->
+                    {
+                        instr = at(JoeProgram.Op.PICKUP, ahead);
+                        instr.n = 4;
+                    }
+                    case "drop" ->
+                    {
+                        instr = at(JoeProgram.Op.DROP, ahead);
+                        instr.n = 64;
+                    }
+                    default ->
+                    {
+                        return;
+                    }
+                }
+                getNavigation().stop();
+                remoteTask = JoeActions.task(this, instr);
+            }
+        }
+    }
+
+    private static JoeProgram.Instr at(JoeProgram.Op op, BlockPos pos)
+    {
+        JoeProgram.Instr instr = new JoeProgram.Instr(op, 0);
+        instr.a = pos;
+        return instr;
+    }
+
     /** No program: potter about near home. */
     private class IdleGoal extends WaterAvoidingRandomStrollGoal
     {
@@ -524,7 +678,7 @@ public class WorkingJoeEntity extends PathfinderMob
         @Override
         public boolean canUse()
         {
-            return isActive() && (program == null || halted) && super.canUse();
+            return isActive() && (program == null || halted) && !remote && super.canUse();
         }
     }
 

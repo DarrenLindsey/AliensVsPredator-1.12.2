@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IGI",
+    "IPI",
+    "IBI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "P": {
+      "item": "avp:part_processor"
+    },
+    "B": {
+      "item": "avp:ingot_lithium"
+    }
+  },
+  "result": {
+    "id": "avp:joe_tablet",
+    "count": 1
+  }
+}

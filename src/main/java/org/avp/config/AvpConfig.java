@@ -219,6 +219,8 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue joesFightXenos;
         public final ModConfigSpec.BooleanValue xenosIgnoreJoes;
         public final ModConfigSpec.BooleanValue joeChunkLoading;
+        public final ModConfigSpec.BooleanValue joeTerminalNeedsPower;
+        public final ModConfigSpec.IntValue joeServerPower;
         public final ModConfigSpec.IntValue highVoltageMultiplier;
         public final ModConfigSpec.IntValue lowVoltageLossPer16;
         public final ModConfigSpec.BooleanValue highVoltageBurnsDevices;
@@ -530,6 +532,12 @@ public final class AvpConfig
             joesFightXenos = b
                     .comment("Joes on security duty also attack Xenomorphs (they mostly lose).")
                     .define("joesFightXenos", false);
+            joeTerminalNeedsPower = b
+                    .comment("Seegson Terminals (4 FE/t) and Network Servers need power to work.")
+                    .define("joeTerminalNeedsPower", true);
+            joeServerPower = b
+                    .comment("FE per tick a Seegson Network Server draws.")
+                    .defineInRange("joeServerPower", 64, 0, 100_000);
             joeChunkLoading = b
                     .comment("Joes with a chunk anchor module keep their chunk loaded (so they work anywhere). Off: the module does nothing.")
                     .define("joeChunkLoading", true);

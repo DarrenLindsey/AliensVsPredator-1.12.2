@@ -96,6 +96,16 @@ public final class ModNetwork
         // the handler body runs only on the client, so the client-only screen class is never loaded on a server
         registrar.playToClient(OpenBlastDoorScreenPayload.TYPE, OpenBlastDoorScreenPayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.openBlastDoorScreen(payload));
+        registrar.playToServer(org.avp.entity.joe.net.JoeTerminalActionPayload.TYPE, org.avp.entity.joe.net.JoeTerminalActionPayload.CODEC,
+                (payload, context) ->
+                {
+                    if (context.player() instanceof net.minecraft.server.level.ServerPlayer player)
+                    {
+                        org.avp.entity.joe.JoeTerminalService.handle(player, payload);
+                    }
+                });
+        registrar.playToClient(org.avp.entity.joe.net.JoeTerminalDataPayload.TYPE, org.avp.entity.joe.net.JoeTerminalDataPayload.CODEC,
+                (payload, context) -> org.avp.client.ClientHooks.joeTerminal(payload.data()));
         registrar.playToClient(VisionModePayload.TYPE, VisionModePayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.visionMode(payload.mode()));
     }

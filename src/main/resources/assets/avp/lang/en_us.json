@@ -1038,5 +1038,11 @@
   "item.avp.joe_module_sensor": "Sensor Suite Module",
   "item.avp.joe_module_plating": "Armour Plating Module",
   "item.avp.joe_module_servos": "Servo Booster Module",
-  "item.avp.joe_module_anchor": "Chunk Anchor Module"
+  "item.avp.joe_module_anchor": "Chunk Anchor Module",
+  "block.avp.seegson_terminal": "Seegson Terminal",
+  "block.avp.seegson_server": "Seegson Network Server",
+  "item.avp.joe_tablet": "Seegson Field Tablet",
+  "item.avp.joe_tablet.desc": "Your Working Joe network, anywhere. Needs your Network Server online.",
+  "message.avp.joe_server_on": "Seegson Network Server: %s units on the network, APOLLO link %s",
+  "message.avp.joe_server_off": "Seegson Network Server: NO POWER (%s units, link %s)"
 }

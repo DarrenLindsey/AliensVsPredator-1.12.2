@@ -263,6 +263,13 @@ public final class ModBlocks
             () -> new org.avp.entity.joe.JoeChargerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
                     .strength(3.0F, 6.0F).noOcclusion().lightLevel(s -> 4)));
 
+    public static final DeferredBlock<org.avp.entity.joe.SeegsonTerminalBlock> SEEGSON_TERMINAL = register("seegson_terminal", Tab.BLOCKS,
+            () -> new org.avp.entity.joe.SeegsonTerminalBlock(false, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
+                    .strength(3.0F, 6.0F).lightLevel(s -> s.getValue(org.avp.entity.joe.SeegsonTerminalBlock.LIT) ? 7 : 0)));
+    public static final DeferredBlock<org.avp.entity.joe.SeegsonTerminalBlock> SEEGSON_SERVER = register("seegson_server", Tab.BLOCKS,
+            () -> new org.avp.entity.joe.SeegsonTerminalBlock(true, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
+                    .strength(5.0F, 12.0F).requiresCorrectToolForDrops().lightLevel(s -> s.getValue(org.avp.entity.joe.SeegsonTerminalBlock.LIT) ? 5 : 0)));
+
     // ---- Portals to the dimensions (org.avp.world.dimension) ----
     public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
             org.avp.world.dimension.ModDimensions.VARDA);

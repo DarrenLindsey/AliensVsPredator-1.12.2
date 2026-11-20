@@ -22,6 +22,20 @@ public final class ClientHooks
     {
     }
 
+    /** Seegson Terminal data: update the open screen, or open one. */
+    public static void joeTerminal(net.minecraft.nbt.CompoundTag data)
+    {
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.screen instanceof org.avp.client.screen.SeegsonTerminalScreen screen)
+        {
+            screen.update(data);
+        }
+        else if (data.getBoolean("Open"))
+        {
+            mc.setScreen(new org.avp.client.screen.SeegsonTerminalScreen(data));
+        }
+    }
+
     /** The biomask vision mode changed (see VisionEffects). */
     public static void visionMode(int mode)
     {

@@ -36,7 +36,8 @@ public final class BiomaskEvents
             return;
         }
         MobEffectInstance current = player.getEffect(MobEffects.NIGHT_VISION);
-        if (!AvpConfig.server(AvpConfig.SERVER.biomaskNightVision) || !isBiomask(player.getItemBySlot(EquipmentSlot.HEAD)))
+        if (!AvpConfig.server(AvpConfig.SERVER.biomaskNightVision) || !isBiomask(player.getItemBySlot(EquipmentSlot.HEAD))
+                || player.getData(org.avp.registry.ModAttachments.VISION) == 0)
         {
             // mask off: the mask's vision goes with it (a night vision potion's doesn't - it shows its icon)
             if (current != null && current.isAmbient() && !current.showIcon())

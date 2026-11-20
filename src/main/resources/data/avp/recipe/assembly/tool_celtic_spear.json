@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:artifact_tech",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 1
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 2
+    },
+    {
+      "item": "minecraft:diamond",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:tool_celtic_spear",
+    "count": 1
+  }
+}

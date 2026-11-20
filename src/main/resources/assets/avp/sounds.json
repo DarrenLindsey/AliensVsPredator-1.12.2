@@ -357,5 +357,31 @@
     "sounds": [
       "avp:items/motiontracker/pong"
     ]
+  },
+  "weapons.plasmacaster": {
+    "subtitle": "subtitles.avp.weapons.plasmacaster",
+    "sounds": [
+      "avp:items/weapons/plasmacaster/plasma_caster_shot_01",
+      "avp:items/weapons/plasmacaster/plasma_caster_shot_02",
+      "avp:items/weapons/plasmacaster/plasma_caster_shot_03"
+    ]
+  },
+  "weapons.plasmacaster.charge": {
+    "subtitle": "subtitles.avp.weapons.plasmacaster.charge",
+    "sounds": [
+      "avp:items/weapons/plasmacaster/plasma_caster_charge_05"
+    ]
+  },
+  "weapons.blades.alarm": {
+    "subtitle": "subtitles.avp.weapons.blades.alarm",
+    "sounds": [
+      "avp:items/weapons/wristbracer/alarm"
+    ]
+  },
+  "predator.vision.switch": {
+    "subtitle": "subtitles.avp.predator.vision.switch",
+    "sounds": [
+      "avp:items/predvision/switch"
+    ]
   }
 }

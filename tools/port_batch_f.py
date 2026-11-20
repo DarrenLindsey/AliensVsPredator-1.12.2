@@ -184,3 +184,55 @@ lang.update({
 write_json(f"{NA}/sounds.json", sounds)
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch F2 (Marine kit, armour) data written")
+
+# ================================================================ F3: Yautja gear
+lang = read_json(f"{NA}/lang/en_us.json", {})
+sounds = read_json(f"{NA}/sounds.json", {})
+flat("wristbracer", "wristblade.png", "Wristbracer",
+     "The Yautja's wrist computer. Carry it to cloak (C) or, as a last resort, self-destruct (K, twice).")
+modelled("wristbracer_blades", "wristblade.png", "Wrist Blades", "Fast, vicious twin blades.")
+modelled("plasmacannon", "plasmacannon.png", "Plasma Caster", None)
+flat("smartdisc", "smartdisc.png", "Smart Disc", "Throw it: it slices through and comes back to your hand.")
+flat("shuriken", "shuriken.png", "Shuriken", "A spinning throwing blade. Pick it up again after.")
+for tool, icon, name in (("sword", "sword", "Yautja Sword"), ("pickaxe", "pick", "Yautja Pickaxe"), ("axe", "axe", "Yautja Axe"),
+                         ("shovel", "shovel", "Yautja Shovel"), ("hoe", "hoe", "Yautja Hoe"), ("spear", "spear", "Combi-Stick")):
+    flat(f"tool_celtic_{tool}", f"tool.celtic.{icon}.png", name)
+    write_json(f"{NA}/models/item/tool_celtic_{tool}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"avp:item/tool_celtic_{tool}"}})
+lang["tooltip.avp.tool_celtic_spear"] = "Hold use and let go to throw it."
+for tag, ids in (("swords", ["tool_celtic_sword", "tool_celtic_spear", "wristbracer_blades"]), ("pickaxes", ["tool_celtic_pickaxe"]),
+                 ("axes", ["tool_celtic_axe"]), ("shovels", ["tool_celtic_shovel"]), ("hoes", ["tool_celtic_hoe"])):
+    add_to_tag(f"{ND}/minecraft/tags/item/{tag}.json", [f"avp:{i}" for i in ids])
+PRED_SOUNDS = {
+    "weapons.plasmacaster": ("weapons/plasmacaster", ["plasma_caster_shot_01", "plasma_caster_shot_02", "plasma_caster_shot_03"]),
+    "weapons.plasmacaster.charge": ("weapons/plasmacaster", ["plasma_caster_charge_05"]),
+    "weapons.blades.alarm": ("weapons/wristbracer", ["alarm"]),
+    "predator.vision.switch": ("predvision", ["switch"]),
+}
+for event, (folder, files) in PRED_SOUNDS.items():
+    for f in files:
+        copy(f"{LA}/sounds/items/{folder}/{f}.ogg", f"{NA}/sounds/items/{folder}/{f}.ogg")
+    sounds[event] = {"subtitle": f"subtitles.avp.{event}", "sounds": [f"avp:items/{folder}/{f}" for f in files]}
+lang.update({
+    "subtitles.avp.weapons.plasmacaster": "Plasma caster fires",
+    "subtitles.avp.weapons.plasmacaster.charge": "Plasma caster charges",
+    "subtitles.avp.weapons.blades.alarm": "Wristbracer counts down",
+    "subtitles.avp.predator.vision.switch": "Biomask vision switches",
+    "tooltip.avp.plasmacaster": "Hold use to charge, let go to fire. A full charge hits much harder.",
+    "message.avp.need_biomask": "You need to be wearing a biomask",
+    "message.avp.vision.normal": "Vision: normal",
+    "message.avp.vision.night": "Vision: night",
+    "message.avp.vision.thermal": "Vision: thermal (Xenomorphs don't show up)",
+    "message.avp.vision.em": "Vision: EM (Xenomorphs only)",
+    "message.avp.cloak_recharging": "Cloak recharging: %s s",
+    "message.avp.cloak_wet": "Cloak shorted out - you're wet",
+    "message.avp.self_destruct_confirm": "Self-destruct: press again to arm",
+    "message.avp.self_destruct": "SELF-DESTRUCT IN %s",
+    "message.avp.self_destruct_disarmed": "Self-destruct disarmed",
+    "avp.configuration.selfDestruct": "Wristbracer Self-Destruct",
+    "avp.configuration.selfDestruct.tooltip": "The wristbracer's self-destruct can be armed (K, twice).",
+    "avp.configuration.selfDestructPower": "Self-Destruct Power",
+    "avp.configuration.selfDestructPower.tooltip": "Explosion size (TNT is 4). Breaks blocks if mobGriefing is on.",
+})
+write_json(f"{NA}/sounds.json", sounds)
+write_json(f"{NA}/lang/en_us.json", lang)
+print("batch F3 (Yautja gear) data written")

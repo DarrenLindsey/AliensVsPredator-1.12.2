@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:artifact_tech",
+      "count": 2
+    },
+    {
+      "item": "minecraft:diamond",
+      "count": 4
+    },
+    {
+      "item": "avp:part_led_display",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 2
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "avp:wristbracer",
+    "count": 1
+  }
+}

@@ -32,6 +32,18 @@ public final class ModAttachments
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> STRUGGLE = ATTACHMENTS.register("struggle",
             () -> AttachmentType.builder(() -> 0).build());
 
+    /** Yautja biomask vision mode (0 normal, 1 night, 2 thermal, 3 EM - see org.avp.item.gear.YautjaGearActions). */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> VISION = ATTACHMENTS.register("vision",
+            () -> AttachmentType.builder(() -> 1).serialize(com.mojang.serialization.Codec.INT).build());
+
+    /** Wristbracer: ticks of cloak left (0 = not cloaked), cooldown before it can cloak again, self-destruct countdown. */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> CLOAK = ATTACHMENTS.register("cloak",
+            () -> AttachmentType.builder(() -> 0).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> CLOAK_COOLDOWN = ATTACHMENTS.register("cloak_cooldown",
+            () -> AttachmentType.builder(() -> 0).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> SELF_DESTRUCT = ATTACHMENTS.register("self_destruct",
+            () -> AttachmentType.builder(() -> 0).build());
+
     private ModAttachments()
     {
     }

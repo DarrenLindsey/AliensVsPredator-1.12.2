@@ -21,4 +21,10 @@ public final class ClientHooks
     private ClientHooks()
     {
     }
+
+    /** The biomask vision mode changed (see VisionEffects). */
+    public static void visionMode(int mode)
+    {
+        VisionEffects.mode = mode;
+    }
 }

@@ -150,8 +150,10 @@ If something fails, copy the **first** error from the console (or `run/logs/late
         armour sets: Marine (helmet lamp), Celtic (helmet = biomask), MK50 + pressure suit (sealed: water breathing),
         Xeno chitin (acid-proof). Gear keys: org.avp.client.GearKeys / GearActionPayload.
   - [x] Builders clear blocks placed inside a finished room's or gallery's space.
-  - [ ] F3 Yautja gear: wrist blades, plasma caster, smart disc, shuriken, spear, wristbracer (self-destruct, cloak),
-        biomask vision modes, Celtic armour
+  - [x] F3 Yautja gear: wrist blades, plasma caster (charge and release), smart disc (returns), shuriken, combi-stick
+        (melee + throw), wristbracer (C cloak: 60 s, water/hits break it, 30 s recharge; K twice: self-destruct, 10 s),
+        biomask vision modes (V: normal / night / thermal - warm bodies glow, not Xenomorphs / EM - Xenomorphs glow),
+        Celtic tools (Yautja alloy tier) and armour.
   - [ ] F4 W-Y and other kit: MK50, pressure suit, anti-vacuum armour, Xeno armour, stun baton, maintenance jack,
         laser mine, spore pod, supply chute
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation

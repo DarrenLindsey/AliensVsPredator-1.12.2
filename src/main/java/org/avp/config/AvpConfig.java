@@ -208,6 +208,8 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue yautjaHonourCode;
         public final ModConfigSpec.BooleanValue biomaskNightVision;
         public final ModConfigSpec.BooleanValue grenadesBreakBlocks;
+        public final ModConfigSpec.BooleanValue selfDestruct;
+        public final ModConfigSpec.DoubleValue selfDestructPower;
         public final ModConfigSpec.BooleanValue flamethrowerIgnites;
         public final ModConfigSpec.BooleanValue helmetLamp;
         public final ModConfigSpec.BooleanValue yautjaCloak;
@@ -468,6 +470,12 @@ public final class AvpConfig
             eggmorphTicks = b
                     .comment("How long a cocooned host takes to turn into an egg (ticks; 24000 = one day).")
                     .defineInRange("eggmorphTicks", 24_000, 200, 1_728_000);
+            selfDestruct = b
+                    .comment("The wristbracer's self-destruct can be armed (K, twice).")
+                    .define("selfDestruct", true);
+            selfDestructPower = b
+                    .comment("Size of the self-destruct explosion (TNT is 4). Breaks blocks if mobGriefing is on.")
+                    .defineInRange("selfDestructPower", 8.0, 1.0, 30.0);
             grenadesBreakBlocks = b
                     .comment("Grenades blow up blocks (off: they only hurt creatures).")
                     .define("grenadesBreakBlocks", false);

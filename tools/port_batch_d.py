@@ -413,6 +413,8 @@ NEW = {
     "gun_ak47": ([("#c:ingots/iron", 7), ("#minecraft:planks", 2), ("#c:ingots/copper", 2), ("avp:part_servo", 1)], 1),
     "gun_sniper": ([("#c:ingots/iron", 6), ("#c:ingots/aluminum", 4), ("avp:polycarbonate", 3), ("avp:part_servo", 1),
                     ("minecraft:spyglass", 1)], 1),
+    "plasmacannon": ([("avp:artifact_tech", 2), ("minecraft:diamond", 2), ("avp:part_processor", 1), ("avp:part_capacitor", 2),
+                      ("#c:ingots/lithium", 2)], 1),
     "gun_m56sg": ([("#c:ingots/iron", 8), ("#c:ingots/aluminum", 8), ("avp:polycarbonate", 6), ("avp:part_servo", 2),
                    ("avp:part_sensor_array", 1), ("avp:part_processor", 2), ("avp:part_led_display", 1)], 1),
 }

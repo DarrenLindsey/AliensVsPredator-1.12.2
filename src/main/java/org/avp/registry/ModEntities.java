@@ -48,6 +48,10 @@ public final class ModEntities
             () -> EntityType.Builder.<org.avp.entity.projectile.GrenadeEntity>of(org.avp.entity.projectile.GrenadeEntity::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(5).build("grenade"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.projectile.ThrownWeaponEntity>> THROWN_WEAPON = ENTITIES.register("thrown_weapon",
+            () -> EntityType.Builder.<org.avp.entity.projectile.ThrownWeaponEntity>of(org.avp.entity.projectile.ThrownWeaponEntity::new, MobCategory.MISC)
+                    .sized(0.4F, 0.4F).clientTrackingRange(8).updateInterval(2).build("thrown_weapon"));
+
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.creature.CreatureProjectile>> CREATURE_PROJECTILE = ENTITIES.register("creature_projectile",
             () -> EntityType.Builder.<org.avp.entity.creature.CreatureProjectile>of(org.avp.entity.creature.CreatureProjectile::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(5).noSummon().build("creature_projectile"));

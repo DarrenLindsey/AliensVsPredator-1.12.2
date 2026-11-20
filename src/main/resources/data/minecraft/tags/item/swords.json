@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "avp:tool_celtic_sword",
+    "avp:tool_celtic_spear",
+    "avp:wristbracer_blades"
+  ]
+}

@@ -58,6 +58,18 @@ public class CreatureProjectile extends ThrowableProjectile
         shooter.level().addFreshEntity(shot);
     }
 
+    /** Fires straight along a direction (a player's plasma caster). */
+    public static void shootAlong(LivingEntity shooter, Vec3 direction, Kind kind, float damage, float speed)
+    {
+        CreatureProjectile shot = new CreatureProjectile(ModEntities.CREATURE_PROJECTILE.get(), shooter.level());
+        shot.setOwner(shooter);
+        shot.setPos(shooter.getX(), shooter.getEyeY() - 0.15, shooter.getZ());
+        shot.entityData.set(KIND, kind.ordinal());
+        shot.damage = damage;
+        shot.shoot(direction.x, direction.y, direction.z, speed, 0.5F);
+        shooter.level().addFreshEntity(shot);
+    }
+
     public Kind kind()
     {
         return Kind.values()[Math.floorMod(entityData.get(KIND), Kind.values().length)];

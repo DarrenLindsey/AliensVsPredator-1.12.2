@@ -96,6 +96,8 @@ public final class ModNetwork
         // the handler body runs only on the client, so the client-only screen class is never loaded on a server
         registrar.playToClient(OpenBlastDoorScreenPayload.TYPE, OpenBlastDoorScreenPayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.openBlastDoorScreen(payload));
+        registrar.playToClient(VisionModePayload.TYPE, VisionModePayload.CODEC,
+                (payload, context) -> org.avp.client.ClientHooks.visionMode(payload.mode()));
     }
 
     @SuppressWarnings("unchecked")

@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:artifact_tech",
+      "count": 2
+    },
+    {
+      "item": "minecraft:shears",
+      "count": 1
+    },
+    {
+      "item": "minecraft:diamond",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 2
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "avp:wristbracer_blades",
+    "count": 1
+  }
+}

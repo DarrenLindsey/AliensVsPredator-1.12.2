@@ -245,6 +245,9 @@ public final class ModBlocks
 
     // Slopes etc. that copy the look of another block (ShapeBlock)
     private static final List<DeferredBlock<? extends Block>> SHAPE_BLOCKS = new ArrayList<>();
+    /** Hardened resin mixed with digested rock: what builder Drones lay hive floors, bridges and seals with. */
+    public static final DeferredBlock<Block> HIVESTONE = simple("hivestone", Kind.STONE, 3.0F, 9.0F);
+
     /** Hive resin spread by Drones over other blocks (NaturalResinBlock). */
     public static final DeferredBlock<org.avp.block.NaturalResinBlock> NATURAL_RESIN = BLOCKS.register("natural_resin",
             () -> new org.avp.block.NaturalResinBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()

@@ -1,4 +1,9 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    "avp:biomask_classic",
+    "avp:biomask_berserker",
+    "avp:biomask_falconer",
+    "avp:biomask_tracker"
+  ]
 }

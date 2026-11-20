@@ -67,6 +67,7 @@ public class DroneEntity extends XenomorphEntity
         goalSelector.addGoal(5, new HiveGoals.BurrowGoal(this));
         goalSelector.addGoal(5, new HiveGoals.BuildResinGoal(this));
         goalSelector.addGoal(5, new HiveGoals.DigHiveGoal(this));
+        goalSelector.addGoal(4, new HiveGoals.BuildHiveGoal(this));
     }
 
     @Override
@@ -162,6 +163,12 @@ public class DroneEntity extends XenomorphEntity
         boolean force = forceFound;
         forceFound = false;
         return force;
+    }
+
+    /** About one in three of a hive's Drones are builders: they lay hivestone floors, bridges and seals. */
+    public boolean isBuilder()
+    {
+        return hive() != null && Math.floorMod(getUUID().getLeastSignificantBits(), 3) == 0;
     }
 
     @Override

@@ -683,6 +683,152 @@ public final class HiveGoals
     }
 
     /**
+     * Builder Drones: they secrete hivestone to make the hive whole - floors over holes and drops,
+     * floors under galleries that cross open space, seals over water and lava leaking in, a roof
+     * over any room open to the sky - and pave the room floors in it.
+     */
+    public static class BuildHiveGoal extends Goal
+    {
+        private final DroneEntity drone;
+        @Nullable
+        private BlockPos job;
+        private int ticks;
+
+        public BuildHiveGoal(DroneEntity drone)
+        {
+            this.drone = drone;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!enabled() || drone.getTarget() != null || drone.isVehicle() || drone.tickCount % 20 >= 2 || !drone.isBuilder()
+                    || !(drone.level() instanceof ServerLevel level))
+            {
+                return false;
+            }
+            Hive hive = drone.hive();
+            if (hive == null || hive.state() != Hive.State.ACTIVE)
+            {
+                return false;
+            }
+            job = findJob(level, hive);
+            return job != null;
+        }
+
+        /** A few random looks around the hive for something to build. Urgent jobs (holes, leaks, sky) first; paving last. */
+        @Nullable
+        private BlockPos findJob(ServerLevel level, Hive hive)
+        {
+            java.util.List<org.avp.world.hive.Room> rooms = hive.rooms();
+            if (rooms.isEmpty())
+            {
+                return null;
+            }
+            net.minecraft.util.RandomSource random = drone.getRandom();
+            BlockPos paving = null;
+            for (int probe = 0; probe < 24; probe++)
+            {
+                org.avp.world.hive.Room room = rooms.get(random.nextInt(rooms.size()));
+                if (!room.done() && room != hive.project())
+                {
+                    continue;
+                }
+                int r = Math.max(1, room.radius());
+                BlockPos c = room.centre();
+                switch (probe % 4)
+                {
+                    case 0 -> { // a hole in a room's floor
+                        BlockPos floor = c.offset(random.nextInt(r * 2 + 1) - r, -1, random.nextInt(r * 2 + 1) - r);
+                        if (room.type().isChamber() && room.contains(floor.above()) && level.getBlockState(floor.above()).isAir() && fillable(level, floor))
+                        {
+                            return floor;
+                        }
+                    }
+                    case 1 -> { // a gallery crossing open space: lay its floor
+                        java.util.List<BlockPos> list = org.avp.world.hive.HivePlanner.digList(room);
+                        if (!list.isEmpty())
+                        {
+                            BlockPos p = list.get(random.nextInt(Math.min(list.size(), Math.max(1, room.cursor()))));
+                            BlockPos floor = p.below();
+                            if (level.getBlockState(p).isAir() && !org.avp.world.hive.HivePlanner.digSet(room).contains(floor) && fillable(level, floor))
+                            {
+                                return floor;
+                            }
+                        }
+                    }
+                    case 2 -> { // water or lava getting in
+                        BlockPos p = c.offset(random.nextInt(r * 2 + 3) - r - 1, random.nextInt(room.height() + 3) - 1, random.nextInt(r * 2 + 3) - r - 1);
+                        if (!level.getFluidState(p).isEmpty() && !level.getBlockState(p).hasBlockEntity())
+                        {
+                            return p.immutable();
+                        }
+                    }
+                    default -> { // open to the sky: roof it over; otherwise pave the floor
+                        BlockPos roof = c.offset(random.nextInt(r * 2 + 1) - r, Math.max(2, room.height()), random.nextInt(r * 2 + 1) - r);
+                        if (room.type().isChamber() && level.getBlockState(roof).isAir() && level.canSeeSky(roof))
+                        {
+                            return roof;
+                        }
+                        BlockPos floor = c.offset(random.nextInt(r * 2 + 1) - r, -1, random.nextInt(r * 2 + 1) - r);
+                        BlockState s = level.getBlockState(floor);
+                        if (paving == null && room.type().isChamber() && room.contains(floor.above()) && level.getBlockState(floor.above()).isAir()
+                                && s.isSolid() && !s.is(org.avp.registry.ModBlocks.HIVESTONE.get()) && !s.is(org.avp.registry.ModBlocks.NATURAL_RESIN.get())
+                                && !s.hasBlockEntity() && !s.is(ModTags.XENO_UNBREAKABLE) && s.getDestroySpeed(level, floor) >= 0)
+                        {
+                            paving = floor;
+                        }
+                    }
+                }
+            }
+            return paving;
+        }
+
+        /** Open (air, a fluid, plants...) and safe to fill. */
+        private static boolean fillable(ServerLevel level, BlockPos pos)
+        {
+            BlockState s = level.getBlockState(pos);
+            return (s.isAir() || s.canBeReplaced() || !s.getFluidState().isEmpty()) && !s.hasBlockEntity() && level.isInWorldBounds(pos);
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return job != null && ticks < 200 && drone.getTarget() == null;
+        }
+
+        @Override
+        public void start()
+        {
+            ticks = 0;
+            drone.setState("BUILDING HIVESTONE");
+            drone.getNavigation().moveTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
+        }
+
+        @Override
+        public void tick()
+        {
+            ticks += 2; // ticked every other tick
+            if (job == null || drone.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(job)) > 4.5 * 4.5)
+            {
+                if (job != null && ticks % 20 == 0)
+                {
+                    drone.getNavigation().moveTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
+                }
+                return;
+            }
+            ServerLevel level = (ServerLevel) drone.level();
+            drone.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(job));
+            drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            level.setBlock(job, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
+            level.playSound(null, job, SoundEvents.MUD_PLACE, SoundSource.HOSTILE, 0.8F, 0.6F);
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.ITEM_SLIME, job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 4, 0.3, 0.1, 0.3, 0.02);
+            job = null;
+        }
+    }
+
+    /**
      * The larder: a hungry member feeds on cocooned prey that can't carry an embryo instead of
      * going out to hunt. Hosts (waiting for an egg, or already carrying an embryo) are left alone.
      */

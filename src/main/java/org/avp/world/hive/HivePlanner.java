@@ -93,6 +93,21 @@ public final class HivePlanner
         return list;
     }
 
+    private static final Map<Room, java.util.Set<BlockPos>> DIG_SETS = new WeakHashMap<>();
+
+    /** The room's dig list as a set (for "is this part of the hive's open space?"). */
+    public static java.util.Set<BlockPos> digSet(Room room)
+    {
+        List<BlockPos> list = digList(room);
+        java.util.Set<BlockPos> set = DIG_SETS.get(room);
+        if (set == null || set.size() != list.size())
+        {
+            set = new java.util.HashSet<>(list);
+            DIG_SETS.put(room, set);
+        }
+        return set;
+    }
+
     /** Would digging this block out be safe and allowed? (never next to water or lava, never unbreakable) */
     public static boolean diggable(ServerLevel level, BlockPos pos)
     {

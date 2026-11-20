@@ -841,5 +841,9 @@
   "avp.configuration.hiveMaxDugBlocks": "Hive Max Dug Blocks",
   "avp.configuration.hiveMaxDugBlocks.tooltip": "Most blocks one hive may dig out for its rooms and galleries.",
   "avp.configuration.foundingDigSpeed": "Founding Dig Speed",
-  "avp.configuration.foundingDigSpeed.tooltip": "How much faster a Drone digs its founding tunnel (it won't hunt or hunger until the hive is made)."
+  "avp.configuration.foundingDigSpeed.tooltip": "How much faster a Drone digs its founding tunnel (it won't hunt or hunger until the hive is made).",
+  "block.avp.hivestone": "Hivestone",
+  "tooltip.avp.hivestone": "Hardened resin and digested rock. Builder Drones lay hive floors, bridges and seals with it.",
+  "avp.configuration.biomaskNightVision": "Biomask Night Vision",
+  "avp.configuration.biomaskNightVision.tooltip": "Wearing a Yautja biomask lets you see in the dark."
 }

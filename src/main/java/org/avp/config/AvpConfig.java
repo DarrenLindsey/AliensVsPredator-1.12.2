@@ -203,6 +203,7 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue eggmorphing;
         public final ModConfigSpec.IntValue eggmorphTicks;
         public final ModConfigSpec.BooleanValue yautjaHonourCode;
+        public final ModConfigSpec.BooleanValue biomaskNightVision;
         public final ModConfigSpec.BooleanValue yautjaCloak;
         public final ModConfigSpec.BooleanValue marinesAlliedToPlayers;
         public final ModConfigSpec.DoubleValue marineRifleDamage;
@@ -452,6 +453,9 @@ public final class AvpConfig
             eggmorphTicks = b
                     .comment("How long a cocooned host takes to turn into an egg (ticks; 24000 = one day).")
                     .defineInRange("eggmorphTicks", 24_000, 200, 1_728_000);
+            biomaskNightVision = b
+                    .comment("Wearing a Yautja biomask gives night vision (Yautja vision; more vision modes come with the Predator gear).")
+                    .define("biomaskNightVision", true);
             yautjaHonourCode = b
                     .comment("Yautja only hunt worthy prey: Xenomorphs, dangerous monsters and armed players. Off: they hunt every player.")
                     .define("yautjaHonourCode", true);

@@ -567,3 +567,31 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("hive room lang written")
+
+# ================================================================ builder Drones: hivestone; biomask vision
+lang = read_json(f"{NA}/lang/en_us.json", {})
+from PIL import ImageEnhance
+base = Image.open(f"{LA}/textures/blocks/hiveresin.png").convert("RGB")
+base = ImageEnhance.Color(base).enhance(0.35)
+base = ImageEnhance.Brightness(base).enhance(0.9)
+rng = random.Random(426)
+stone = Image.new("RGB", base.size)
+stone.putdata([(v, v, v + 4) for v in (rng.randint(60, 100) for _ in range(base.size[0] * base.size[1]))])
+stone = stone.filter(ImageFilter.GaussianBlur(0.8))
+hivestone = Image.blend(stone, base, 0.55)
+hivestone.save(f"{NA}/textures/block/hivestone.png")
+write_json(f"{NA}/blockstates/hivestone.json", {"variants": {"": {"model": "avp:block/hivestone"}}})
+write_json(f"{NA}/models/block/hivestone.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "avp:block/hivestone"}})
+write_json(f"{NA}/models/item/hivestone.json", {"parent": "avp:block/hivestone"})
+write_json(f"{ND}/avp/loot_table/blocks/hivestone.json", {"type": "minecraft:block", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:hivestone"}], "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
+add_to_tag(f"{ND}/minecraft/tags/block/mineable/pickaxe.json", ["avp:hivestone"])
+add_to_tag(f"{ND}/avp/tags/item/facehugger_proof.json", ["avp:biomask_classic", "avp:biomask_berserker", "avp:biomask_falconer", "avp:biomask_tracker"])
+lang.update({
+    "block.avp.hivestone": "Hivestone",
+    "tooltip.avp.hivestone": "Hardened resin and digested rock. Builder Drones lay hive floors, bridges and seals with it.",
+    "avp.configuration.biomaskNightVision": "Biomask Night Vision",
+    "avp.configuration.biomaskNightVision.tooltip": "Wearing a Yautja biomask lets you see in the dark.",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("hivestone + biomask data written")

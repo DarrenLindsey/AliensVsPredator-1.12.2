@@ -115,9 +115,12 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       ambush tunnels), natural caves broken into are taken over. Resin columns in the chambers. Max 6 rooms
       with a Queen (2 without), a dug-block cap, never digs next to water/lava. Founding: an urge - the
       digger ignores prey and hunger and digs 3x faster; if it dies the nearest Drone takes over at once.
+      Builder Drones (1 in 3 of a hive's Drones): lay hivestone (new block) over holes in room floors, under
+      galleries that cross open space, over water/lava leaking in, roof rooms open to the sky, pave floors.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.
       Tunnel 2 wide x 4 high; founding chamber a dome 15 wide x 8 high; a Queen only grows in the chamber
       and never spawns naturally (nor do boss forms).
+- [x] Skulls and biomasks can be worn (head slot); a biomask gives night vision and stops facehuggers.
 - [ ] Later: resin deterrent, Octohuggers hanging from ceilings,
       Marines/Yautja holding their weapons (once the guns are ported), Yautja trophies.
 - [ ] Model continuity pass (at the very end): check every creature's hitbox vs. model size and

@@ -36,8 +36,15 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * In 1.12.2 the facing and orientation were saved in a TileEntity. In 1.21
  * they're block state properties, which is simpler and needs no syncing.
  */
-public class TrophyBlock extends HorizontalDirectionalBlock implements EntityBlock
+public class TrophyBlock extends HorizontalDirectionalBlock implements EntityBlock, net.minecraft.world.item.Equipable
 {
+    /** Skulls and biomasks can be worn on the head, like vanilla mob heads (a biomask gives Yautja vision: BiomaskEvents). */
+    @Override
+    public net.minecraft.world.entity.EquipmentSlot getEquipmentSlot()
+    {
+        return net.minecraft.world.entity.EquipmentSlot.HEAD;
+    }
+
     public enum Orientation implements StringRepresentable
     {
         SIDE, FLAT, WALL;

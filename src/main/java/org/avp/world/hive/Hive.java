@@ -85,6 +85,9 @@ public class Hive
         return jobs.get(drone);
     }
 
+    /** What the hive is short of (worked out now and then by its members; not saved). */
+    public boolean needsHosts, needsFood;
+
     /** Royal succession: the member being fed royal jelly to become the next Queen. */
     @Nullable
     private UUID heir;

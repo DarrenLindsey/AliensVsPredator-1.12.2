@@ -102,8 +102,9 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       home when idle. Drones coat the hive in resin from the core outwards (natural_resin: the block
       underneath still shows, comes back when scraped off; burns; natural ground only unless configured).
       Drones subdue animals/villagers, carry them home and cocoon them (hosts in the Queen's chamber while she
-      lives, else the hatchery); the Queen lays only where she is - up to 12 unhatched eggs around her, but
-      only 3 while eggs of the hive are still waiting near the way out;
+      lives, else the hatchery); the Queen lays at the rear of her egg sac, never more than 3 lying there;
+      worker Drones carry the eggs to cocooned hosts or set them out around her chamber; hive Drones forage
+      (hunt hosts/food for the hive even when full) while it's short; debug labels show the running goal;
       cocoons turn into eggs over time (eggmorphing). A Queen's hive grows to the full radius, a queenless
       one stays a small nest. Royal succession: a queenless hive picks its biggest royal-line member as
       heir and feeds it royal jelly from every kill until it becomes a Queen. Breaking resin, hurting

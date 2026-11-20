@@ -479,7 +479,8 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            return drone.getFirstPassenger() instanceof net.minecraft.world.entity.LivingEntity && drone.hive() != null;
+            return drone.getFirstPassenger() instanceof net.minecraft.world.entity.LivingEntity passenger && !(passenger instanceof OvamorphEntity)
+                    && drone.hive() != null;
         }
 
         @Override
@@ -974,6 +975,149 @@ public final class HiveGoals
                 }
             }
             return false;
+        }
+    }
+
+    /**
+     * Worker Drones take the eggs from the rear of the Queen's egg sac (she lays no more than 3 there)
+     * and carry them to the cocooned hosts - or set them out around her chamber.
+     */
+    public static class CarryEggGoal extends Goal
+    {
+        private final DroneEntity drone;
+        @Nullable
+        private OvamorphEntity egg;
+        @Nullable
+        private BlockPos destination;
+        private int ticks;
+
+        public CarryEggGoal(DroneEntity drone)
+        {
+            this.drone = drone;
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!enabled() || drone.getClass() != DroneEntity.class || drone.getTarget() != null || drone.isVehicle()
+                    || drone.tickCount % 20 >= 2 || !(drone.level() instanceof ServerLevel level))
+            {
+                return false;
+            }
+            Hive hive = drone.hive();
+            if (hive == null || hive.queen() == null || !hive.hasQueen(level.getGameTime())
+                    || !(level.getEntity(hive.queen()) instanceof AdultXenomorphEntity queen) || drone.distanceTo(queen) > 32)
+            {
+                return false;
+            }
+            Vec3 rear = queen.eggSacRear();
+            egg = level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(rear, rear).inflate(2.5),
+                    e -> e.isFull() && !e.isPassenger() && e.openProgress() <= -20).stream().findFirst().orElse(null);
+            if (egg == null)
+            {
+                return false;
+            }
+            destination = destination(level, hive, rear);
+            return destination != null;
+        }
+
+        /** Next to a cocooned host with no egg yet; else somewhere in the Queen's chamber, away from the sac. */
+        @Nullable
+        private BlockPos destination(ServerLevel level, Hive hive, Vec3 rear)
+        {
+            net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(hive.core())
+                    .inflate(hive.buildRadius(level.getGameTime(), HiveData.maxRadius()) + 2);
+            for (net.minecraft.world.entity.LivingEntity host : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
+                    e -> e.hasData(ModAttachments.COCOONED) && org.avp.entity.parasite.FacehuggerEntity.isValidHost(e)
+                            && level.getEntitiesOfClass(OvamorphEntity.class, e.getBoundingBox().inflate(2.5)).isEmpty()))
+            {
+                for (Direction d : Direction.Plane.HORIZONTAL)
+                {
+                    BlockPos p = host.blockPosition().relative(d);
+                    if (level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
+                    {
+                        return p;
+                    }
+                }
+            }
+            org.avp.world.hive.Room room = hive.rooms(org.avp.world.hive.Room.Type.QUEEN).stream().findFirst()
+                    .or(() -> hive.rooms(org.avp.world.hive.Room.Type.HATCHERY).stream().filter(org.avp.world.hive.Room::done).findFirst()).orElse(null);
+            for (int tries = 0; room != null && tries < 6; tries++)
+            {
+                BlockPos p = org.avp.world.hive.HivePlanner.floorSpot(level, room, false);
+                if (p != null && p.distToCenterSqr(rear) > 25 && level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(p).inflate(1.0)).isEmpty())
+                {
+                    return p;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return egg != null && egg.isAlive() && destination != null && ticks < 600 && drone.getTarget() == null;
+        }
+
+        @Override
+        public void start()
+        {
+            ticks = 0;
+            drone.setState("CARRYING EGG");
+            drone.getNavigation().moveTo(egg, 0.9);
+        }
+
+        @Override
+        public void tick()
+        {
+            ticks += 2;
+            if (egg == null || destination == null)
+            {
+                return;
+            }
+            if (!egg.isPassenger())
+            {
+                // go and pick it up
+                if (drone.distanceToSqr(egg) < 2.5 * 2.5)
+                {
+                    egg.startRiding(drone, true);
+                    drone.getNavigation().moveTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
+                }
+                else if (ticks % 20 == 0)
+                {
+                    drone.getNavigation().moveTo(egg, 0.9);
+                }
+                return;
+            }
+            if (drone.blockPosition().distSqr(destination) > 4)
+            {
+                if (ticks % 20 == 0)
+                {
+                    drone.getNavigation().moveTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
+                }
+                return;
+            }
+            drone.releasing = true;
+            egg.stopRiding();
+            drone.releasing = false;
+            egg.moveTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, egg.getYRot(), 0);
+            drone.level().playSound(null, destination, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 0.6F, 0.6F);
+            egg = null;
+        }
+
+        @Override
+        public void stop()
+        {
+            if (egg != null && egg.isPassenger())
+            {
+                // interrupted: put it down where it is
+                drone.releasing = true;
+                egg.stopRiding();
+                drone.releasing = false;
+            }
+            egg = null;
+            destination = null;
         }
     }
 

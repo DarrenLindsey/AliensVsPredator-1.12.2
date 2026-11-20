@@ -104,6 +104,10 @@ public class OvamorphEntity extends XenomorphEntity
             }
             return;
         }
+        if (isPassenger())
+        {
+            return; // being carried by a Drone: it waits until it's set down
+        }
         boolean hostNearby = !level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(8), FacehuggerEntity::isValidHost).isEmpty();
         if (triggered || hostNearby)
         {

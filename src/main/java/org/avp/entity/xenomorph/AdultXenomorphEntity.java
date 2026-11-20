@@ -281,27 +281,22 @@ public class AdultXenomorphEntity extends XenomorphEntity
             return;
         }
         eggTimer = 0;
-        // she lays where she is (as in Aliens). Her clutch: up to 12 unhatched eggs around her - but only 3
-        // while eggs of her hive are still waiting near the way out
-        java.util.List<OvamorphEntity> clutch = level().getEntitiesOfClass(OvamorphEntity.class, getBoundingBox().inflate(6));
-        org.avp.world.hive.Hive hive = hive();
-        boolean eggsAtExit = hive != null && !level().getEntitiesOfClass(OvamorphEntity.class,
-                new net.minecraft.world.phys.AABB(hive.entrance()).inflate(12), e -> e.distanceToSqr(this) > 12 * 12).isEmpty();
-        if (clutch.size() >= (eggsAtExit ? 3 : 12))
+        // she lays at the rear of her egg sac, and no more than 3 lie there at once: the Drones carry
+        // them away to the hosts and around the chamber, which makes room for more
+        Vec3 rear = eggSacRear();
+        if (level().getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(rear, rear).inflate(2.5)).size() >= 3)
         {
             return;
         }
         BlockPos spot = null;
-        for (int tries = 0; tries < 16 && spot == null; tries++)
+        for (int tries = 0; tries < 12 && spot == null; tries++)
         {
-            double angle = random.nextDouble() * Math.PI * 2;
-            double distance = getBbWidth() / 2 + 1.5 + random.nextDouble() * 2.0;
-            BlockPos p = BlockPos.containing(getX() + Math.cos(angle) * distance, getY(), getZ() + Math.sin(angle) * distance);
+            BlockPos p = BlockPos.containing(rear.x + random.nextDouble() * 2 - 1, rear.y, rear.z + random.nextDouble() * 2 - 1);
             for (int dy = 1; dy >= -2 && spot == null; dy--)
             {
                 BlockPos q = p.above(dy);
-                if (level().getBlockState(q).isAir() && level().getBlockState(q.above()).isAir() && level().getBlockState(q.below()).isSolid()
-                        && level().getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(q).inflate(0.4)).isEmpty())
+                if (level().getBlockState(q).isAir() && level().getBlockState(q.below()).isSolid()
+                        && level().getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(q).inflate(0.3)).isEmpty())
                 {
                     spot = q;
                 }
@@ -309,7 +304,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
         }
         if (spot == null)
         {
-            return; // no room around her right now
+            return; // no room behind her right now
         }
         OvamorphEntity egg = ModEntities.OVAMORPH.get().create(level());
         if (egg != null)
@@ -319,6 +314,12 @@ public class AdultXenomorphEntity extends XenomorphEntity
             setHunger(hunger() - 15);
             playSound(net.minecraft.sounds.SoundEvents.SLIME_SQUISH, 1.0F, 0.5F);
         }
+    }
+
+    /** Where her eggs come out: the rear of her egg sac, behind her. */
+    public Vec3 eggSacRear()
+    {
+        return position().add(Vec3.directionFromRotation(0, yBodyRot).scale(-(getBbWidth() / 2 + 2.5)));
     }
 
     @Override

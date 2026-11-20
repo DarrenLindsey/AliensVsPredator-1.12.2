@@ -69,6 +69,7 @@ public class DroneEntity extends XenomorphEntity
         goalSelector.addGoal(5, new HiveGoals.DigHiveGoal(this));
         goalSelector.addGoal(4, new HiveGoals.BuildHiveGoal(this));
         goalSelector.addGoal(4, new HiveGoals.CoatWallsGoal(this));
+        goalSelector.addGoal(3, new HiveGoals.CarryEggGoal(this));
     }
 
     @Override
@@ -269,7 +270,8 @@ public class DroneEntity extends XenomorphEntity
             player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.captured"), true);
         }
         else if (!(prey instanceof net.minecraft.world.entity.Mob) || !(host ? AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts)
-                : AvpConfig.server(AvpConfig.SERVER.hiveLarder)) || prey.getType().is(org.avp.registry.ModTags.XENOMORPHS))
+                : AvpConfig.server(AvpConfig.SERVER.hiveLarder)) || prey.getType().is(org.avp.registry.ModTags.XENOMORPHS)
+                || prey.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD))
         {
             return false;
         }

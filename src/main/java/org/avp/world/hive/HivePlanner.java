@@ -362,7 +362,7 @@ public final class HivePlanner
             }
             else
             {
-                int min = Math.min(reach - radius - 1, 9 + radius + random.nextInt(4));
+                int min = Math.min(reach - radius - 1, 6 + radius + random.nextInt(4));
                 int max = reach - radius - 1;
                 if (max < min || max < 6)
                 {
@@ -380,8 +380,8 @@ public final class HivePlanner
             BlockPos c = centre;
             int r = radius;
             if (Math.sqrt(centre.distSqr(core)) > reach + 2
-                    || hive.rooms().stream().anyMatch(o -> o != start && Math.sqrt(o.centre().distSqr(c)) < o.radius() + r + 3)
-                    || !safe(level, centre, Math.max(2, radius), Math.max(2, height)))
+                    || hive.rooms().stream().anyMatch(o -> o != start && o.type() != Room.Type.CAVE && Math.sqrt(o.centre().distSqr(c)) < o.radius() + r + 3)
+                    || !safe(level, centre, Math.max(2, radius - 1), Math.max(2, height - 1)))
             {
                 continue;
             }
@@ -393,7 +393,8 @@ public final class HivePlanner
     /** No water or lava (or unbreakable blocks) in the space a room would take. */
     private static boolean safe(ServerLevel level, BlockPos centre, int radius, int height)
     {
-        for (BlockPos p : BlockPos.betweenClosed(centre.offset(-radius - 1, -1, -radius - 1), centre.offset(radius + 1, height + 1, radius + 1)))
+        // the room's own space (blocks next to water or lava are skipped while digging anyway)
+        for (BlockPos p : BlockPos.betweenClosed(centre.offset(-radius, 0, -radius), centre.offset(radius, height, radius)))
         {
             if ((p.getX() + p.getY() + p.getZ()) % 2 != 0)
             {

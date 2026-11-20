@@ -148,6 +148,15 @@ public abstract class XenomorphEntity extends Monster
         if (random.nextInt(4) == 0)
         {
             org.avp.world.hive.HivePlanner.plan(level, hive);
+            // foraging: is the hive short of hosts (for the eggs) or food (for the larder)?
+            java.util.List<net.minecraft.world.entity.LivingEntity> held = level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                    new net.minecraft.world.phys.AABB(hive.core()).inflate(hive.buildRadius(now, org.avp.world.hive.HiveData.maxRadius()) + 2),
+                    e -> e.hasData(org.avp.registry.ModAttachments.COCOONED));
+            long hosts = held.stream().filter(org.avp.entity.parasite.FacehuggerEntity::isValidHost).count();
+            hive.needsHosts = hive.state() == org.avp.world.hive.Hive.State.ACTIVE && hosts < 4
+                    && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosCocoonHosts);
+            hive.needsFood = hive.state() == org.avp.world.hive.Hive.State.ACTIVE && held.size() - hosts < 3
+                    && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.hiveLarder);
         }
         if (random.nextInt(200) == 0)
         {
@@ -510,6 +519,24 @@ public abstract class XenomorphEntity extends Monster
         }
     }
 
+    /**
+     * What it's really doing, for the debug label: the movement goal running right now (by name),
+     * or the state a goal reported, or hunting/lurking.
+     */
+    private String activity()
+    {
+        net.minecraft.world.entity.ai.goal.WrappedGoal running = goalSelector.getAvailableGoals().stream()
+                .filter(net.minecraft.world.entity.ai.goal.WrappedGoal::isRunning)
+                .filter(g -> g.getFlags().contains(Goal.Flag.MOVE))
+                .min(java.util.Comparator.comparingInt(net.minecraft.world.entity.ai.goal.WrappedGoal::getPriority)).orElse(null);
+        if (running != null)
+        {
+            String name = running.getGoal().getClass().getSimpleName().replace("Goal", "");
+            return name.replaceAll("([a-z])([A-Z])", "$1 $2").toUpperCase(java.util.Locale.ROOT);
+        }
+        return getTarget() != null ? "HUNTING" : state;
+    }
+
     private void updateDebugLabel()
     {
         boolean debug = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoDebugLabels);
@@ -517,7 +544,7 @@ public abstract class XenomorphEntity extends Monster
         {
             if (!hasCustomName() || debugNamed)
             {
-                String now = getTarget() != null && "LURKING".equals(state) ? "HUNTING" : state;
+                String now = activity();
                 int pack = packmates().size() + 1;
                 org.avp.world.hive.Hive hive = hive();
                 String role = hive == null ? "" : getUUID().equals(hive.heir()) ? " | HEIR" : getUUID().equals(hive.digger()) ? " | DIGGER"
@@ -633,7 +660,26 @@ public abstract class XenomorphEntity extends Monster
         {
             return isHungry() || org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosAlwaysHuntPlayers);
         }
-        return isHungry();
+        return isHungry() || foragesFor(target);
+    }
+
+    /**
+     * A worker Drone of a founded hive also hunts for the hive, full or not: hosts while the hive is
+     * short of cocooned hosts, other prey while the larder is low (it brings them back alive).
+     */
+    private boolean foragesFor(net.minecraft.world.entity.LivingEntity target)
+    {
+        if (getClass() != DroneEntity.class || !(target instanceof net.minecraft.world.entity.Mob) || target.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD)
+                || target.getBbWidth() > 1.5F || target.getBbHeight() > 2.3F || !(level() instanceof ServerLevel))
+        {
+            return false;
+        }
+        org.avp.world.hive.Hive hive = hive();
+        if (hive == null)
+        {
+            return false;
+        }
+        return org.avp.entity.parasite.FacehuggerEntity.isValidHost(target) ? hive.needsHosts : hive.needsFood;
     }
 
     /** Eating what it killed: bigger prey fills it up more. */

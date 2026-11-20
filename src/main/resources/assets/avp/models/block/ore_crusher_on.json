@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "avp:block/ore_crusher_front_on",
+    "side": "avp:block/refinery_side",
+    "top": "avp:block/refinery_top"
+  }
+}

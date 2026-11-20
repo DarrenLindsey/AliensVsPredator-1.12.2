@@ -49,6 +49,10 @@ public final class ModBlockEntities
             () -> BlockEntityType.Builder.of(org.avp.block.conveyor.ConveyorBlockEntity::new, ModBlocks.CONVEYOR.get(), ModBlocks.CONVEYOR_EXPRESS.get(),
                     ModBlocks.CONVEYOR_SORTING.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.refining.RefineryBlockEntity>> REFINERY = BLOCK_ENTITIES.register("refinery",
+            () -> BlockEntityType.Builder.of(org.avp.refining.RefineryBlockEntity::new,
+                    org.avp.refining.Refining.BLOCKS.values().stream().map(b -> (net.minecraft.world.level.block.Block) b.get()).toArray(net.minecraft.world.level.block.Block[]::new)).build(null));
+
     /** Lockers and supply crates (64-slot inventory). */
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",

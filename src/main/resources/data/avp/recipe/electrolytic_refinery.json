@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CLC",
+    "NVN",
+    "CPC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:copper_block"
+    },
+    "L": {
+      "item": "avp:ingot_lithium"
+    },
+    "N": {
+      "item": "avp:neodymium"
+    },
+    "V": {
+      "item": "avp:acid_leach_vat"
+    },
+    "P": {
+      "item": "avp:part_powersupply"
+    }
+  },
+  "result": {
+    "id": "avp:electrolytic_refinery",
+    "count": 1
+  }
+}

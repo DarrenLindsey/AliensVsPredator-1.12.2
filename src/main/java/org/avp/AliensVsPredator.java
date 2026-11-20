@@ -35,6 +35,7 @@ public class AliensVsPredator
         ModBlocks.BLOCKS.register(modBus);
         org.avp.registry.ModArmor.load();
         org.avp.registry.ModGear.load();
+        org.avp.refining.Refining.load();
         org.avp.registry.ModFluids.load();
         org.avp.registry.ModFluids.TYPES.register(modBus);
         org.avp.registry.ModFluids.FLUIDS.register(modBus);

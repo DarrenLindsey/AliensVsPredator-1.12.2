@@ -140,6 +140,11 @@
     "avp:seegson_server",
     "avp:conveyor",
     "avp:conveyor_express",
-    "avp:conveyor_sorting"
+    "avp:conveyor_sorting",
+    "avp:ore_crusher",
+    "avp:hydro_washer",
+    "avp:acid_leach_vat",
+    "avp:electrolytic_refinery",
+    "avp:fusion_refinery"
   ]
 }

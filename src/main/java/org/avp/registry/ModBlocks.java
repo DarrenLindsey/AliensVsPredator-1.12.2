@@ -454,7 +454,7 @@ public final class ModBlocks
     }
 
     /** Registers any block (plus its item) and puts it in a creative tab. */
-    private static <B extends Block> DeferredBlock<B> register(String id, Tab tab, Supplier<B> factory)
+    public static <B extends Block> DeferredBlock<B> register(String id, Tab tab, Supplier<B> factory)
     {
         DeferredBlock<B> block = BLOCKS.register(id, factory);
         withItem(block, tab);

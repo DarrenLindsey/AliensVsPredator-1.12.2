@@ -201,6 +201,7 @@ public final class ClientSetup
     {
         event.register(ModMenus.STORAGE.get(), StorageScreen::new);
         event.register(ModMenus.TURRET.get(), org.avp.client.screen.TurretScreen::new);
+        event.register(ModMenus.REFINERY.get(), org.avp.client.screen.RefineryScreen::new);
     }
 
     /** Wrap the slope/corner/... models so they can show a copied block's texture. */

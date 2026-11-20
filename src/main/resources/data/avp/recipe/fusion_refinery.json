@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IEI",
+    "DFD",
+    "IEI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "E": {
+      "item": "avp:electrolytic_refinery"
+    },
+    "D": {
+      "item": "minecraft:diamond_block"
+    },
+    "F": {
+      "item": "avp:fusion_reactor"
+    }
+  },
+  "result": {
+    "id": "avp:fusion_refinery",
+    "count": 1
+  }
+}

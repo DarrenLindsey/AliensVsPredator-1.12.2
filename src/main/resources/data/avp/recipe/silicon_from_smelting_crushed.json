@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "avp:crushed_silicon"
+  },
+  "result": {
+    "id": "avp:silicon"
+  },
+  "experience": 0.5,
+  "cookingtime": 200
+}

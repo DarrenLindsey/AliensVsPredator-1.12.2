@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "avp:crushed_aluminum"
+  },
+  "result": {
+    "id": "avp:ingot_aluminum"
+  },
+  "experience": 0.5,
+  "cookingtime": 200
+}

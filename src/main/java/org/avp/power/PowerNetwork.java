@@ -388,6 +388,21 @@ public final class PowerNetwork
         // the line carries only so much per tick; trying to force more through strains it
         long[] load = loadOf(level, network);
         int room = (int) Math.max(0, capacity() - load[1]);
+        // what the far end would actually draw (a generator offers its whole buffer; that alone is no overload)
+        long demand = 0;
+        for (IEnergyStorage receiver : receivers)
+        {
+            demand += receiver.receiveEnergy(amount, true);
+            if (demand >= amount)
+            {
+                break;
+            }
+        }
+        amount = (int) Math.min(amount, demand);
+        if (amount <= 0)
+        {
+            return 0;
+        }
         if (amount > room)
         {
             if (!simulate)

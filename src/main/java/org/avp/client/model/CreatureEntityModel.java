@@ -25,7 +25,7 @@ public class CreatureEntityModel<T extends Mob> extends AvpEntityModel<T, Genera
         HEAD, JAW, LEFT_LEG, RIGHT_LEG, LEFT_ARM, RIGHT_ARM, TAIL, LEFT_WING, RIGHT_WING, OTHER
     }
 
-    private record Animated(ModelPart part, Role role, int index)
+    private record Animated(ModelPart part, Role role, int index, boolean topLevel)
     {
     }
 
@@ -42,7 +42,8 @@ public class CreatureEntityModel<T extends Mob> extends AvpEntityModel<T, Genera
             Role role = roleOf(e.getKey());
             if (role != Role.OTHER)
             {
-                animated.add(new Animated(e.getValue(), role, role == Role.TAIL ? tail++ : 0));
+                boolean top = model.root().hasChild(e.getKey()) && model.root().getChild(e.getKey()) == e.getValue();
+                animated.add(new Animated(e.getValue(), role, role == Role.TAIL ? tail++ : 0, top));
             }
         }
     }
@@ -97,6 +98,7 @@ public class CreatureEntityModel<T extends Mob> extends AvpEntityModel<T, Genera
         float walkOpposite = -walk;
         float attack = entity.getAttackAnim(age - entity.tickCount);
         float flap = Mth.sin(age * 0.6F) * 0.7F;
+        swingTail(Mth.sin(age * 0.08F) * 0.12F * (1F + swingAmount));
         for (Animated a : animated)
         {
             ModelPart p = a.part;
@@ -114,12 +116,50 @@ public class CreatureEntityModel<T extends Mob> extends AvpEntityModel<T, Genera
                 case RIGHT_LEG -> p.xRot += walkOpposite;
                 case LEFT_ARM -> p.xRot += walkOpposite * 0.5F - Mth.sin(attack * Mth.PI) * 1.2F;
                 case RIGHT_ARM -> p.xRot += walk * 0.5F - Mth.sin(attack * Mth.PI) * 1.2F;
-                case TAIL -> p.yRot += Mth.sin(age * 0.08F - a.index * 0.4F) * 0.04F * (a.index + 1) * (1F + swingAmount);
+                case TAIL -> {
+                    // swung as one piece around its root (see swingTail), so the segments never come apart
+                }
                 case LEFT_WING -> p.zRot += flap;
                 case RIGHT_WING -> p.zRot -= flap;
                 default -> {
                 }
             }
+        }
+    }
+
+    /**
+     * The tail sways as one rigid piece around the pivot of its first segment: each segment's
+     * pivot is turned around the root and the segment turned by the same angle, so the joints
+     * stay together whatever the model's part layout (the old per-segment sway pulled them apart).
+     */
+    private void swingTail(float angle)
+    {
+        // the root is the segment nearest the body (tails point backwards, +z); only top-level parts are moved
+        ModelPart root = null;
+        for (Animated a : animated)
+        {
+            if (a.role == Role.TAIL && a.topLevel && (root == null || a.part.z < root.z))
+            {
+                root = a.part;
+            }
+        }
+        if (root == null || angle == 0)
+        {
+            return;
+        }
+        float cos = Mth.cos(angle), sin = Mth.sin(angle);
+        float rx = root.x, rz = root.z;
+        for (Animated a : animated)
+        {
+            if (a.role != Role.TAIL || !a.topLevel)
+            {
+                continue;
+            }
+            ModelPart p = a.part;
+            float dx = p.x - rx, dz = p.z - rz;
+            p.x = rx + dx * cos + dz * sin;
+            p.z = rz - dx * sin + dz * cos;
+            p.yRot += angle;
         }
     }
 

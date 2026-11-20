@@ -39,9 +39,4 @@ public class BursterEntity extends ChestbursterEntity
         return ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, spec().matureInto());
     }
 
-    @Override
-    public boolean isPushedByFluid()
-    {
-        return !spec().has(Ability.AQUATIC);
-    }
 }

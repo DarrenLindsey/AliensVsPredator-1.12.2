@@ -1212,22 +1212,70 @@ public final class HiveGoals
                 }
                 return;
             }
-            // seal it, and any liquid touching it
             drone.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(leak));
             drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-            for (BlockPos p : BlockPos.betweenClosed(leak.offset(-1, -1, -1), leak.offset(1, 1, 1)))
+            for (BlockPos p : sealPlan(level, hive, leak))
             {
-                if (level.getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock)
-                {
-                    level.setBlock(p, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
-                    hive.leaks.remove(p.immutable());
-                }
+                level.setBlock(p, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
+                hive.leaks.remove(p);
             }
             level.playSound(null, leak, SoundEvents.MUD_PLACE, SoundSource.HOSTILE, 1.0F, 0.6F);
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, leak.getX() + 0.5, leak.getY() + 0.5, leak.getZ() + 0.5, 6, 0.4, 0.4, 0.4, 0.02);
             hive.checkForLeaks(level, leak, 2); // still coming through somewhere next to it?
             leak = null;
         }
+    }
+
+    /**
+     * Where to put hivestone to stop a leak for good. It follows the liquid upstream: a waterfall or
+     * small spring (up to 160 blocks of liquid, with its source) is filled in completely - source
+     * and all - leaving a hivestone pillar; anything bigger (a lake, an aquifer) gets a skin of
+     * hivestone over every bit of its surface that touches open space, so it can't flow round the patch.
+     */
+    static java.util.List<BlockPos> sealPlan(ServerLevel level, Hive hive, BlockPos leak)
+    {
+        net.minecraft.world.level.material.Fluid fluid = level.getFluidState(leak).getType();
+        java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
+        java.util.LinkedHashSet<BlockPos> body = new java.util.LinkedHashSet<>();
+        queue.add(leak.immutable());
+        body.add(leak.immutable());
+        boolean source = false, tooBig = false;
+        while (!queue.isEmpty())
+        {
+            BlockPos p = queue.poll();
+            source |= level.getFluidState(p).isSource();
+            // upwards first: that's where it's coming from
+            for (Direction d : new Direction[] { Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN })
+            {
+                BlockPos n = p.relative(d);
+                if (!body.contains(n) && level.getBlockState(n).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock
+                        && level.getFluidState(n).getType().isSame(fluid) && n.distManhattan(leak) <= 40)
+                {
+                    if (body.size() >= 160)
+                    {
+                        tooBig = true;
+                        queue.clear();
+                        break;
+                    }
+                    body.add(n.immutable());
+                    queue.add(n.immutable());
+                }
+            }
+        }
+        if (source && !tooBig)
+        {
+            return new java.util.ArrayList<>(body); // fill the whole flow, source and all
+        }
+        // too big to fill: seal its surface where it meets open space
+        java.util.List<BlockPos> skin = new java.util.ArrayList<>();
+        for (BlockPos p : body)
+        {
+            if (Hive.isLeak(level, p))
+            {
+                skin.add(p);
+            }
+        }
+        return skin;
     }
 
     /**

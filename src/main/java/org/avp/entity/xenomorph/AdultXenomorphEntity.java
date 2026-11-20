@@ -175,12 +175,6 @@ public class AdultXenomorphEntity extends XenomorphEntity
     }
 
     @Override
-    public boolean isPushedByFluid()
-    {
-        return !has(Ability.AQUATIC);
-    }
-
-    @Override
     public void aiStep()
     {
         super.aiStep();

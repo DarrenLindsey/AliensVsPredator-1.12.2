@@ -441,6 +441,13 @@ public abstract class XenomorphEntity extends Monster
         return destination != null && tickCount < destinationUntil ? destination : null;
     }
 
+    /** Currents don't push Xenomorphs around - they're far too strong (they still swim and sink as usual). */
+    @Override
+    public boolean isPushedByFluid()
+    {
+        return false;
+    }
+
     /** Where a hive job is taking it (so it climbs walls to get there, e.g. back out of a pit it fell into). */
     @Nullable
     private net.minecraft.world.phys.Vec3 destination;

@@ -81,7 +81,8 @@ public class PowerlineBlock extends BaseEntityBlock
         if (state.getBlock() instanceof PowerlineBlock || state.getBlock() instanceof RedstoneSensorBlock
                 || state.getBlock() instanceof PowerMachineBlock || state.getBlock() instanceof PoweredBlock
                 || state.getBlock() instanceof BlastDoorBlock || state.getBlock() instanceof BreakerBlock
-                || state.getBlock() instanceof FusionReactorBlock)
+                || state.getBlock() instanceof FusionReactorBlock
+                || state.getBlock() instanceof AtmosphereProcessorBlock)
         {
             return true;
         }

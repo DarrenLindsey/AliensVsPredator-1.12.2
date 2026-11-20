@@ -65,7 +65,8 @@ public final class PowerNetwork
     public static boolean takesHighVoltage(Level level, BlockPos pos)
     {
         return level.getBlockEntity(pos) instanceof PowerMachineBlockEntity machine
-                && (machine.kind().isTransformer() || machine.kind() == PowerMachineBlock.Kind.POWERCELL);
+                && (machine.kind().isTransformer() || machine.kind() == PowerMachineBlock.Kind.POWERCELL)
+                || level.getBlockEntity(pos) instanceof org.avp.block.entity.AtmosphereProcessorBlockEntity; // heavy industrial plant
     }
 
     /** A step-up transformer whose output (front) faces into the line makes the whole line high voltage. */

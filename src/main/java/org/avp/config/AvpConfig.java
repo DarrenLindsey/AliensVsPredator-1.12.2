@@ -215,6 +215,10 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue powerlinesBurnOut;
         public final ModConfigSpec.BooleanValue xenosCutPower;
         public final ModConfigSpec.IntValue reactorOutput;
+        public final ModConfigSpec.IntValue processorPower;
+        public final ModConfigSpec.IntValue processorRadius;
+        public final ModConfigSpec.BooleanValue processorMeltdown;
+        public final ModConfigSpec.BooleanValue acheronUnbreathable;
         public final ModConfigSpec.BooleanValue reactorMeltdown;
         public final ModConfigSpec.BooleanValue blackGooMutation;
         public final ModConfigSpec.DoubleValue ampuleLeakChance;
@@ -510,6 +514,18 @@ public final class AvpConfig
             xenosCutPower = b
                     .comment("Xenomorphs tear out powerlines near them to kill the power, as in Aliens.")
                     .define("xenosCutPower", true);
+            processorPower = b
+                    .comment("FE per tick an atmosphere processor draws while running.")
+                    .defineInRange("processorPower", 1024, 0, 1_000_000);
+            processorRadius = b
+                    .comment("How far (blocks, square) a running atmosphere processor makes the air breathable.")
+                    .defineInRange("processorRadius", 64, 8, 512);
+            processorMeltdown = b
+                    .comment("An atmosphere processor running with no water touching it heats up, and at 100% explodes like Hadley's Hope. Off: it shuts itself down.")
+                    .define("processorMeltdown", true);
+            acheronUnbreathable = b
+                    .comment("Acheron (LV-426) air can't be breathed: you suffocate unless you wear a sealed suit (MK50, pressure suit), a biomask, or stand near a running atmosphere processor.")
+                    .define("acheronUnbreathable", true);
             reactorOutput = b
                     .comment("FE per tick a compact fusion reactor makes.")
                     .defineInRange("reactorOutput", 2048, 1, 1_000_000);

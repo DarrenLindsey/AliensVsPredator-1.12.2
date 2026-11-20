@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "avp:block/floorgrill",
+    "bottom": "avp:block/industrialwall2",
+    "side": "avp:block/industrialvent"
+  }
+}

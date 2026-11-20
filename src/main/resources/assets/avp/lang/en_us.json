@@ -1020,5 +1020,9 @@
   "terminal.avp.load": "LINE LOAD: %s / %s FE/t",
   "terminal.avp.overload": "!! LINE OVERLOAD !!",
   "terminal.avp.voltage_high": "LINE: HIGH VOLTAGE - step down before use",
-  "terminal.avp.voltage_low": "LINE: LOW VOLTAGE (%s%% loss)"
+  "terminal.avp.voltage_low": "LINE: LOW VOLTAGE (%s%% loss)",
+  "block.avp.atmosphere_processor": "Atmosphere Processor",
+  "message.avp.processor_running": "PROCESSING | Stored: %s FE | Coolant: %s | Core heat: %s%%",
+  "message.avp.processor_idle": "IDLE (needs power) | Stored: %s FE | Coolant: %s | Core heat: %s%%",
+  "message.avp.unbreathable": "The air here is unbreathable - you need a sealed suit or an atmosphere processor"
 }

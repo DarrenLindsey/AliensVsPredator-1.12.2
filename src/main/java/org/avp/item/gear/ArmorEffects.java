@@ -46,9 +46,41 @@ public final class ArmorEffects
             return;
         }
         lamp(level, player);
+        thinAir(level, player);
         if (player.tickCount % 20 == 0 && (ModArmor.wearsFull(player, "mk50") || ModArmor.wearsFull(player, "pressure")))
         {
             player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 60, 0, true, false, false));
+        }
+    }
+
+    /** Whether a player can breathe where they are: only a problem on unprocessed Acheron. */
+    public static boolean canBreathe(ServerLevel level, Player player)
+    {
+        return !level.dimension().equals(org.avp.world.dimension.ModDimensions.ACHERON) || !AvpConfig.server(AvpConfig.SERVER.acheronUnbreathable)
+                || player.isCreative() || player.isSpectator()
+                || ModArmor.wearsFull(player, "mk50") || ModArmor.wearsFull(player, "pressure")
+                || org.avp.item.BiomaskEvents.isBiomask(player.getItemBySlot(EquipmentSlot.HEAD))
+                || org.avp.block.entity.AtmosphereProcessorBlockEntity.breathable(level, player.blockPosition());
+    }
+
+    /** LV-426's air: your air runs out over ~15 seconds, then it hurts like drowning. */
+    private static void thinAir(ServerLevel level, Player player)
+    {
+        if (canBreathe(level, player))
+        {
+            return;
+        }
+        if (player.tickCount % 100 == 0)
+        {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.unbreathable")
+                    .withStyle(net.minecraft.ChatFormatting.RED), true);
+        }
+        // vanilla gives back 4 a tick out of water; take 5
+        int air = Math.max(0, player.getAirSupply() - 5);
+        player.setAirSupply(air);
+        if (air == 0 && player.tickCount % 20 == 0)
+        {
+            player.hurt(player.damageSources().drown(), 2.0F);
         }
     }
 

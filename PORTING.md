@@ -69,7 +69,10 @@ If something fails, copy the **first** error from the console (or `run/logs/late
   - Done (pass 2): voltage tiers. A line fed by a step-up transformer's front is HIGH voltage: x4 capacity (`highVoltageMultiplier`), no loss,
     but only transformers and power cells can draw from it - other devices spark and refuse it (`highVoltageBurnsDevices` breaks them).
     Low-voltage lines lose 2% per 16 cables (`lowVoltageLossPer16`, max 50%). Terminal shows the tier and loss. transformerRate default 16384.
-  - Still to do: atmosphere processor multiblock, Seegson vs W-Y tiers, corporate grid lock, emergency backup cells, Tesla-powered CCFL.
+  - Done (pass 3): Atmosphere Processor (Hadley's Hope): draws 1024 FE/t (`processorPower`), may sit on high voltage, makes air breathable
+    within 64 blocks (`processorRadius`); needs water touching it as coolant or it heats up and explodes at 100% (`processorMeltdown`).
+    Acheron air is unbreathable (`acheronUnbreathable`): air runs out in ~15 s then drowning damage, unless sealed suit / biomask / processor.
+  - Still to do: Seegson vs W-Y tiers, corporate grid lock, emergency backup cells, Tesla-powered CCFL.
 - [x] Batch E - Black goo fluid (E1: bucket, mutations, phials, leaking ampules), Varda / Acheron dimensions and portals
       (E2: tools/port_dimensions.py - data-driven: overworld-shaped terrain in unistone/unidirt; Varda forest/badlands
       with unidentified trees, ferns, stalagmites, black goo lakes, yellow water, Varda wildlife; Acheron always night,

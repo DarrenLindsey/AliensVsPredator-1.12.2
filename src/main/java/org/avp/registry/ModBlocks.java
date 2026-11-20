@@ -255,6 +255,10 @@ public final class ModBlocks
             () -> new org.avp.block.FusionReactorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
                     .strength(8.0F, 20.0F).requiresCorrectToolForDrops().lightLevel(s -> 9)));
 
+    public static final DeferredBlock<org.avp.block.AtmosphereProcessorBlock> ATMOSPHERE_PROCESSOR = register("atmosphere_processor", Tab.BLOCKS,
+            () -> new org.avp.block.AtmosphereProcessorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
+                    .strength(8.0F, 20.0F).requiresCorrectToolForDrops().lightLevel(s -> 7)));
+
     // ---- Portals to the dimensions (org.avp.world.dimension) ----
     public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
             org.avp.world.dimension.ModDimensions.VARDA);

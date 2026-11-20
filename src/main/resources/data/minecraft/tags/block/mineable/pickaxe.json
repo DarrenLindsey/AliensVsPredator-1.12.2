@@ -133,6 +133,7 @@
     "avp:deepslate_orecobalt",
     "avp:hivestone",
     "avp:breaker",
-    "avp:fusion_reactor"
+    "avp:fusion_reactor",
+    "avp:atmosphere_processor"
   ]
 }

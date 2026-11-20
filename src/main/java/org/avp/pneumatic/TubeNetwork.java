@@ -55,6 +55,10 @@ public final class TubeNetwork
                 {
                     stations.putIfAbsent(st.name(), next);
                 }
+                else if (s.getBlock() instanceof org.avp.apollo.ApolloCoreBlock)
+                {
+                    stations.putIfAbsent("APOLLO", next);
+                }
                 else if (s.getBlock() instanceof CompressorBlock && level.getBlockEntity(next) instanceof CompressorBlockEntity c)
                 {
                     compressors++;

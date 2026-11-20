@@ -1,0 +1,9 @@
+# APOLLO courier: brings what you request on the terminal's APOLLO tab to you,
+# and stores whatever it's carrying between jobs.
+name Joe-Courier
+home ~ ~ ~
+when lowpower: charge
+forever
+  courier
+  unless empty: store
+end

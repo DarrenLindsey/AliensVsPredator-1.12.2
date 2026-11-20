@@ -137,3 +137,32 @@ stops it. Use an item on a sorting belt to set its filter: matching items go off
 
 ## Built-in programs (`/joes run avp:NAME`, or the terminal's LIBRARY)
 farmer, patrol, security, maintenance, courier, lights, escort, miner, assembler, dispatcher.
+
+## APOLLO (station AI storage)
+The **APOLLO Core** stores items as a manifest (counts, not slots): 16,384 items and 64 types, plus that much again for
+every **APOLLO Data Bank** joined to it (touching it, or touching another bank). It needs power (32 FE/t).
+- Hoppers, pipes, PneuPost and Joes (`put`) can put anything into it.
+- It's a PneuPost station called **APOLLO**, so canisters can deliver to it, and it can **dispatch** down the tubes.
+- In a Seegson Terminal's **APOLLO** tab: search the manifest, then **TO ME** (a courier Joe brings it to you, wherever
+  you are) or **DISPATCH** to a named PneuPost station.
+- `courier` (JOE-SCRIPT): take one delivery job from APOLLO and carry it to the player who asked.
+  `store`: take everything it carries to APOLLO. See the built-in `avp:apollo_courier` program.
+- Company policy: specimens (eggs, facehuggers, embryos, royal jelly) go in, but never come out. Special Order 937.
+
+## Weyland-Yutani ore refining (multiplies ore up to x8)
+| machine | from ore | power | needs | also takes |
+|---|---|---|---|---|
+| Ore Crusher | 2 crushed ore | 24 FE/t | - | washed ore -> crushed (and cobble -> gravel -> sand) |
+| Hydro-Washer | 3 washed ore | 48 FE/t | water (touching it, buckets, pipes) | shards -> washed |
+| Acid Leaching Vat | 4 leached shards | 96 FE/t | Xenomorph acid | crystals -> shards |
+| Electrolytic Refinery | 6 refined crystals | 384 FE/t | - (may sit on high voltage) | - |
+| Nostromo-class Fusion Refinery | 8 refined crystals | 1,536 FE/t | - (may sit on high voltage) | - |
+Crushed ore smelts (or blasts) to an ingot. Works for iron, gold, copper, aluminium, lithium, cobalt, neodymium and silicon.
+Xenomorph acid: use an empty phial on a Xenomorph to draw a vial (careful - it splashes; chitin armour protects you).
+
+## Seegson PneuPost (pneumatic tubes)
+Glass **PneuPost Tubes** link **Stations** (named: name the item in an anvil, or rename in its screen) and **Compressors**
+(16 FE/t each; more compressors, faster canisters, up to 4). Put items in a station's OUTGOING row and click a destination
+to send a canister - you can watch it shoot through the glass. "A" sets a station to auto-send there (when a stack fills,
+every few seconds, or on a redstone pulse). Hoppers/pipes/Joes put into OUTGOING and take from INCOMING. If a tube on the
+way is broken (or melted), the canister bursts out there and spills.

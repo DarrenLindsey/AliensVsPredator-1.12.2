@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "avp:block/apollo_core"
+    },
+    "lit=true": {
+      "model": "avp:block/apollo_core_on"
+    }
+  }
+}

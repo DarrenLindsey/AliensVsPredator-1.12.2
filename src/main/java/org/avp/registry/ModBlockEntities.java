@@ -58,6 +58,9 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.pneumatic.CompressorBlockEntity>> COMPRESSOR = BLOCK_ENTITIES.register("pneumatic_compressor",
             () -> BlockEntityType.Builder.of(org.avp.pneumatic.CompressorBlockEntity::new, ModBlocks.PNEUMATIC_COMPRESSOR.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.apollo.ApolloCoreBlockEntity>> APOLLO_CORE = BLOCK_ENTITIES.register("apollo_core",
+            () -> BlockEntityType.Builder.of(org.avp.apollo.ApolloCoreBlockEntity::new, ModBlocks.APOLLO_CORE.get()).build(null));
+
     /** Lockers and supply crates (64-slot inventory). */
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",

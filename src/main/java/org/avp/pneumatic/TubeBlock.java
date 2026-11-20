@@ -61,7 +61,8 @@ public class TubeBlock extends Block
 
     public static boolean connects(BlockState other)
     {
-        return other.getBlock() instanceof TubeBlock || other.getBlock() instanceof PneumaticStationBlock || other.getBlock() instanceof CompressorBlock;
+        return other.getBlock() instanceof TubeBlock || other.getBlock() instanceof PneumaticStationBlock || other.getBlock() instanceof CompressorBlock
+                || other.getBlock() instanceof org.avp.apollo.ApolloCoreBlock;
     }
 
     private BlockState connected(BlockGetter level, BlockPos pos, BlockState state)

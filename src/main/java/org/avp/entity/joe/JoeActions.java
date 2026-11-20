@@ -84,6 +84,14 @@ final class JoeActions
             {
                 return new Dig(joe, instr.a);
             }
+            case COURIER ->
+            {
+                return Courier.start(joe);
+            }
+            case STORE ->
+            {
+                return Courier.storeAll(joe);
+            }
             case PLACE ->
             {
                 return new AtBlock(joe, instr.a, 4.0, "placing at ", () -> place(joe, instr));

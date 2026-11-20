@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "MCM",
+    "PRP"
+  ],
+  "key": {
+    "P": {
+      "item": "avp:part_processor"
+    },
+    "S": {
+      "item": "avp:seegson_server"
+    },
+    "M": {
+      "item": "avp:part_motherboard"
+    },
+    "C": {
+      "item": "minecraft:ender_chest"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "avp:apollo_core",
+    "count": 1
+  }
+}

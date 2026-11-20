@@ -178,6 +178,57 @@ public final class JoeTerminalService
                         joe.drive(p.text());
                     }
                 }
+                case JoeTerminalActionPayload.APOLLO_REQUEST, JoeTerminalActionPayload.APOLLO_DISPATCH ->
+                {
+                    org.avp.apollo.ApolloCoreBlockEntity core = org.avp.apollo.ApolloCoreBlockEntity.of(player.server, owner);
+                    String[] parts = p.text().split(" ");
+                    org.avp.apollo.ApolloCoreBlockEntity.Entry entry = null;
+                    if (core != null && parts.length >= 2)
+                    {
+                        for (var e : core.manifest())
+                        {
+                            if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(e.proto.getItem()).toString().equals(parts[0]))
+                            {
+                                entry = e;
+                                break;
+                            }
+                        }
+                    }
+                    int count = 1;
+                    try
+                    {
+                        count = parts.length >= 2 ? Math.max(1, Math.min(576, Integer.parseInt(parts[1]))) : 1;
+                    }
+                    catch (NumberFormatException ignored)
+                    {
+                    }
+                    if (core == null)
+                    {
+                        message = "!No APOLLO core found (place one and power it).";
+                    }
+                    else if (!server && core.getLevel() != player.level())
+                    {
+                        message = "!APOLLO is out of range (needs the Network Server).";
+                    }
+                    else if (entry == null)
+                    {
+                        message = "!Select an item first.";
+                    }
+                    else if (org.avp.apollo.ApolloCoreBlockEntity.isSpecimen(entry.proto))
+                    {
+                        core.say("REQUEST DENIED. SPECIMEN IS COMPANY PROPERTY.");
+                        message = "!APOLLO: REQUEST DENIED. SPECIAL ORDER 937.";
+                    }
+                    else if (p.action() == JoeTerminalActionPayload.APOLLO_REQUEST)
+                    {
+                        core.queue(new org.avp.apollo.ApolloCoreBlockEntity.Job(entry.proto.copy(), count, owner, player.level().getGameTime()));
+                        message = "Request logged. A courier Joe will bring it to you.";
+                    }
+                    else
+                    {
+                        message = core.dispatch(parts.length >= 3 ? parts[2].toUpperCase(java.util.Locale.ROOT) : "", entry.proto, count);
+                    }
+                }
                 case JoeTerminalActionPayload.SAVE_FILE, JoeTerminalActionPayload.DELETE_FILE, JoeTerminalActionPayload.LOAD_FILE ->
                 {
                     String[] parts = p.text().split("\n", 2);
@@ -308,6 +359,31 @@ public final class JoeTerminalService
             s.put("Blips", blips(selected));
             s.putFloat("Yaw", selected.getYRot());
             data.put("Selected", s);
+        }
+        org.avp.apollo.ApolloCoreBlockEntity core = org.avp.apollo.ApolloCoreBlockEntity.of(player.server, owner);
+        if (core != null && (server || core.getLevel() == player.level()))
+        {
+            CompoundTag a = new CompoundTag();
+            a.putBoolean("Online", core.online());
+            a.putLong("Stored", core.stored());
+            a.putLong("Capacity", core.capacity());
+            a.putInt("Types", core.manifest().size());
+            a.putInt("TypeLimit", core.typeLimit());
+            a.putInt("Jobs", core.jobs().size());
+            ListTag items = new ListTag();
+            core.manifest().stream().sorted((x, y) -> Long.compare(y.count, x.count)).limit(400).forEach(e ->
+            {
+                CompoundTag t = new CompoundTag();
+                t.putString("Id", net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(e.proto.getItem()).toString());
+                t.putString("Name", e.proto.getHoverName().getString());
+                t.putLong("Count", e.count);
+                items.add(t);
+            });
+            a.put("Items", items);
+            ListTag alog = new ListTag();
+            core.log().forEach(l -> alog.add(StringTag.valueOf(l)));
+            a.put("Log", alog);
+            data.put("Apollo", a);
         }
         ListTag files = new ListTag();
         if (server)

@@ -289,6 +289,14 @@ public final class ModBlocks
     public static final DeferredBlock<org.avp.pneumatic.CompressorBlock> PNEUMATIC_COMPRESSOR = register("pneumatic_compressor", Tab.BLOCKS,
             () -> new org.avp.pneumatic.CompressorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(3.0F, 6.0F)));
 
+    // ---- APOLLO (org.avp.apollo) ----
+    public static final DeferredBlock<org.avp.apollo.ApolloCoreBlock> APOLLO_CORE = register("apollo_core", Tab.BLOCKS,
+            () -> new org.avp.apollo.ApolloCoreBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(6.0F, 20.0F)
+                    .requiresCorrectToolForDrops().lightLevel(s -> s.getValue(org.avp.apollo.ApolloCoreBlock.LIT) ? 9 : 0)));
+    public static final DeferredBlock<org.avp.apollo.ApolloBankBlock> APOLLO_BANK = register("apollo_bank", Tab.BLOCKS,
+            () -> new org.avp.apollo.ApolloBankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(4.0F, 10.0F)
+                    .requiresCorrectToolForDrops()));
+
     // ---- Portals to the dimensions (org.avp.world.dimension) ----
     public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
             org.avp.world.dimension.ModDimensions.VARDA);

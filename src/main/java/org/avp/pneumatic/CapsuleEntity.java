@@ -76,7 +76,8 @@ public class CapsuleEntity extends Entity
         {
             return; // wait for the chunk
         }
-        if (!last && !(level().getBlockState(next).getBlock() instanceof TubeBlock) || last && !(level().getBlockEntity(next) instanceof PneumaticStationBlockEntity))
+        if (!last && !(level().getBlockState(next).getBlock() instanceof TubeBlock) || last && !(level().getBlockEntity(next) instanceof PneumaticStationBlockEntity)
+                && !(level().getBlockEntity(next) instanceof org.avp.apollo.ApolloCoreBlockEntity))
         {
             burst();
             return;
@@ -118,7 +119,19 @@ public class CapsuleEntity extends Entity
 
     private void deliver(BlockPos station)
     {
-        if (level().getBlockEntity(station) instanceof PneumaticStationBlockEntity st)
+        if (level().getBlockEntity(station) instanceof org.avp.apollo.ApolloCoreBlockEntity core)
+        {
+            for (ItemStack stack : cargo)
+            {
+                ItemStack left = core.store(stack, false);
+                if (!left.isEmpty())
+                {
+                    Containers.dropItemStack(level(), station.getX() + 0.5, station.getY() + 1.1, station.getZ() + 0.5, left);
+                }
+            }
+            level().playSound(null, station, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.6F, 1.6F);
+        }
+        else if (level().getBlockEntity(station) instanceof PneumaticStationBlockEntity st)
         {
             for (ItemStack stack : cargo)
             {

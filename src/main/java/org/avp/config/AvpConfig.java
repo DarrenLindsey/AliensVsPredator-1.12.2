@@ -221,6 +221,7 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue joeChunkLoading;
         public final ModConfigSpec.DoubleValue conveyorSpeed;
         public final ModConfigSpec.DoubleValue capsuleSpeed;
+        public final ModConfigSpec.IntValue apolloPower;
         public final ModConfigSpec.IntValue compressorPower;
         public final ModConfigSpec.BooleanValue joeTerminalNeedsPower;
         public final ModConfigSpec.IntValue joeServerPower;
@@ -541,6 +542,9 @@ public final class AvpConfig
             joeServerPower = b
                     .comment("FE per tick a Seegson Network Server draws.")
                     .defineInRange("joeServerPower", 64, 0, 100_000);
+            apolloPower = b
+                    .comment("FE per tick the APOLLO core draws.")
+                    .defineInRange("apolloPower", 32, 0, 100_000);
             capsuleSpeed = b
                     .comment("PneuPost canister speed (blocks per tick) per powered compressor on the line (up to 4).")
                     .defineInRange("capsuleSpeed", 0.35, 0.05, 4.0);

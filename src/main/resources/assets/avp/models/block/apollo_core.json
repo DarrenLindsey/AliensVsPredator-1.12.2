@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "avp:block/apollo_core",
+    "top": "avp:block/apollo_core_side",
+    "bottom": "avp:block/apollo_core_side"
+  }
+}

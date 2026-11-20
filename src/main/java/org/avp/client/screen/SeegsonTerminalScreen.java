@@ -27,7 +27,7 @@ public class SeegsonTerminalScreen extends Screen
 {
     static final int AMBER = 0xFFFFB000, AMBER_HI = 0xFFFFD27A, DIM = 0xFF7A5200, FAINT = 0xFF3A2800, BG = 0xFF0A0C07, RED = 0xFFFF4A2A,
             GREEN = 0xFF7CFF6A;
-    private static final String[] TABS = { "STATUS", "PROGRAM", "LIBRARY", "DRIVE", "LOG" };
+    private static final String[] TABS = { "STATUS", "PROGRAM", "LIBRARY", "DRIVE", "LOG", "APOLLO" };
 
     private CompoundTag data;
     private final BlockPos pos;
@@ -43,7 +43,9 @@ public class SeegsonTerminalScreen extends Screen
 
     private int left, top, w, h, rightX, contentY;
     private MultiLineEditBox editor;
-    private EditBox nameBox, placeBox, sendBox, renameBox;
+    private EditBox nameBox, placeBox, sendBox, renameBox, searchBox, countBox, stationBox;
+    private String apolloPick = "", search = "";
+    private int apolloScroll;
 
     public SeegsonTerminalScreen(CompoundTag data)
     {
@@ -136,7 +138,11 @@ public class SeegsonTerminalScreen extends Screen
         }
         clearWidgets();
         editor = null;
-        nameBox = placeBox = sendBox = renameBox = null;
+        if (searchBox != null)
+        {
+            search = searchBox.getValue();
+        }
+        nameBox = placeBox = sendBox = renameBox = searchBox = countBox = stationBox = null;
         int rw = left + w - 6 - rightX;
         // tabs
         int tw = rw / TABS.length;
@@ -233,9 +239,81 @@ public class SeegsonTerminalScreen extends Screen
                 addRenderableWidget(new TermButton(rightX + rw - 136, by, 66, 14, "SEND", () -> send(JoeTerminalActionPayload.SEND, sendBox.getValue()), false));
                 addRenderableWidget(new TermButton(rightX + rw - 68, by, 68, 14, "SEND ALL", () -> send(JoeTerminalActionPayload.SEND, "", sendBox.getValue()), false));
             }
+            case 5 ->
+            {
+                searchBox = term(new EditBox(font, rightX, contentY, rw, 12, Component.literal("search")));
+                searchBox.setHint(Component.literal("search manifest").withColor(DIM));
+                searchBox.setValue(search);
+                addRenderableWidget(searchBox);
+                countBox = term(new EditBox(font, rightX, by - 18, 40, 14, Component.literal("count")));
+                countBox.setValue("64");
+                countBox.setMaxLength(3);
+                addRenderableWidget(countBox);
+                addRenderableWidget(new TermButton(rightX + 44, by - 18, 70, 14, "TO ME", () ->
+                        send(JoeTerminalActionPayload.APOLLO_REQUEST, apolloPick + " " + countBox.getValue().trim()), false));
+                stationBox = term(new EditBox(font, rightX, by, rw - 74, 14, Component.literal("station")));
+                stationBox.setHint(Component.literal("PneuPost station").withColor(DIM));
+                stationBox.setMaxLength(20);
+                addRenderableWidget(stationBox);
+                addRenderableWidget(new TermButton(rightX + rw - 70, by, 70, 14, "DISPATCH", () ->
+                        send(JoeTerminalActionPayload.APOLLO_DISPATCH, apolloPick + " " + countBox.getValue().trim() + " "
+                                + stationBox.getValue().trim().replace(' ', '_')), false));
+            }
             default ->
             {
             }
+        }
+    }
+
+    private List<CompoundTag> apolloItems()
+    {
+        List<CompoundTag> out = new ArrayList<>();
+        ListTag items = data.getCompound("Apollo").getList("Items", Tag.TAG_COMPOUND);
+        String q = searchBox != null ? searchBox.getValue().toLowerCase(java.util.Locale.ROOT) : search.toLowerCase(java.util.Locale.ROOT);
+        for (int i = 0; i < items.size(); i++)
+        {
+            CompoundTag t = items.getCompound(i);
+            if (q.isEmpty() || t.getString("Name").toLowerCase(java.util.Locale.ROOT).contains(q) || t.getString("Id").contains(q))
+            {
+                out.add(t);
+            }
+        }
+        return out;
+    }
+
+    private void drawApollo(GuiGraphics g, Font f, int rw)
+    {
+        CompoundTag a = data.getCompound("Apollo");
+        if (a.isEmpty())
+        {
+            g.drawString(f, "NO APOLLO CORE ON THIS NETWORK", rightX, contentY + 20, DIM, false);
+            return;
+        }
+        long stored = a.getLong("Stored"), cap = Math.max(1, a.getLong("Capacity"));
+        String head = (a.getBoolean("Online") ? "APOLLO ONLINE" : "APOLLO OFFLINE") + "  " + String.format("%,d/%,d", stored, cap) + "  "
+                + a.getInt("Types") + "/" + a.getInt("TypeLimit") + " types  " + a.getInt("Jobs") + " jobs";
+        g.drawString(f, f.plainSubstrByWidth(head, rw), rightX, contentY + 15, a.getBoolean("Online") ? GREEN : RED, false);
+        g.fill(rightX, contentY + 25, rightX + rw, contentY + 27, FAINT);
+        g.fill(rightX, contentY + 25, rightX + (int) (rw * stored / cap), contentY + 27, AMBER);
+        List<CompoundTag> items = apolloItems();
+        int y = contentY + 30, rows = (top + h - 66 - y) / 10;
+        apolloScroll = Math.max(0, Math.min(apolloScroll, Math.max(0, items.size() - rows)));
+        for (int i = apolloScroll; i < items.size() && i < apolloScroll + rows; i++, y += 10)
+        {
+            CompoundTag t = items.get(i);
+            boolean pick = t.getString("Id").equals(apolloPick);
+            if (pick)
+            {
+                g.fill(rightX, y - 1, rightX + rw, y + 9, 0xFF241A06);
+            }
+            String count = String.format("%,d", t.getLong("Count"));
+            g.drawString(f, f.plainSubstrByWidth(t.getString("Name"), rw - f.width(count) - 6), rightX + 2, y, pick ? AMBER_HI : AMBER, false);
+            g.drawString(f, count, rightX + rw - f.width(count), y, DIM, false);
+        }
+        ListTag log = a.getList("Log", Tag.TAG_STRING);
+        if (!log.isEmpty())
+        {
+            g.drawString(f, f.plainSubstrByWidth("MU/TH/UR: " + log.getString(log.size() - 1), rw), rightX, top + h - 64, GREEN, false);
         }
     }
 
@@ -298,6 +376,16 @@ public class SeegsonTerminalScreen extends Screen
                 return true;
             }
         }
+        if (tab == 5 && mx >= rightX && mx < left + w - 6 && my >= contentY + 30 && my < top + h - 66)
+        {
+            int row = (int) (my - contentY - 30) / 10 + apolloScroll;
+            List<CompoundTag> items = apolloItems();
+            if (row >= 0 && row < items.size())
+            {
+                apolloPick = items.get(row).getString("Id");
+                return true;
+            }
+        }
         if (tab == 2)
         {
             ListTag files = data.getList("Files", Tag.TAG_STRING);
@@ -325,6 +413,11 @@ public class SeegsonTerminalScreen extends Screen
         if (tab == 2)
         {
             fileScroll = Math.max(0, fileScroll - (int) Math.signum(sy));
+            return true;
+        }
+        if (tab == 5)
+        {
+            apolloScroll = Math.max(0, apolloScroll - (int) Math.signum(sy));
             return true;
         }
         return super.mouseScrolled(mx, my, sx, sy);
@@ -395,6 +488,7 @@ public class SeegsonTerminalScreen extends Screen
             case 2 -> drawLibrary(g, f, rw, mx, my);
             case 3 -> drawRadar(g, f, sel);
             case 4 -> drawLog(g, f, sel, rw);
+            case 5 -> drawApollo(g, f, rw);
             default ->
             {
             }

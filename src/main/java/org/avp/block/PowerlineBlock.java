@@ -85,7 +85,8 @@ public class PowerlineBlock extends BaseEntityBlock
                 || state.getBlock() instanceof AtmosphereProcessorBlock || state.getBlock() instanceof org.avp.entity.joe.JoeChargerBlock
                 || state.getBlock() instanceof org.avp.entity.joe.SeegsonTerminalBlock
                 || state.getBlock() instanceof org.avp.refining.RefineryBlock
-                || state.getBlock() instanceof org.avp.pneumatic.CompressorBlock)
+                || state.getBlock() instanceof org.avp.pneumatic.CompressorBlock
+                || state.getBlock() instanceof org.avp.apollo.ApolloCoreBlock)
         {
             return true;
         }

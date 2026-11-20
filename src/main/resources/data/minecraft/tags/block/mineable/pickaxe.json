@@ -148,6 +148,8 @@
     "avp:fusion_refinery",
     "avp:pneumatic_tube",
     "avp:pneumatic_station",
-    "avp:pneumatic_compressor"
+    "avp:pneumatic_compressor",
+    "avp:apollo_core",
+    "avp:apollo_bank"
   ]
 }

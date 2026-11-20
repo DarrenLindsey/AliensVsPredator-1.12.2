@@ -1569,7 +1569,7 @@ public class WorkingJoeEntity extends PathfinderMob
         }
     }
 
-    private class WaitTask implements Task
+    class WaitTask implements Task
     {
         private int left;
 

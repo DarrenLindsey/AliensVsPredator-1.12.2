@@ -1092,5 +1092,7 @@
   "block.avp.pneumatic_station": "Seegson PneuPost Station",
   "block.avp.pneumatic_compressor": "Seegson PneuPost Compressor",
   "item.avp.pneumatic_canister": "PneuPost Canister",
-  "entity.avp.pneumatic_capsule": "PneuPost Canister"
+  "entity.avp.pneumatic_capsule": "PneuPost Canister",
+  "block.avp.apollo_core": "APOLLO Core",
+  "block.avp.apollo_bank": "APOLLO Data Bank"
 }

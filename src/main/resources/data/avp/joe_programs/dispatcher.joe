@@ -1,0 +1,18 @@
+# Dispatcher: listens for orders from other Joes or the terminal.
+# From the terminal LOG tab, send:  orders goto 100 64 200
+name Joe-Dispatch
+home ~ ~ ~
+when message orders: call obey
+when lowpower: charge
+wait 5
+func obey
+  print "Order from $sender: $msg"
+  if word(msg, 0) == "goto"
+    set tx = num(word(msg, 1))
+    set ty = num(word(msg, 2))
+    set tz = num(word(msg, 3))
+    goto $tx $ty $tz
+  end
+  if msg == "home": goto home
+  if msg == "report": report "At $x $y $z, battery $charge%"
+end

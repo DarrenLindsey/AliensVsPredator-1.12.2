@@ -45,6 +45,10 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.entity.joe.SeegsonTerminalBlockEntity>> SEEGSON_TERMINAL = BLOCK_ENTITIES.register("seegson_terminal",
             () -> BlockEntityType.Builder.of(org.avp.entity.joe.SeegsonTerminalBlockEntity::new, ModBlocks.SEEGSON_TERMINAL.get(), ModBlocks.SEEGSON_SERVER.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.conveyor.ConveyorBlockEntity>> CONVEYOR = BLOCK_ENTITIES.register("conveyor",
+            () -> BlockEntityType.Builder.of(org.avp.block.conveyor.ConveyorBlockEntity::new, ModBlocks.CONVEYOR.get(), ModBlocks.CONVEYOR_EXPRESS.get(),
+                    ModBlocks.CONVEYOR_SORTING.get()).build(null));
+
     /** Lockers and supply crates (64-slot inventory). */
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",

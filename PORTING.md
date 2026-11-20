@@ -300,6 +300,15 @@ shares alarms and reports to the owner; /joes list|recall|lockdown|resume|stop|c
 Xenos ignore them; badly damaged Joes may malfunction (red eyes, attack people) until fitted with a processor.
 Sneak-use with an empty hand packs one up (keeps program, battery, load).
 
+Pass 2: JOE-SCRIPT v2 (variables, expressions, if/elif/else, while, repeat, for, func/call, break/continue,
+$var substitution, messaging between Joes), turtle actions (dig, place, use, take, put, drop, pickup, craft, equip,
+attack, scan, find, inspect, face), 8 upgrade modules (cargo, battery, drill, fabricator, sensor, plating, servos,
+chunk anchor), Seegson Terminal (amber CRT GUI: status, editor, library, radar + remote drive, log), Seegson Network
+Server (program library, control at any distance/dimension), Seegson Field Tablet, conveyor belts (normal, express,
+sorting). Full reference: docs/JOE-SCRIPT.md.
+Ideas for later: item lift (vertical conveyor), fluid tank module, Joe-to-Joe item handoff, waypoint markers,
+on-screen camera feed, multiblock factory controller.
+
 ## Planned: Working Joe robots (original notes)
 
 Seegson "Working Joe" androids you build and set up as a network:

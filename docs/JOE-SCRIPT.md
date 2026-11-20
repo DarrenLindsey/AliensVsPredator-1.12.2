@@ -115,3 +115,25 @@ forever
   end
 end
 ```
+
+## The Seegson Terminal, Network Server and Field Tablet
+- **Seegson Terminal** (computer, 4 FE/t): amber CRT console. Tabs: **STATUS** (unit details, battery, variables;
+  recall / stop / resume / security / clear alarm / rename), **PROGRAM** (editor: fetch a unit's program, check syntax,
+  upload to one or all units, save to the library), **LIBRARY** (your saved programs plus the built-in `[ROM]` ones:
+  open, run, run on all, delete), **DRIVE** (live top-down radar with blips, and remote control: WASD to walk,
+  Q dig, E use, F attack, X stop, plus dig up/down, pick up, drop, place), **LOG** (the unit's `print` output, errors
+  and reports; send messages to one unit or all on a channel).
+- Without a server a terminal reaches your Joes within 64 blocks, in the same dimension.
+- **Seegson Network Server** (64 FE/t, keeps its own chunk loaded): while it's powered your terminals and tablet
+  reach **every Joe you own, at any distance and in any dimension**, and you get the program library (64 files).
+- **Seegson Field Tablet**: the terminal in your hand, anywhere (needs your server online).
+- Pair with the **chunk anchor** module so far-away Joes keep running.
+
+## Conveyors
+Conveyor Belt, Express Conveyor Belt and Sorting Conveyor Belt carry items, mobs and players. At the end of a belt,
+items go into whatever container is there. Hoppers, pipes and Joes (`put` / `drop`) can load a belt. A redstone signal
+stops it. Use an item on a sorting belt to set its filter: matching items go off to the left, the rest straight on
+(sneak-use with an empty hand to clear).
+
+## Built-in programs (`/joes run avp:NAME`, or the terminal's LIBRARY)
+farmer, patrol, security, maintenance, courier, lights, escort, miner, assembler, dispatcher.

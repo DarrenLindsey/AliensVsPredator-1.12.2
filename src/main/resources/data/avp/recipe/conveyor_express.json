@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "CCC",
+    "CSC",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "avp:conveyor"
+    },
+    "S": {
+      "item": "avp:part_servo"
+    }
+  },
+  "result": {
+    "id": "avp:conveyor_express",
+    "count": 8
+  }
+}

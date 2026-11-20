@@ -219,6 +219,7 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue joesFightXenos;
         public final ModConfigSpec.BooleanValue xenosIgnoreJoes;
         public final ModConfigSpec.BooleanValue joeChunkLoading;
+        public final ModConfigSpec.DoubleValue conveyorSpeed;
         public final ModConfigSpec.BooleanValue joeTerminalNeedsPower;
         public final ModConfigSpec.IntValue joeServerPower;
         public final ModConfigSpec.IntValue highVoltageMultiplier;
@@ -538,6 +539,9 @@ public final class AvpConfig
             joeServerPower = b
                     .comment("FE per tick a Seegson Network Server draws.")
                     .defineInRange("joeServerPower", 64, 0, 100_000);
+            conveyorSpeed = b
+                    .comment("Conveyor belt speed multiplier.")
+                    .defineInRange("conveyorSpeed", 1.0, 0.1, 5.0);
             joeChunkLoading = b
                     .comment("Joes with a chunk anchor module keep their chunk loaded (so they work anywhere). Off: the module does nothing.")
                     .define("joeChunkLoading", true);

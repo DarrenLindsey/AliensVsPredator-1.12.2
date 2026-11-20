@@ -1,0 +1,27 @@
+# Miner: digs out the nearest ore of one kind, then brings it home.
+# Change the ore below. Best with drill + sensor + cargo modules.
+name Joe-Miner
+home ~ ~ ~
+set ore = "iron_ore"
+when lowpower: call go_charge
+forever
+  scan $ore 24
+  if not found
+    report "No more $ore in range. Stopping."
+    stop
+  end
+  dig $fx $fy $fz
+  pickup 4
+  if full
+    call unload
+  end
+end
+func unload
+  goto home
+  put ~2 ~ ~
+  print "Unloaded. Carrying $items items now."
+end
+func go_charge
+  call unload
+  charge
+end

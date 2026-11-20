@@ -1044,5 +1044,10 @@
   "item.avp.joe_tablet": "Seegson Field Tablet",
   "item.avp.joe_tablet.desc": "Your Working Joe network, anywhere. Needs your Network Server online.",
   "message.avp.joe_server_on": "Seegson Network Server: %s units on the network, APOLLO link %s",
-  "message.avp.joe_server_off": "Seegson Network Server: NO POWER (%s units, link %s)"
+  "message.avp.joe_server_off": "Seegson Network Server: NO POWER (%s units, link %s)",
+  "block.avp.conveyor": "Conveyor Belt",
+  "block.avp.conveyor_express": "Express Conveyor Belt",
+  "block.avp.conveyor_sorting": "Sorting Conveyor Belt",
+  "message.avp.conveyor_filter": "Sorting: %s goes left, everything else straight on",
+  "message.avp.conveyor_no_filter": "Sorting: no filter (use an item on the belt to set one; sneak to clear)"
 }

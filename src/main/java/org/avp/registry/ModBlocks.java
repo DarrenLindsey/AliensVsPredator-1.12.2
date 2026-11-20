@@ -270,6 +270,17 @@ public final class ModBlocks
             () -> new org.avp.entity.joe.SeegsonTerminalBlock(true, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
                     .strength(5.0F, 12.0F).requiresCorrectToolForDrops().lightLevel(s -> s.getValue(org.avp.entity.joe.SeegsonTerminalBlock.LIT) ? 5 : 0)));
 
+    // ---- Conveyors ----
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR = register("conveyor", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.NORMAL,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR_EXPRESS = register("conveyor_express", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.EXPRESS,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR_SORTING = register("conveyor_sorting", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.SORTING,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+
     // ---- Portals to the dimensions (org.avp.world.dimension) ----
     public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
             org.avp.world.dimension.ModDimensions.VARDA);

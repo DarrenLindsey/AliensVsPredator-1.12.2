@@ -1,0 +1,18 @@
+# Assembler: takes logs from a chest, crafts planks and sticks,
+# and drops the sticks onto a conveyor in front of it.
+# Needs a fabricator module.
+name Joe-Fab
+home ~ ~ ~
+when lowpower: charge
+forever
+  take ~-2 ~ ~ oak_log 8
+  if count(oak_log) == 0
+    print "Waiting for logs."
+    wait 10
+    continue
+  end
+  craft oak_planks 8
+  craft stick 8
+  face ~ ~ ~2
+  drop stick
+end

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    {
+      "item": "avp:conveyor"
+    },
+    {
+      "item": "avp:part_sensor_array"
+    }
+  ],
+  "result": {
+    "id": "avp:conveyor_sorting",
+    "count": 1
+  }
+}

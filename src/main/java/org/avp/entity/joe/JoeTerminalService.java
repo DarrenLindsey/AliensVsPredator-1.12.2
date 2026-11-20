@@ -1,7 +1,6 @@
 package org.avp.entity.joe;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -22,7 +21,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -387,16 +385,6 @@ public final class JoeTerminalService
             list.add(b);
         }
         return list;
-    }
-
-    static ItemStack unused()
-    {
-        return ItemStack.EMPTY;
-    }
-
-    static Map<String, String> none()
-    {
-        return Map.of();
     }
 
     static boolean needsPower()

@@ -233,44 +233,67 @@ public abstract class XenomorphEntity extends Monster
         int range = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPackRange);
         java.util.UUID id = packId();
         return level().getEntitiesOfClass(XenomorphEntity.class, getBoundingBox().inflate(range),
-                x -> x != this && x.isAlive() && !(x instanceof OvamorphEntity) && x.packId().equals(id));
+                x -> x != this && packsWith(x) && x.packId().equals(id));
     }
 
     /** Pack strength, for choosing a leader: the toughest, then the oldest. */
-    private double strength()
+    /** Pack rank: the Queen first, then the strongest, then the oldest; ties broken by id so every pack has exactly one leader. */
+    private static int compareRank(XenomorphEntity a, XenomorphEntity b)
     {
-        return getMaxHealth() * 1000 + Math.min(age, 999);
+        int c = Boolean.compare(a.isQueen(), b.isQueen());
+        if (c == 0)
+        {
+            c = Float.compare(a.getMaxHealth(), b.getMaxHealth());
+        }
+        if (c == 0)
+        {
+            c = Integer.compare(a.age, b.age);
+        }
+        return c != 0 ? c : a.getUUID().compareTo(b.getUUID());
+    }
+
+    /** Can it be in a pack with this one? Adults (not eggs or newborns) of the same hive, or both hiveless. */
+    private boolean packsWith(XenomorphEntity other)
+    {
+        return other.isAlive() && canPack() && other.canPack() && java.util.Objects.equals(hiveId, other.hiveId);
+    }
+
+    private boolean canPack()
+    {
+        return !(this instanceof OvamorphEntity) && !(this instanceof ChestbursterEntity);
     }
 
     /**
-     * Every 2 seconds: find (or form) a pack. It joins the strongest leader nearby, or leads
-     * itself. If its leader is gone or too far away, it looks again.
+     * Every 2 seconds: find (or form) a pack. Everyone in range follows the highest-ranked
+     * Xenomorph among them (or that one's leader), so a group always settles on one leader -
+     * even when they're all equally strong (they used to each lead themselves) - and a pack
+     * never mixes members of different hives.
      */
     private void updatePack()
     {
-        if (this instanceof OvamorphEntity || !org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPacks))
+        if (!canPack() || !org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPacks) || !(level() instanceof ServerLevel server))
         {
             packLeader = null;
             return;
         }
         int range = org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoPackRange);
-        XenomorphEntity leader = null;
-        if (packLeader != null && !packLeader.equals(getUUID()) && level() instanceof ServerLevel server
-                && server.getEntity(packLeader) instanceof XenomorphEntity current && current.isAlive()
-                && current.isPackLeader() && current.distanceToSqr(this) < range * range * 4)
-        {
-            leader = current;
-        }
-        // a stronger leader nearby? (or none yet) - follow the strongest
+        XenomorphEntity best = this;
         for (XenomorphEntity other : level().getEntitiesOfClass(XenomorphEntity.class, getBoundingBox().inflate(range),
-                x -> x != this && x.isAlive() && !(x instanceof OvamorphEntity) && x.isPackLeader()))
+                x -> x != this && packsWith(x)))
         {
-            if (other.strength() > strength() && (leader == null || other.strength() > leader.strength()))
+            if (compareRank(other, best) > 0)
             {
-                leader = other;
+                best = other;
             }
         }
-        packLeader = leader == null ? getUUID() : leader.getUUID();
+        // follow the top one's own leader if it has a better one (long strings of Xenomorphs end up as one pack)
+        if (best != this && best.packLeader != null && !best.packLeader.equals(best.getUUID())
+                && server.getEntity(best.packLeader) instanceof XenomorphEntity root && packsWith(root) && compareRank(root, best) > 0
+                && root.distanceToSqr(this) < range * range * 4)
+        {
+            best = root;
+        }
+        packLeader = best.getUUID();
     }
 
     /** Spotted prey (or got hurt): the rest of the pack joins in. */
@@ -285,7 +308,8 @@ public abstract class XenomorphEntity extends Monster
         }
         for (XenomorphEntity mate : packmates())
         {
-            if (mate.getTarget() == null && (mate.wantsToHunt(target) || target == getLastHurtByMob()))
+            if (mate.getTarget() == null && !mate.isVehicle() && !"BURROWING".equals(mate.state)
+                    && (mate.wantsToHunt(target) || target == getLastHurtByMob()))
             {
                 mate.fromPack = true;
                 mate.setTarget(target);

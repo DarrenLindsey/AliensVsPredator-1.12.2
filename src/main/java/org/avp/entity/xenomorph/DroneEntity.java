@@ -70,6 +70,7 @@ public class DroneEntity extends XenomorphEntity
         goalSelector.addGoal(4, new HiveGoals.BuildHiveGoal(this));
         goalSelector.addGoal(4, new HiveGoals.CoatWallsGoal(this));
         goalSelector.addGoal(3, new HiveGoals.CarryEggGoal(this));
+        goalSelector.addGoal(1, new HiveGoals.SealLeakGoal(this));
     }
 
     @Override

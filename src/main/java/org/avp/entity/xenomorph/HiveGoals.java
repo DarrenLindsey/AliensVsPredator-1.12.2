@@ -285,8 +285,7 @@ public final class HiveGoals
                 double dx = (p.getX() - centre.getX()) / (double) r, dz = (p.getZ() - centre.getZ()) / (double) r;
                 double dy = (p.getY() - centre.getY()) / (double) height; // 0 at the floor, ~1 at the top of the dome
                 BlockState s = level.getBlockState(p);
-                if (dx * dx + dz * dz + dy * dy <= 1.0 && !s.isAir() && s.getFluidState().isEmpty() && !s.is(ModTags.XENO_UNBREAKABLE)
-                        && s.getDestroySpeed(level, p) >= 0 && !s.hasBlockEntity())
+                if (dx * dx + dz * dz + dy * dy <= 1.0 && !s.isAir() && org.avp.world.hive.HivePlanner.diggable(level, p))
                 {
                     level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                 }
@@ -674,6 +673,7 @@ public final class HiveGoals
             {
                 level.destroyBlockProgress(drone.getId(), block, -1);
                 level.destroyBlock(block, false, drone);
+                hive.checkForLeaks(level, block, 1); // did that open onto water or lava?
                 org.avp.world.hive.HivePlanner.advance(level, hive, block, true);
                 block = null;
             }
@@ -1126,6 +1126,107 @@ public final class HiveGoals
             }
             egg = null;
             destination = null;
+        }
+    }
+
+    /**
+     * Water or lava getting into the hive: the nearest free Drone drops what it's doing and walls it
+     * off with hivestone, from a safe distance, until the flow is stopped.
+     */
+    public static class SealLeakGoal extends Goal
+    {
+        private final DroneEntity drone;
+        @Nullable
+        private BlockPos leak;
+        private int ticks;
+
+        public SealLeakGoal(DroneEntity drone)
+        {
+            this.drone = drone;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!enabled() || drone.getTarget() != null || drone.isVehicle() || !(drone.level() instanceof ServerLevel level))
+            {
+                return false;
+            }
+            Hive hive = drone.hive();
+            if (hive == null || hive.leaks.isEmpty())
+            {
+                return false;
+            }
+            hive.leaks.removeIf(p -> !Hive.isLeak(level, p));
+            leak = hive.leaks.stream().filter(p -> p.distSqr(drone.blockPosition()) < 48 * 48)
+                    .min(java.util.Comparator.comparingDouble(p -> p.distSqr(drone.blockPosition()))).orElse(null);
+            return leak != null;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return leak != null && ticks < 400 && drone.getTarget() == null;
+        }
+
+        @Override
+        public void start()
+        {
+            ticks = 0;
+            drone.setState("SEALING LEAK");
+            approach();
+        }
+
+        private void approach()
+        {
+            BlockPos stand = org.avp.world.hive.HivePlanner.openSide((ServerLevel) drone.level(), leak);
+            BlockPos to = stand != null ? stand : leak;
+            drone.navigateTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 1.1);
+        }
+
+        @Override
+        public void tick()
+        {
+            ticks += 2;
+            if (leak == null)
+            {
+                return;
+            }
+            ServerLevel level = (ServerLevel) drone.level();
+            Hive hive = drone.hive();
+            if (hive == null || !Hive.isLeak(level, leak))
+            {
+                if (hive != null)
+                {
+                    hive.leaks.remove(leak);
+                }
+                leak = null;
+                return;
+            }
+            if (drone.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(leak)) > 4.5 * 4.5)
+            {
+                if (ticks % 20 == 0)
+                {
+                    approach();
+                }
+                return;
+            }
+            // seal it, and any liquid touching it
+            drone.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(leak));
+            drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            for (BlockPos p : BlockPos.betweenClosed(leak.offset(-1, -1, -1), leak.offset(1, 1, 1)))
+            {
+                if (level.getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock)
+                {
+                    level.setBlock(p, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
+                    hive.leaks.remove(p.immutable());
+                }
+            }
+            level.playSound(null, leak, SoundEvents.MUD_PLACE, SoundSource.HOSTILE, 1.0F, 0.6F);
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, leak.getX() + 0.5, leak.getY() + 0.5, leak.getZ() + 0.5, 6, 0.4, 0.4, 0.4, 0.02);
+            hive.checkForLeaks(level, leak, 2); // still coming through somewhere next to it?
+            leak = null;
         }
     }
 

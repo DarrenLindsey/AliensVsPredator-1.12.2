@@ -85,6 +85,38 @@ public class Hive
         return jobs.get(drone);
     }
 
+    /** Water or lava getting into the hive, waiting to be sealed (not saved: they're found again). */
+    public final java.util.Set<BlockPos> leaks = new java.util.LinkedHashSet<>();
+
+    /** Is this a leak: liquid (not a waterlogged block) next to open space? */
+    public static boolean isLeak(net.minecraft.world.level.Level level, BlockPos pos)
+    {
+        if (!(level.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock))
+        {
+            return false;
+        }
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values())
+        {
+            if (level.getBlockState(pos.relative(d)).isAir())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Note any leaks next to this spot. */
+    public void checkForLeaks(net.minecraft.world.level.Level level, BlockPos around, int radius)
+    {
+        for (BlockPos p : BlockPos.betweenClosed(around.offset(-radius, -radius, -radius), around.offset(radius, radius, radius)))
+        {
+            if (leaks.size() < 64 && !level.getFluidState(p).isEmpty() && isLeak(level, p))
+            {
+                leaks.add(p.immutable());
+            }
+        }
+    }
+
     /** What the hive is short of (worked out now and then by its members; not saved). */
     public boolean needsHosts, needsFood;
 

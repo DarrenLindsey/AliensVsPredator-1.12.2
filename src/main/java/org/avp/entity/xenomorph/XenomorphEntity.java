@@ -786,6 +786,16 @@ public abstract class XenomorphEntity extends Monster
         {
             updateStuck();
         }
+        // watch for water and lava getting into the hive
+        if (tickCount % 40 == Math.floorMod(getId(), 40) && level() instanceof ServerLevel server && hiveId != null)
+        {
+            org.avp.world.hive.Hive hive = hive();
+            if (hive != null && blockPosition().distSqr(hive.core()) <= Math.pow(hive.buildRadius(server.getGameTime(),
+                    org.avp.world.hive.HiveData.maxRadius()) + 6, 2))
+            {
+                hive.checkForLeaks(server, blockPosition(), 5);
+            }
+        }
         if (tickCount % 100 == Math.floorMod(getId(), 100) && level() instanceof ServerLevel server)
         {
             updateHive(server);

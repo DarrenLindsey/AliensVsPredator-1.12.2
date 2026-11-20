@@ -122,6 +122,8 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       Builder Drone (2: stocky, slow, armoured; hivestone) and Coater Drone (2: lean, quick; climbs walls and
       ceilings spraying resin, big caves first). They don't mature further; the rest are workers. Resin creep: resin in a living
       hive slowly spreads to neighbouring surfaces. Captured caves are measured (flood fill) and claimed whole.
+      Leaks: hive members watch for water/lava next to the hive's open space (and around every block dug);
+      the nearest free Drone drops its job and seals it with hivestone from a safe distance until it stops.
       Builder Drones: lay hivestone (new block) over holes in room floors, under
       galleries that cross open space, over water/lava leaking in, roof rooms open to the sky, pave floors.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.

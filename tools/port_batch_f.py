@@ -236,3 +236,57 @@ lang.update({
 write_json(f"{NA}/sounds.json", sounds)
 write_json(f"{NA}/lang/en_us.json", lang)
 print("batch F3 (Yautja gear) data written")
+
+# ================================================================ F4: W-Y and other kit
+lang = read_json(f"{NA}/lang/en_us.json", {})
+sounds = read_json(f"{NA}/sounds.json", {})
+modelled("stunbaton", "stunbaton.png", "Stun Baton", "A jolt that slows and weakens - for bringing one back alive.")
+flat("mine_laser", "mine.laser.png", "Laser Mine")
+copy(f"{LA}/textures/misc/proximity-mine.png", f"{NA}/textures/entity/laser_mine.png")
+for kind, crate, name, lore in (("supplychute", "supplychuteblock", "Supply Chute Beacon", "Calls down a supply drop where you stand (needs open sky)."),
+                               ("supplychute_marines", "supplychuteblock_marines", "USCM Supply Beacon", "Calls down a Colonial Marines supply drop: ammunition and grenades."),
+                               ("supplychute_seegson", "supplychuteblock_seegson", "Seegson Supply Beacon", "Calls down a Seegson supply drop: tools and survival gear.")):
+    write_json(f"{NA}/models/item/{kind}.json", {"parent": f"avp:item/{crate}"})
+    lang[f"item.avp.{kind}"] = name
+    lang[f"tooltip.avp.{kind}"] = lore
+copy(f"{LA}/textures/tile/supplychute.png", f"{NA}/textures/entity/supplychute.png")
+copy(f"{LA}/textures/tile/supplychute.marines.png", f"{NA}/textures/entity/supplychute_marines.png")
+copy(f"{LA}/textures/tile/supplychute.seegson.png", f"{NA}/textures/entity/supplychute_seegson.png")
+
+
+def pool(entries, rolls):
+    return {"rolls": rolls, "entries": [{"type": "minecraft:empty", "weight": w} if n == "minecraft:air" else
+                                        {"type": "minecraft:item", "name": n, "weight": w,
+                                         "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}}]}
+                                        for n, w, lo, hi in entries]}
+
+
+write_json(f"{ND}/avp/loot_table/supply/marines.json", {"type": "minecraft:chest", "pools": [
+    pool([("avp:ammo_ar", 6, 1, 3), ("avp:ammo_pistol", 4, 1, 3), ("avp:ammo_smg", 1, 1, 1), ("avp:ammo_sniper", 2, 1, 2),
+          ("avp:grenade_m40", 4, 1, 4), ("avp:grenade_incendiary", 2, 1, 2), ("avp:ammo_flamethrower", 2, 1, 1),
+          ("minecraft:cooked_beef", 3, 2, 6), ("avp:food_doritos", 2, 1, 2)], {"type": "minecraft:uniform", "min": 4, "max": 8}),
+    pool([("avp:motiontracker", 1, 1, 1), ("avp:gun_m41a", 1, 1, 1), ("avp:helm_marine", 1, 1, 1), ("minecraft:air", 6, 1, 1)], 1)]})
+write_json(f"{ND}/avp/loot_table/supply/seegson.json", {"type": "minecraft:chest", "pools": [
+    pool([("minecraft:torch", 4, 4, 12), ("minecraft:bread", 4, 2, 6), ("minecraft:golden_apple", 1, 1, 1), ("avp:ammo_flamethrower", 3, 1, 2),
+          ("avp:ammo_pistol", 2, 1, 2), ("minecraft:iron_ingot", 3, 2, 6), ("avp:polycarbonate", 3, 2, 6), ("avp:tool_maintenancejack", 1, 1, 1)],
+         {"type": "minecraft:uniform", "min": 4, "max": 8}),
+    pool([("avp:gun_flamethrower_sevastopol", 1, 1, 1), ("avp:stunbaton", 1, 1, 1), ("minecraft:air", 6, 1, 1)], 1)]})
+write_json(f"{ND}/avp/loot_table/supply/unbranded.json", {"type": "minecraft:chest", "pools": [
+    pool([("minecraft:bread", 4, 2, 6), ("minecraft:torch", 4, 4, 12), ("minecraft:iron_ingot", 3, 2, 5), ("avp:ammo_pistol", 2, 1, 2),
+          ("minecraft:arrow", 2, 8, 16)], {"type": "minecraft:uniform", "min": 3, "max": 6})]})
+for i in range(4):
+    copy(f"{LA}/sounds/items/weapons/stunbaton/hit{i}.ogg", f"{NA}/sounds/items/weapons/stunbaton/hit{i}.ogg")
+sounds["weapons.stunbaton"] = {"subtitle": "subtitles.avp.weapons.stunbaton", "sounds": [f"avp:items/weapons/stunbaton/hit{i}" for i in range(4)]}
+lang.update({
+    "subtitles.avp.weapons.stunbaton": "Stun baton crackles",
+    "tooltip.avp.mine_laser": "Use it on a wall: anything that breaks its beam sets it off. Hit it to take it down.",
+    "message.avp.supply_no_sky": "The drop needs open sky above you",
+    "message.avp.supply_inbound": "Supply drop inbound",
+    "entity.avp.laser_mine": "Laser Mine",
+    "entity.avp.supply_drop": "Supply Drop",
+    "entity.avp.grenade": "Grenade",
+    "entity.avp.thrown_weapon": "Thrown Weapon",
+})
+write_json(f"{NA}/sounds.json", sounds)
+write_json(f"{NA}/lang/en_us.json", lang)
+print("batch F4 (W-Y kit) data written")

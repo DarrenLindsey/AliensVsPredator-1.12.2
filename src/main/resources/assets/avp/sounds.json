@@ -383,5 +383,14 @@
     "sounds": [
       "avp:items/predvision/switch"
     ]
+  },
+  "weapons.stunbaton": {
+    "subtitle": "subtitles.avp.weapons.stunbaton",
+    "sounds": [
+      "avp:items/weapons/stunbaton/hit0",
+      "avp:items/weapons/stunbaton/hit1",
+      "avp:items/weapons/stunbaton/hit2",
+      "avp:items/weapons/stunbaton/hit3"
+    ]
   }
 }

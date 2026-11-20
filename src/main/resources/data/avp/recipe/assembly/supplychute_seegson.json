@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "minecraft:wool",
+      "count": 4
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 3
+    },
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "avp:supplychute_seegson",
+    "count": 1
+  }
+}

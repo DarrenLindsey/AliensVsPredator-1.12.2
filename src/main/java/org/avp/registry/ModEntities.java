@@ -52,6 +52,14 @@ public final class ModEntities
             () -> EntityType.Builder.<org.avp.entity.projectile.ThrownWeaponEntity>of(org.avp.entity.projectile.ThrownWeaponEntity::new, MobCategory.MISC)
                     .sized(0.4F, 0.4F).clientTrackingRange(8).updateInterval(2).build("thrown_weapon"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.projectile.LaserMineEntity>> LASER_MINE = ENTITIES.register("laser_mine",
+            () -> EntityType.Builder.<org.avp.entity.projectile.LaserMineEntity>of(org.avp.entity.projectile.LaserMineEntity::new, MobCategory.MISC)
+                    .sized(0.4F, 0.4F).clientTrackingRange(8).updateInterval(20).build("laser_mine"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.projectile.SupplyDropEntity>> SUPPLY_DROP = ENTITIES.register("supply_drop",
+            () -> EntityType.Builder.<org.avp.entity.projectile.SupplyDropEntity>of(org.avp.entity.projectile.SupplyDropEntity::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F).clientTrackingRange(16).updateInterval(2).build("supply_drop"));
+
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.creature.CreatureProjectile>> CREATURE_PROJECTILE = ENTITIES.register("creature_projectile",
             () -> EntityType.Builder.<org.avp.entity.creature.CreatureProjectile>of(org.avp.entity.creature.CreatureProjectile::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(5).noSummon().build("creature_projectile"));

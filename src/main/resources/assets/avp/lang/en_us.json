@@ -976,5 +976,22 @@
   "avp.configuration.selfDestruct": "Wristbracer Self-Destruct",
   "avp.configuration.selfDestruct.tooltip": "The wristbracer's self-destruct can be armed (K, twice).",
   "avp.configuration.selfDestructPower": "Self-Destruct Power",
-  "avp.configuration.selfDestructPower.tooltip": "Explosion size (TNT is 4). Breaks blocks if mobGriefing is on."
+  "avp.configuration.selfDestructPower.tooltip": "Explosion size (TNT is 4). Breaks blocks if mobGriefing is on.",
+  "item.avp.stunbaton": "Stun Baton",
+  "tooltip.avp.stunbaton": "A jolt that slows and weakens - for bringing one back alive.",
+  "item.avp.mine_laser": "Laser Mine",
+  "item.avp.supplychute": "Supply Chute Beacon",
+  "tooltip.avp.supplychute": "Calls down a supply drop where you stand (needs open sky).",
+  "item.avp.supplychute_marines": "USCM Supply Beacon",
+  "tooltip.avp.supplychute_marines": "Calls down a Colonial Marines supply drop: ammunition and grenades.",
+  "item.avp.supplychute_seegson": "Seegson Supply Beacon",
+  "tooltip.avp.supplychute_seegson": "Calls down a Seegson supply drop: tools and survival gear.",
+  "subtitles.avp.weapons.stunbaton": "Stun baton crackles",
+  "tooltip.avp.mine_laser": "Use it on a wall: anything that breaks its beam sets it off. Hit it to take it down.",
+  "message.avp.supply_no_sky": "The drop needs open sky above you",
+  "message.avp.supply_inbound": "Supply drop inbound",
+  "entity.avp.laser_mine": "Laser Mine",
+  "entity.avp.supply_drop": "Supply Drop",
+  "entity.avp.grenade": "Grenade",
+  "entity.avp.thrown_weapon": "Thrown Weapon"
 }

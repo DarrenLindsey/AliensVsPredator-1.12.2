@@ -51,6 +51,17 @@ public final class ModGear
     public static final DeferredItem<Item> SHURIKEN = item("shuriken",
             () -> new org.avp.item.gear.ThrowableWeaponItem(7F, 2.0F, false, new Item.Properties().stacksTo(16)));
 
+    public static final DeferredItem<Item> LASER_MINE = item("mine_laser", () -> new org.avp.item.gear.WyGearItems.LaserMine(new Item.Properties()));
+
+    // ---- F4: Weyland-Yutani and other kit
+    public static final DeferredItem<Item> STUN_BATON = item("stunbaton", () -> new org.avp.item.gear.WyGearItems.StunBaton(new Item.Properties()));
+    public static final DeferredItem<Item> SUPPLY_CHUTE = item("supplychute", () -> new org.avp.item.gear.WyGearItems.SupplyChute(0, new Item.Properties()));
+    public static final DeferredItem<Item> SUPPLY_CHUTE_MARINES = item("supplychute_marines",
+            () -> new org.avp.item.gear.WyGearItems.SupplyChute(1, new Item.Properties()));
+    public static final DeferredItem<Item> SUPPLY_CHUTE_SEEGSON = item("supplychute_seegson",
+            () -> new org.avp.item.gear.WyGearItems.SupplyChute(2, new Item.Properties()));
+    public static final DeferredHolder<SoundEvent, SoundEvent> STUN_BATON_HIT = sound("weapons.stunbaton");
+
     public static final DeferredHolder<SoundEvent, SoundEvent> PLASMA_SHOT = sound("weapons.plasmacaster");
     public static final DeferredHolder<SoundEvent, SoundEvent> PLASMA_CHARGE = sound("weapons.plasmacaster.charge");
     public static final DeferredHolder<SoundEvent, SoundEvent> BLADES_ALARM = sound("weapons.blades.alarm");

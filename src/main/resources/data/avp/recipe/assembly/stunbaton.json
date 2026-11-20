@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 3
+    },
+    {
+      "item": "avp:part_capacitor",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/lithium",
+      "count": 1
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:stunbaton",
+    "count": 1
+  }
+}

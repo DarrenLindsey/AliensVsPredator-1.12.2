@@ -1,0 +1,33 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "minecraft:wool",
+      "count": 4
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 1
+    },
+    {
+      "item": "avp:part_led_display",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "item": "minecraft:gunpowder",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "avp:supplychute_marines",
+    "count": 1
+  }
+}

@@ -154,8 +154,10 @@ If something fails, copy the **first** error from the console (or `run/logs/late
         (melee + throw), wristbracer (C cloak: 60 s, water/hits break it, 30 s recharge; K twice: self-destruct, 10 s),
         biomask vision modes (V: normal / night / thermal - warm bodies glow, not Xenomorphs / EM - Xenomorphs glow),
         Celtic tools (Yautja alloy tier) and armour.
-  - [ ] F4 W-Y and other kit: MK50, pressure suit, anti-vacuum armour, Xeno armour, stun baton, maintenance jack,
-        laser mine, spore pod, supply chute
+  - [x] F4 W-Y and other kit: stun baton (slows/weakens, electric), laser mine (wall-mounted beam tripwire), supply
+        chute beacons (unbranded / USCM / Seegson: a drop drifts down and lands as a stocked supply crate,
+        data/avp/loot_table/supply/*). MK50 / pressure / Xeno armour are in F2; the maintenance jack already pries
+        blast doors. Left for later: spore pod (with the black goo, batch E), NBT drive (with the network rack).
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation
 
 Registry names changed from `shippanel.foo` style to `shippanel_foo` (modern convention).

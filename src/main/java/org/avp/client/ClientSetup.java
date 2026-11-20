@@ -81,6 +81,9 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.COATER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
         event.registerEntityRenderer(ModEntities.CREATURE_PROJECTILE.get(), NoopRenderer::new); // particles only
         event.registerEntityRenderer(ModEntities.GRENADE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.THROWN_WEAPON.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.LASER_MINE.get(), org.avp.client.render.GearEntityRenderers.LaserMine::new);
+        event.registerEntityRenderer(ModEntities.SUPPLY_DROP.get(), org.avp.client.render.GearEntityRenderers.SupplyDrop::new);
         ModEntities.CATALOG.forEach((id, type) -> registerCreature(event, type.get(), id));
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.BLAST_DOOR.get(), BlastDoorRenderer::new);

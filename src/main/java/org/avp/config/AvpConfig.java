@@ -209,6 +209,15 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue biomaskNightVision;
         public final ModConfigSpec.BooleanValue grenadesBreakBlocks;
         public final ModConfigSpec.IntValue powerlineCapacity;
+        public final ModConfigSpec.IntValue joeBattery;
+        public final ModConfigSpec.IntValue joeChargeRate;
+        public final ModConfigSpec.BooleanValue joeNeedsPower;
+        public final ModConfigSpec.BooleanValue joeReports;
+        public final ModConfigSpec.BooleanValue joeChatter;
+        public final ModConfigSpec.BooleanValue joesMalfunction;
+        public final ModConfigSpec.IntValue joeMalfunctionChance;
+        public final ModConfigSpec.BooleanValue joesFightXenos;
+        public final ModConfigSpec.BooleanValue xenosIgnoreJoes;
         public final ModConfigSpec.IntValue highVoltageMultiplier;
         public final ModConfigSpec.IntValue lowVoltageLossPer16;
         public final ModConfigSpec.BooleanValue highVoltageBurnsDevices;
@@ -496,6 +505,33 @@ public final class AvpConfig
             ampuleLeakChance = b
                     .comment("Chance an Engineer ampule cracks and leaks black goo each time a phial is filled from it (0 = never).")
                     .defineInRange("ampuleLeakChance", 0.2, 0.0, 1.0);
+            joeBattery = b
+                    .comment("Working Joe battery size (FE). A Joe uses 1 FE/t standing, 4 walking, 8 fighting.")
+                    .defineInRange("joeBattery", 240_000, 1000, 100_000_000);
+            joeChargeRate = b
+                    .comment("FE per tick a Joe charger gives a Joe.")
+                    .defineInRange("joeChargeRate", 600, 1, 1_000_000);
+            joeNeedsPower = b
+                    .comment("Working Joes run on a battery (and power down when it's empty). Off: they run forever.")
+                    .define("joeNeedsPower", true);
+            joeReports = b
+                    .comment("Working Joes send status messages to their owner over the Seegson network (alarms, faults, job reports).")
+                    .define("joeReports", true);
+            joeChatter = b
+                    .comment("Working Joes now and then say something to people near them.")
+                    .define("joeChatter", true);
+            joesMalfunction = b
+                    .comment("A badly damaged Working Joe may malfunction and attack people (as in Alien: Isolation). Fix it with a processor.")
+                    .define("joesMalfunction", true);
+            joeMalfunctionChance = b
+                    .comment("Percent chance, per hit below 35% health, that a Joe malfunctions.")
+                    .defineInRange("joeMalfunctionChance", 15, 0, 100);
+            joesFightXenos = b
+                    .comment("Joes on security duty also attack Xenomorphs (they mostly lose).")
+                    .define("joesFightXenos", false);
+            xenosIgnoreJoes = b
+                    .comment("Xenomorphs ignore Working Joes (nothing alive in them to hunt).")
+                    .define("xenosIgnoreJoes", true);
             powerlineCapacity = b
                     .comment("FE per tick one powerline network can carry. Forcing more through it overloads it: it sparks, arcs, and may burn out (a breaker trips instead).")
                     .defineInRange("powerlineCapacity", 4096, 64, 1_000_000);

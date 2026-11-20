@@ -1,0 +1,9 @@
+# Security: guards its post, answers the network's alarms, then goes back.
+name Joe-Security
+home ~ ~ ~
+security on
+when alarm: goto alarm
+when hurt: report "Under attack at my post."
+when lowpower: charge
+guard ~ ~ ~ 10 60
+if night: say "Night shift. All quiet."

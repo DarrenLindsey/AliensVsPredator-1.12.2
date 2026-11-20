@@ -909,7 +909,8 @@ public abstract class XenomorphEntity extends Monster
         if (!target.isAlive() || target.getType().is(org.avp.registry.ModTags.XENOMORPHS)
                 || target instanceof net.minecraft.world.entity.decoration.ArmorStand
                 || target.hasData(org.avp.registry.ModAttachments.EMBRYO) || target.hasData(org.avp.registry.ModAttachments.COCOONED)
-                || target.getVehicle() instanceof XenomorphEntity)
+                || target.getVehicle() instanceof XenomorphEntity
+                || target instanceof org.avp.entity.joe.WorkingJoeEntity && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosIgnoreJoes))
         {
             return false;
         }

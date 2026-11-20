@@ -82,7 +82,7 @@ public class PowerlineBlock extends BaseEntityBlock
                 || state.getBlock() instanceof PowerMachineBlock || state.getBlock() instanceof PoweredBlock
                 || state.getBlock() instanceof BlastDoorBlock || state.getBlock() instanceof BreakerBlock
                 || state.getBlock() instanceof FusionReactorBlock
-                || state.getBlock() instanceof AtmosphereProcessorBlock)
+                || state.getBlock() instanceof AtmosphereProcessorBlock || state.getBlock() instanceof org.avp.entity.joe.JoeChargerBlock)
         {
             return true;
         }

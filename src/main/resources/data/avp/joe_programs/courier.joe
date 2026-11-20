@@ -1,0 +1,8 @@
+# Courier: carries everything from the chest 3 blocks west to the chest 3 blocks east.
+name Joe-Courier
+home ~ ~ ~
+when lowpower: charge
+label top
+haul ~-3 ~ ~ -> ~3 ~ ~
+unless full: wait 10
+jump top

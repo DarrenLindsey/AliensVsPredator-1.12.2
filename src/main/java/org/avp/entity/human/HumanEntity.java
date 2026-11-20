@@ -98,6 +98,10 @@ public class HumanEntity extends PathfinderMob
     /** Who they open fire on. */
     public boolean isHostile(LivingEntity e)
     {
+        if (e instanceof org.avp.entity.joe.WorkingJoeEntity joe)
+        {
+            return joe.isRogue();
+        }
         if (e instanceof HumanEntity || e.getType().is(ModTags.XENOMORPHS) && e instanceof org.avp.entity.xenomorph.OvamorphEntity)
         {
             return false;

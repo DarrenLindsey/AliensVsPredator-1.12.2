@@ -1,0 +1,9 @@
+# Patrol: walks a square route and raises the alarm at intruders.
+name Joe-Patrol
+home ~ ~ ~
+security on
+when hostile: say "Intruder detected. Please remain calm."
+when alarm: goto alarm
+when lowpower: charge
+patrol ~8 ~ ~ ; ~8 ~ ~8 ; ~ ~ ~8 ; ~ ~ ~
+wait 5

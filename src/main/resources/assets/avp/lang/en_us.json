@@ -1024,5 +1024,11 @@
   "block.avp.atmosphere_processor": "Atmosphere Processor",
   "message.avp.processor_running": "PROCESSING | Stored: %s FE | Coolant: %s | Core heat: %s%%",
   "message.avp.processor_idle": "IDLE (needs power) | Stored: %s FE | Coolant: %s | Core heat: %s%%",
-  "message.avp.unbreathable": "The air here is unbreathable - you need a sealed suit or an atmosphere processor"
+  "message.avp.unbreathable": "The air here is unbreathable - you need a sealed suit or an atmosphere processor",
+  "item.avp.working_joe": "Seegson Working Joe",
+  "item.avp.working_joe.desc": "Use on the ground to activate. Program it with a book and quill.",
+  "item.avp.working_joe.programmed": "Programmed",
+  "entity.avp.working_joe": "Working Joe",
+  "block.avp.joe_charger": "Joe Charger",
+  "message.avp.joe_charger": "Joe Charger: %s FE stored"
 }

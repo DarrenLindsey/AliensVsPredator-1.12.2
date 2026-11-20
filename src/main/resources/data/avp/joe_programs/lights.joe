@@ -1,0 +1,8 @@
+# Lights: flips a lever 2 blocks south on at night and off at dawn.
+name Joe-Lights
+home ~ ~ ~
+when night: lever ~ ~ ~2 on
+when day: lever ~ ~ ~2 off
+when lowpower: charge
+goto home
+wait 30

@@ -1,0 +1,5 @@
+# Escort: follows you around and fights anything hostile that comes at you.
+name Joe-Escort
+security on
+when lowpower: charge
+follow

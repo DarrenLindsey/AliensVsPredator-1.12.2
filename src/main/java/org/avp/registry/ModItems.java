@@ -133,6 +133,9 @@ public final class ModItems
         }
     }
 
+    /** A boxed Seegson Working Joe (org.avp.entity.joe). */
+    public static final DeferredItem<Item> WORKING_JOE = ITEMS.register("working_joe",
+            () -> new org.avp.entity.joe.WorkingJoeItem(new Item.Properties().stacksTo(1)));
     public static final DeferredItem<Item> BUILDER_DRONE_SPAWN_EGG = ITEMS.register("builder_drone_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.BUILDER_DRONE, 0x1A1C20, 0x5A5048, new Item.Properties()));
     public static final DeferredItem<Item> COATER_DRONE_SPAWN_EGG = ITEMS.register("coater_drone_spawn_egg",
@@ -141,6 +144,7 @@ public final class ModItems
     {
         Tab.MAIN.add(DRONE_SPAWN_EGG);
         Tab.MAIN.add(BUILDER_DRONE_SPAWN_EGG);
+        Tab.MAIN.add(WORKING_JOE);
         Tab.MAIN.add(COATER_DRONE_SPAWN_EGG);
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);
         Tab.MAIN.add(CHESTBURSTER_SPAWN_EGG);

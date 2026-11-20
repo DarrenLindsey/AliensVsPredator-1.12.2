@@ -134,6 +134,7 @@
     "avp:hivestone",
     "avp:breaker",
     "avp:fusion_reactor",
-    "avp:atmosphere_processor"
+    "avp:atmosphere_processor",
+    "avp:joe_charger"
   ]
 }

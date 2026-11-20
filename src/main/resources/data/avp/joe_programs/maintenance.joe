@@ -1,0 +1,8 @@
+# Maintenance: looks after the powerlines and lights in a 33x33 area
+# and takes spare parts from a chest 2 blocks east.
+name Joe-Maint
+home ~ ~ ~
+when lowpower: charge
+maintain ~-16 ~-4 ~-16 ~16 ~8 ~16 <- ~2 ~ ~
+goto home
+wait 20

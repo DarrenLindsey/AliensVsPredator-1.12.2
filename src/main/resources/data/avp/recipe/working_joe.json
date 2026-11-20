@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ISI",
+    "MPA",
+    "IWI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "S": {
+      "item": "avp:part_sensor_array"
+    },
+    "M": {
+      "item": "avp:part_motherboard"
+    },
+    "P": {
+      "item": "avp:part_processor"
+    },
+    "A": {
+      "item": "avp:part_powersupply"
+    },
+    "W": {
+      "item": "avp:part_servo"
+    }
+  },
+  "result": {
+    "id": "avp:working_joe",
+    "count": 1
+  }
+}

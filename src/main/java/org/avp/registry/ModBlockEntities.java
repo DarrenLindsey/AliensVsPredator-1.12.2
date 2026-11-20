@@ -39,6 +39,9 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.entity.AtmosphereProcessorBlockEntity>> ATMOSPHERE_PROCESSOR = BLOCK_ENTITIES.register("atmosphere_processor",
             () -> BlockEntityType.Builder.of(org.avp.block.entity.AtmosphereProcessorBlockEntity::new, ModBlocks.ATMOSPHERE_PROCESSOR.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.entity.joe.JoeChargerBlockEntity>> JOE_CHARGER = BLOCK_ENTITIES.register("joe_charger",
+            () -> BlockEntityType.Builder.of(org.avp.entity.joe.JoeChargerBlockEntity::new, ModBlocks.JOE_CHARGER.get()).build(null));
+
     /** Lockers and supply crates (64-slot inventory). */
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",

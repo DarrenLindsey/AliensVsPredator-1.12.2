@@ -1,0 +1,8 @@
+# Farmer: tends the crops in a 9x9 field around where it's loaded
+# and stores the harvest in a chest 6 blocks north.
+name Joe-Farm
+home ~ ~ ~
+when night: say "Good evening. The crops are secure."
+when lowpower: charge
+farm ~-4 ~-1 ~-4 ~4 ~ ~4 -> ~ ~ ~-6
+wait 30

@@ -288,7 +288,19 @@ Ideas for later uses of captured specimens:
   samples - each with its own harvest (jelly, acid, resin, chitin) and research.
 - **Stasis mechanism** (1.12.2 block): display a frozen creature for the "museum" look.
 
-## Planned: Working Joe robots
+## Working Joe robots - done (first pass)
+
+Seegson Working Joes (org.avp.entity.joe): craft one (iron blocks, sensor array, motherboard, processor, power supply, servo),
+use it on the ground - you own it and get the manual. Program it with a book and quill (JOE-SCRIPT, see JoeProgram):
+goto/patrol/wait/say/report/haul/farm/maintain/lever/press/open/close/guard/follow/charge/security/alarm, labels and jumps,
+if/unless conditions, and "when" event responses (night, day, alarm, hurt, lowpower, hostile, player, redstone X Y Z).
+Data pack programs in data/<ns>/joe_programs/*.joe (avp: farmer, patrol, security, maintenance, courier, lights, escort);
+a book whose first line is "load avp:farmer" runs one. Battery + Joe Charger on the power network; the Seegson network
+shares alarms and reports to the owner; /joes list|recall|lockdown|resume|stop|clearalarm|run|example|manual.
+Xenos ignore them; badly damaged Joes may malfunction (red eyes, attack people) until fitted with a processor.
+Sneak-use with an empty hand packs one up (keeps program, battery, load).
+
+## Planned: Working Joe robots (original notes)
 
 Seegson "Working Joe" androids you build and set up as a network:
 - A control terminal assigns jobs (patrol, guard a door, carry items between storage, repair doors,

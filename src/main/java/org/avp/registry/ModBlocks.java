@@ -245,6 +245,11 @@ public final class ModBlocks
 
     // Slopes etc. that copy the look of another block (ShapeBlock)
     private static final List<DeferredBlock<? extends Block>> SHAPE_BLOCKS = new ArrayList<>();
+    /** Hive resin spread by Drones over other blocks (NaturalResinBlock). */
+    public static final DeferredBlock<org.avp.block.NaturalResinBlock> NATURAL_RESIN = BLOCKS.register("natural_resin",
+            () -> new org.avp.block.NaturalResinBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK).sound(SoundType.SLIME_BLOCK).strength(1.5F, 3.0F).ignitedByLava()));
+
     public static final DeferredBlock<ShapeBlock> SLOPE = shape("slope");
     public static final DeferredBlock<ShapeBlock> CORNER = shape("corner");
     public static final DeferredBlock<ShapeBlock> INVERTEDCORNER = shape("invertedcorner");

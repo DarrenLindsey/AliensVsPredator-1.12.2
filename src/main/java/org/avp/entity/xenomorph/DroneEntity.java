@@ -63,6 +63,9 @@ public class DroneEntity extends XenomorphEntity
     {
         super.registerGoals();
         addHunterGoals(1.0);
+        goalSelector.addGoal(1, new HiveGoals.CarryHostGoal(this));
+        goalSelector.addGoal(5, new HiveGoals.BurrowGoal(this));
+        goalSelector.addGoal(5, new HiveGoals.BuildResinGoal(this));
     }
 
     @Override
@@ -119,8 +122,39 @@ public class DroneEntity extends XenomorphEntity
     }
 
     @Override
+    public boolean isRoyalLine()
+    {
+        return true;
+    }
+
+    /**
+     * A Drone from a hive doesn't kill a host it has worn down: it subdues it and carries it home
+     * to be cocooned for the eggs (players are always fought).
+     */
+    private boolean trySubdue(Entity target)
+    {
+        org.avp.world.hive.Hive hive = hive();
+        if (!(target instanceof net.minecraft.world.entity.Mob host) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
+                || !AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts) || isVehicle() || host.isVehicle() || host.isPassenger()
+                || !org.avp.entity.parasite.FacehuggerEntity.isValidHost(host) || host.getBbWidth() > 1.5F || host.getBbHeight() > 2.3F
+                || host.getHealth() - getAttributeValue(Attributes.ATTACK_DAMAGE) > host.getMaxHealth() * 0.4F)
+        {
+            return false;
+        }
+        host.setHealth(Math.max(1.0F, host.getMaxHealth() * 0.2F));
+        host.startRiding(this, true);
+        playSound(ModSounds.ALIEN_ATTACK.get(), 0.8F, 0.7F);
+        setTarget(null);
+        return true;
+    }
+
+    @Override
     public boolean doHurtTarget(Entity target)
     {
+        if (!level().isClientSide && trySubdue(target))
+        {
+            return true;
+        }
         boolean hit = super.doHurtTarget(target);
         if (hit)
         {

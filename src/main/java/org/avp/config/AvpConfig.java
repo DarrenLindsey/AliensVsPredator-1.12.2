@@ -188,6 +188,15 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue xenoAcidWeaponDamage;
         public final ModConfigSpec.IntValue droneMatureTicks;
         public final ModConfigSpec.IntValue queenEggTicks;
+        public final ModConfigSpec.BooleanValue hives;
+        public final ModConfigSpec.IntValue hiveSpacing;
+        public final ModConfigSpec.IntValue hiveRadius;
+        public final ModConfigSpec.DoubleValue resinBuildSpeed;
+        public final ModConfigSpec.BooleanValue resinCoversBuiltBlocks;
+        public final ModConfigSpec.BooleanValue xenosCocoonHosts;
+        public final ModConfigSpec.BooleanValue royalSuccession;
+        public final ModConfigSpec.BooleanValue eggmorphing;
+        public final ModConfigSpec.IntValue eggmorphTicks;
         public final ModConfigSpec.BooleanValue yautjaHonourCode;
         public final ModConfigSpec.BooleanValue yautjaCloak;
         public final ModConfigSpec.BooleanValue marinesAlliedToPlayers;
@@ -396,6 +405,33 @@ public final class AvpConfig
             queenEggTicks = b
                     .comment("A well-fed Queen lays an egg this often (ticks) while she isn't fighting, up to 12 nearby.")
                     .defineInRange("queenEggTicks", 6_000, 100, 1_728_000);
+            hives = b
+                    .comment("Xenomorphs found and build hives: Drones dig down to deepslate, coat the hive in resin and bring hosts back alive.")
+                    .define("hives", true);
+            hiveSpacing = b
+                    .comment("Only one hive within this many blocks. Xenomorphs inside this range join it instead of starting another.")
+                    .defineInRange("hiveSpacing", 256, 32, 4096);
+            hiveRadius = b
+                    .comment("How far from its core a hive with a Queen grows (a hive without a Queen stays a small nest, up to 8).")
+                    .defineInRange("hiveRadius", 24, 6, 64);
+            resinBuildSpeed = b
+                    .comment("How fast Drones spread resin (1.0 = normal, 0 = never).")
+                    .defineInRange("resinBuildSpeed", 1.0, 0.0, 20.0);
+            resinCoversBuiltBlocks = b
+                    .comment("Resin may coat any plain solid block, including player-built ones. Off: only natural blocks (avp:resin_coverable).")
+                    .define("resinCoversBuiltBlocks", false);
+            xenosCocoonHosts = b
+                    .comment("Drones subdue animals and villagers instead of killing them, carry them back and cocoon them in the hive for the eggs.")
+                    .define("xenosCocoonHosts", true);
+            royalSuccession = b
+                    .comment("A hive without a Queen picks an heir and feeds it royal jelly from every kill, until it grows into a Queen.")
+                    .define("royalSuccession", true);
+            eggmorphing = b
+                    .comment("Cocooned hosts slowly turn into eggs (the deleted scene from Alien), so a hive can spread without a Queen.")
+                    .define("eggmorphing", true);
+            eggmorphTicks = b
+                    .comment("How long a cocooned host takes to turn into an egg (ticks; 24000 = one day).")
+                    .defineInRange("eggmorphTicks", 24_000, 200, 1_728_000);
             yautjaHonourCode = b
                     .comment("Yautja only hunt worthy prey: Xenomorphs, dangerous monsters and armed players. Off: they hunt every player.")
                     .define("yautjaHonourCode", true);

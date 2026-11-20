@@ -63,6 +63,115 @@ public abstract class XenomorphEntity extends Monster
     private int hunger = 60 + new java.util.Random().nextInt(41);
     public static final int MAX_HUNGER = 100;
 
+    /** The hive it belongs to (HiveData), or null. */
+    @Nullable
+    private java.util.UUID hiveId;
+
+    @Nullable
+    public java.util.UUID hiveId()
+    {
+        return hiveId;
+    }
+
+    public void setHiveId(@Nullable java.util.UUID hiveId)
+    {
+        this.hiveId = hiveId;
+    }
+
+    /** Its hive, if it belongs to one (server only). */
+    @Nullable
+    public org.avp.world.hive.Hive hive()
+    {
+        return level() instanceof ServerLevel server && hiveId != null ? org.avp.world.hive.HiveData.get(server).get(hiveId) : null;
+    }
+
+    /** Is this the hive Queen? */
+    public boolean isQueen()
+    {
+        return false;
+    }
+
+    /** Can it grow (eventually) into a Queen? Drone -> Warrior -> Praetorian -> Queen. */
+    public boolean isRoyalLine()
+    {
+        return false;
+    }
+
+    public void addJelly(int amount)
+    {
+        jelly += amount;
+    }
+
+    /**
+     * Every few seconds: joins the hive whose area it's in, keeps the hive's records up to date
+     * (Queen, royal heir) and, with no Queen, picks an heir for royal succession.
+     */
+    private void updateHive(ServerLevel level)
+    {
+        if (!org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.hives))
+        {
+            return;
+        }
+        org.avp.world.hive.HiveData data = org.avp.world.hive.HiveData.get(level);
+        long now = level.getGameTime();
+        org.avp.world.hive.Hive hive = data.get(hiveId);
+        if (hive == null)
+        {
+            hiveId = null;
+            hive = data.nearest(blockPosition(), org.avp.world.hive.HiveData.spacing()).orElse(null);
+            if (hive == null && isQueen() && !level.canSeeSky(blockPosition()))
+            {
+                // a Queen with no hive founds one where she stands - if she's underground
+                hive = data.create(blockPosition(), blockPosition(), org.avp.world.hive.Hive.State.ACTIVE, now);
+            }
+            if (hive == null)
+            {
+                return;
+            }
+            hiveId = hive.id();
+        }
+        hive.touch(now);
+        if (random.nextInt(200) == 0)
+        {
+            data.tidy(now);
+        }
+        if (isQueen() && (hive.queen() == null || hive.queen().equals(getUUID()) || !hive.hasQueen(now)))
+        {
+            hive.setQueen(getUUID(), now);
+            if (getUUID().equals(hive.heir()))
+            {
+                hive.setHeir(null);
+            }
+            data.changed();
+        }
+        if (!hive.hasQueen(now) && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.royalSuccession) && isRoyalLine())
+        {
+            // royal succession: the biggest royal-line member becomes the heir
+            Entity heir = hive.heir() == null ? null : level.getEntity(hive.heir());
+            if (heir == null || !heir.isAlive() || heir instanceof net.minecraft.world.entity.LivingEntity current && current.getMaxHealth() < getMaxHealth())
+            {
+                hive.setHeir(getUUID());
+                data.changed();
+            }
+        }
+    }
+
+    /** Royal succession: a kill by a member of a queenless hive feeds royal jelly to the heir. */
+    private void feedHeir(ServerLevel level, net.minecraft.world.entity.LivingEntity victim)
+    {
+        org.avp.world.hive.Hive hive = hive();
+        if (hive == null || hive.heir() == null || hive.hasQueen(level.getGameTime())
+                || !org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.royalSuccession))
+        {
+            return;
+        }
+        if (level.getEntity(hive.heir()) instanceof XenomorphEntity heir)
+        {
+            heir.addJelly((int) (victim.getMaxHealth() * 150));
+            level.sendParticles(ParticleTypes.HAPPY_VILLAGER, heir.getX(), heir.getY() + heir.getBbHeight(), heir.getZ(), 3, 0.3, 0.2, 0.3, 0);
+        }
+    }
+
     protected XenomorphEntity(EntityType<? extends XenomorphEntity> type, Level level)
     {
         super(type, level);
@@ -461,6 +570,7 @@ public abstract class XenomorphEntity extends Monster
     public boolean killedEntity(ServerLevel level, net.minecraft.world.entity.LivingEntity victim)
     {
         feed(Math.max(5, (int) (victim.getMaxHealth() * 2)));
+        feedHeir(level, victim);
         return super.killedEntity(level, victim);
     }
 
@@ -498,6 +608,10 @@ public abstract class XenomorphEntity extends Monster
         if (tickCount % 40 == Math.floorMod(getId(), 40))
         {
             updatePack();
+        }
+        if (tickCount % 100 == Math.floorMod(getId(), 100) && level() instanceof ServerLevel server)
+        {
+            updateHive(server);
         }
         if (tickCount % 10 == 0 && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.smartXenomorphs))
         {
@@ -571,6 +685,7 @@ public abstract class XenomorphEntity extends Monster
         if (next instanceof XenomorphEntity xeno)
         {
             xeno.hunger = hunger;
+            xeno.hiveId = hiveId;
         }
         if (next instanceof Mob mob && hasCustomName())
         {
@@ -588,7 +703,8 @@ public abstract class XenomorphEntity extends Monster
     {
         if (!target.isAlive() || target.getType().is(org.avp.registry.ModTags.XENOMORPHS)
                 || target instanceof net.minecraft.world.entity.decoration.ArmorStand
-                || target.hasData(org.avp.registry.ModAttachments.EMBRYO))
+                || target.hasData(org.avp.registry.ModAttachments.EMBRYO) || target.hasData(org.avp.registry.ModAttachments.COCOONED)
+                || target.getVehicle() instanceof XenomorphEntity)
         {
             return false;
         }
@@ -632,6 +748,7 @@ public abstract class XenomorphEntity extends Monster
         {
             goalSelector.addGoal(6, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, speed * 0.8));
         }
+        goalSelector.addGoal(5, new HiveGoals.ReturnToHiveGoal(this));
         goalSelector.addGoal(7, new net.minecraft.world.entity.ai.goal.LookAtPlayerGoal(this, net.minecraft.world.entity.player.Player.class, 16F));
         goalSelector.addGoal(8, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));
 
@@ -726,6 +843,10 @@ public abstract class XenomorphEntity extends Monster
         tag.putInt("Jelly", jelly);
         tag.putInt("XenoAge", age);
         tag.putInt("Hunger", hunger);
+        if (hiveId != null)
+        {
+            tag.putUUID("Hive", hiveId);
+        }
         if (packLeader != null)
         {
             tag.putUUID("PackLeader", packLeader);
@@ -743,6 +864,7 @@ public abstract class XenomorphEntity extends Monster
             hunger = tag.getInt("Hunger");
         }
         packLeader = tag.hasUUID("PackLeader") ? tag.getUUID("PackLeader") : null;
+        hiveId = tag.hasUUID("Hive") ? tag.getUUID("Hive") : null;
     }
 
     /** Walks to royal jelly it can see nearby (when not busy fighting). */
@@ -760,7 +882,7 @@ public abstract class XenomorphEntity extends Monster
         @Override
         public boolean canUse()
         {
-            if (xeno.getTarget() != null || xeno.matureInto() == null || xeno.tickCount % 10 != 0)
+            if (xeno.getTarget() != null || xeno.matureInto() == null || xeno.tickCount % 10 >= 2)
             {
                 return false;
             }

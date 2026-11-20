@@ -191,6 +191,10 @@ public class OvamorphEntity extends XenomorphEntity
         if (hurt)
         {
             triggered = true;
+            if (level() instanceof net.minecraft.server.level.ServerLevel server && source.getEntity() instanceof net.minecraft.world.entity.LivingEntity attacker)
+            {
+                org.avp.world.hive.HiveData.alert(server, blockPosition(), attacker); // the hive defends its eggs
+            }
         }
         return hurt;
     }

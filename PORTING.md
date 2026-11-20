@@ -96,7 +96,17 @@ If something fails, copy the **first** error from the console (or `run/logs/late
   - Engineer / Space Jockey (neutral until struck, hunt Xenomorphs that come close).
   - Wildlife: Goo Mutant, Babyhead, Aethon (flying boss), Scelemur, Ursuidae, Deacon Shark,
     Hammerpede (venom), Mutant Yautja, Predator Hound (hunts Xenomorphs).
-- [ ] Next: hive resin / hive building (Drones build resin), Octohuggers hanging from ceilings,
+- [x] Hives (org.avp.world.hive, entity/xenomorph/HiveGoals): one hive per "Hive Spacing" (256); a Drone
+      with no hive in range claims the spot and digs a winding 3-high staircase down to the deepslate,
+      hollows out a chamber and founds the hive; members join the hive whose area they're in and drift
+      home when idle. Drones coat the hive in resin from the core outwards (natural_resin: the block
+      underneath still shows, comes back when scraped off; burns; natural ground only unless configured).
+      Drones subdue animals/villagers, carry them home and cocoon them; the Queen lays eggs next to them;
+      cocoons turn into eggs over time (eggmorphing). A Queen's hive grows to the full radius, a queenless
+      one stays a small nest. Royal succession: a queenless hive picks its biggest royal-line member as
+      heir and feeds it royal jelly from every kill until it becomes a Queen. Breaking resin, hurting
+      eggs or cutting a cocoon free (sneak-use, empty hand) alerts the hive.
+- [ ] Later: resin deterrent, Octohuggers hanging from ceilings,
       Marines/Yautja holding their weapons (once the guns are ported), Yautja trophies.
 - [ ] Model continuity pass (at the very end): check every creature's hitbox vs. model size and
       centre the model on its hitbox (the Drone needed this: its head stuck out 1.3 blocks). The catalog

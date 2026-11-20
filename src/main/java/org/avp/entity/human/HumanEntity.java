@@ -165,7 +165,7 @@ public class HumanEntity extends PathfinderMob
         @Override
         public boolean canUse()
         {
-            if (!allied() || human.getTarget() != null || human.tickCount % 20 != 0)
+            if (!allied() || human.getTarget() != null || human.tickCount % 20 >= 2)
             {
                 return false;
             }
@@ -182,7 +182,7 @@ public class HumanEntity extends PathfinderMob
         @Override
         public void tick()
         {
-            if (human.tickCount % 10 == 0)
+            if (human.tickCount % 10 < 2)
             {
                 human.getNavigation().moveTo(leader, 1.1);
             }

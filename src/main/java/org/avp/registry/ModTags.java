@@ -42,6 +42,10 @@ public final class ModTags
     public static final TagKey<net.minecraft.world.level.block.Block> XENO_UNBREAKABLE = TagKey.create(Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "xeno_unbreakable"));
 
+    /** Natural blocks hive resin may coat (anything solid too, with "Resin Covers Built Blocks"). */
+    public static final TagKey<net.minecraft.world.level.block.Block> RESIN_COVERABLE = TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "resin_coverable"));
+
     private ModTags()
     {
     }

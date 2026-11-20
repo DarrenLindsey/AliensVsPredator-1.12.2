@@ -20,6 +20,10 @@ public final class ModAttachments
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Embryo>> EMBRYO = ATTACHMENTS.register("embryo",
             () -> AttachmentType.builder(() -> new Embryo(0, 6000, "standard")).serialize(Embryo.CODEC).build());
 
+    /** A host cocooned in a hive: ticks it's been there (it turns into an egg in time - "eggmorphing"). */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> COCOONED = ATTACHMENTS.register("cocooned",
+            () -> AttachmentType.builder(() -> 0).serialize(com.mojang.serialization.Codec.INT).build());
+
     private ModAttachments()
     {
     }

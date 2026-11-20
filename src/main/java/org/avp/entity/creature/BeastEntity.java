@@ -314,7 +314,7 @@ public class BeastEntity extends Monster
         @Override
         public boolean canUse()
         {
-            if (hound.getTarget() != null || hound.tickCount % 20 != 0)
+            if (hound.getTarget() != null || hound.tickCount % 20 >= 2)
             {
                 return false;
             }
@@ -331,7 +331,7 @@ public class BeastEntity extends Monster
         @Override
         public void tick()
         {
-            if (hound.tickCount % 10 == 0)
+            if (hound.tickCount % 10 < 2)
             {
                 hound.getNavigation().moveTo(master, 1.2);
             }

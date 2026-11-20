@@ -29,6 +29,10 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ShapeBlockEntity>> SHAPE = BLOCK_ENTITIES.register("shape",
             () -> BlockEntityType.Builder.of(ShapeBlockEntity::new, ModBlocks.shapeBlocks()).build(null));
 
+    /** Hive resin over another block. */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.entity.ResinBlockEntity>> RESIN = BLOCK_ENTITIES.register("resin",
+            () -> BlockEntityType.Builder.of(org.avp.block.entity.ResinBlockEntity::new, ModBlocks.NATURAL_RESIN.get()).build(null));
+
     /** Lockers and supply crates (64-slot inventory). */
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",

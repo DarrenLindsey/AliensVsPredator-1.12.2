@@ -631,7 +631,7 @@ public final class XenoBrain
         @Override
         public boolean canUse()
         {
-            if (xeno.getTarget() != null || xeno.investigatePos() != null || xeno.isPackLeader() || xeno.tickCount % 20 != 0)
+            if (xeno.getTarget() != null || xeno.investigatePos() != null || xeno.isPackLeader() || xeno.tickCount % 20 >= 2)
             {
                 return false;
             }
@@ -743,6 +743,12 @@ public final class XenoBrain
         public boolean canContinueToUse()
         {
             return block != null && canDig(xeno, block) && xeno.distanceToSqr(Vec3.atCenterOf(block)) < 3.5 * 3.5;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick()
+        {
+            return true; // digging progress is per tick
         }
 
         @Override

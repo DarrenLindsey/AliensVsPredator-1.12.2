@@ -116,6 +116,27 @@ public class AdultXenomorphEntity extends XenomorphEntity
         }
     }
 
+    @Override
+    public boolean isQueen()
+    {
+        return has(Ability.QUEEN);
+    }
+
+    /** Warriors and Praetorians are in line for the throne (their growth leads to a Queen). */
+    @Override
+    public boolean isRoyalLine()
+    {
+        for (CreatureSpec s = spec(); s != null && s.matureInto() != null; s = Creatures.ALL.get(s.matureInto()))
+        {
+            CreatureSpec next = Creatures.ALL.get(s.matureInto());
+            if (next != null && next.has(Ability.QUEEN))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ---------------------------------------------------------------- movement
 
     @Override
@@ -267,8 +288,17 @@ public class AdultXenomorphEntity extends XenomorphEntity
         OvamorphEntity egg = ModEntities.OVAMORPH.get().create(level());
         if (egg != null)
         {
-            Vec3 behind = Vec3.directionFromRotation(0, yBodyRot).scale(-2.5);
-            egg.moveTo(getX() + behind.x, getY(), getZ() + behind.z, random.nextFloat() * 360F, 0);
+            // next to a cocooned host if the hive has one (the egg opens for it), else behind her
+            Vec3 at = position().add(Vec3.directionFromRotation(0, yBodyRot).scale(-2.5));
+            java.util.List<net.minecraft.world.entity.Mob> cocooned = level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+                    getBoundingBox().inflate(16), m -> m.hasData(org.avp.registry.ModAttachments.COCOONED)
+                            && !m.hasData(org.avp.registry.ModAttachments.EMBRYO));
+            if (!cocooned.isEmpty())
+            {
+                net.minecraft.world.entity.Mob host = cocooned.get(random.nextInt(cocooned.size()));
+                at = host.position().add(random.nextInt(3) - 1, 0, random.nextInt(3) - 1);
+            }
+            egg.moveTo(at.x, at.y, at.z, random.nextFloat() * 360F, 0);
             level().addFreshEntity(egg);
             setHunger(hunger() - 15);
             playSound(net.minecraft.sounds.SoundEvents.SLIME_SQUISH, 1.0F, 0.5F);
@@ -442,7 +472,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
         @Override
         public boolean canUse()
         {
-            if (guard.getTarget() != null || guard.tickCount % 20 != 0)
+            if (guard.getTarget() != null || guard.tickCount % 20 >= 2)
             {
                 return false;
             }
@@ -460,7 +490,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
         @Override
         public void tick()
         {
-            if (guard.tickCount % 10 == 0)
+            if (guard.tickCount % 10 < 2)
             {
                 guard.getNavigation().moveTo(queen, 1.0);
             }

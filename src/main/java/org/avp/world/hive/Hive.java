@@ -1,0 +1,197 @@
+package org.avp.world.hive;
+
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+
+/**
+ * One Xenomorph hive (1.12.2 XenomorphHive): where its core is, how it got there and how big it
+ * has grown. Kept in HiveData, saved with the world.
+ */
+public class Hive
+{
+    public enum State
+    {
+        /** A Drone is still digging down to where the hive will be. */
+        FOUNDING,
+        /** Built and growing. */
+        ACTIVE
+    }
+
+    private final UUID id;
+    private BlockPos core;
+    /** Top of the tunnel down to the hive (where it was founded). */
+    private BlockPos entrance;
+    private State state;
+    private int resin;
+    @Nullable
+    private UUID queen;
+    /** Game time a Queen was last seen alive at this hive. */
+    private long queenSeen = -100_000;
+    /** Game time anything in the hive was last alive (empty hives are forgotten after a while). */
+    private long lastActive;
+    /** Where the founding Drone is digging, and which way. */
+    @Nullable
+    private BlockPos digPos;
+    private Direction digDir = Direction.NORTH;
+    /** Royal succession: the member being fed royal jelly to become the next Queen. */
+    @Nullable
+    private UUID heir;
+
+    public Hive(UUID id, BlockPos core, BlockPos entrance, State state, long now)
+    {
+        this.id = id;
+        this.core = core;
+        this.entrance = entrance;
+        this.state = state;
+        this.lastActive = now;
+    }
+
+    public UUID id()
+    {
+        return id;
+    }
+
+    public BlockPos core()
+    {
+        return core;
+    }
+
+    public void setCore(BlockPos core)
+    {
+        this.core = core;
+    }
+
+    public BlockPos entrance()
+    {
+        return entrance;
+    }
+
+    public State state()
+    {
+        return state;
+    }
+
+    public void setState(State state)
+    {
+        this.state = state;
+    }
+
+    public int resin()
+    {
+        return resin;
+    }
+
+    public void addResin(int amount)
+    {
+        resin = Math.max(0, resin + amount);
+    }
+
+    @Nullable
+    public UUID queen()
+    {
+        return queen;
+    }
+
+    public void setQueen(@Nullable UUID queen, long now)
+    {
+        this.queen = queen;
+        if (queen != null)
+        {
+            queenSeen = now;
+        }
+    }
+
+    /** Has a living Queen (seen in the last 10 seconds)? */
+    public boolean hasQueen(long now)
+    {
+        return queen != null && now - queenSeen < 200;
+    }
+
+    public void touch(long now)
+    {
+        lastActive = now;
+    }
+
+    public long lastActive()
+    {
+        return lastActive;
+    }
+
+    @Nullable
+    public BlockPos digPos()
+    {
+        return digPos;
+    }
+
+    public Direction digDir()
+    {
+        return digDir;
+    }
+
+    public void setDig(@Nullable BlockPos pos, Direction dir)
+    {
+        this.digPos = pos;
+        this.digDir = dir;
+    }
+
+    /** How far from the core it builds: a Queen's hive grows to the full radius, a queenless one stays a small nest. */
+    public int buildRadius(long now, int maxRadius)
+    {
+        int cap = hasQueen(now) ? maxRadius : Math.min(maxRadius, 8);
+        return Math.min(cap, 5 + resin / 30);
+    }
+
+    @Nullable
+    public UUID heir()
+    {
+        return heir;
+    }
+
+    public void setHeir(@Nullable UUID heir)
+    {
+        this.heir = heir;
+    }
+
+    public CompoundTag save()
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.putUUID("Id", id);
+        tag.put("Core", NbtUtils.writeBlockPos(core));
+        tag.put("Entrance", NbtUtils.writeBlockPos(entrance));
+        tag.putString("State", state.name());
+        tag.putInt("Resin", resin);
+        if (queen != null)
+        {
+            tag.putUUID("Queen", queen);
+        }
+        tag.putLong("LastActive", lastActive);
+        if (digPos != null)
+        {
+            tag.put("Dig", NbtUtils.writeBlockPos(digPos));
+            tag.putInt("DigDir", digDir.get2DDataValue());
+        }
+        if (heir != null)
+        {
+            tag.putUUID("Heir", heir);
+        }
+        return tag;
+    }
+
+    public static Hive load(CompoundTag tag)
+    {
+        Hive hive = new Hive(tag.getUUID("Id"), NbtUtils.readBlockPos(tag, "Core").orElse(BlockPos.ZERO),
+                NbtUtils.readBlockPos(tag, "Entrance").orElse(BlockPos.ZERO), State.valueOf(tag.getString("State")), tag.getLong("LastActive"));
+        hive.resin = tag.getInt("Resin");
+        hive.queen = tag.hasUUID("Queen") ? tag.getUUID("Queen") : null;
+        hive.digPos = NbtUtils.readBlockPos(tag, "Dig").orElse(null);
+        hive.digDir = Direction.from2DDataValue(tag.getInt("DigDir"));
+        hive.heir = tag.hasUUID("Heir") ? tag.getUUID("Heir") : null;
+        return hive;
+    }
+}

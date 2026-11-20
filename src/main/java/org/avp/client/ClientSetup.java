@@ -142,7 +142,9 @@ public final class ClientSetup
     {
         var shapeIds = Arrays.stream(ModBlocks.shapeBlocks()).map(BuiltInRegistries.BLOCK::getKey).toList();
         event.getModels().replaceAll((location, model) ->
-                shapeIds.contains(location.id()) && !"inventory".equals(location.variant()) ? new MimicBakedModel(model) : model);
+                shapeIds.contains(location.id()) && !"inventory".equals(location.variant()) ? new MimicBakedModel(model)
+                        : location.id().equals(BuiltInRegistries.BLOCK.getKey(ModBlocks.NATURAL_RESIN.get())) ? new org.avp.client.model.ResinBakedModel(model)
+                        : model);
     }
 
     private ClientSetup()

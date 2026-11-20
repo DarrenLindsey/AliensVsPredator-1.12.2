@@ -479,3 +479,63 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print(f"catalog creature data written: {len(catalog)} creatures")
+
+# ================================================================ hives
+import random
+from PIL import Image, ImageFilter
+lang = read_json(f"{NA}/lang/en_us.json", {})
+# resin coating texture: the 1.12.2 resin, cut into blobs and drips so the block underneath shows through
+src_tex = Image.open(f"{LA}/textures/blocks/hiveresin.png").convert("RGBA")
+w, h = src_tex.size
+rng = random.Random(1979)
+noise = Image.new("L", (w, h))
+noise.putdata([rng.randint(0, 255) for _ in range(w * h)])
+noise = noise.filter(ImageFilter.GaussianBlur(1.6))
+lo, hi = min(noise.getdata()), max(noise.getdata())
+drips = [rng.randint(0, w - 1) for _ in range(6)]
+out = Image.new("RGBA", (w, h))
+for y in range(h):
+    for x in range(w):
+        n = (noise.getpixel((x, y)) - lo) / max(1, hi - lo)
+        edge = min(x, y, w - 1 - x, h - 1 - y) / (w / 2)  # resin gathers at the edges and corners
+        keep = n + (0.35 - edge) * 0.8 > 0.55 or any(abs(x - d) <= 0 and y < h * 0.8 for d in drips)
+        r, g, b, a = src_tex.getpixel((x, y))
+        out.putpixel((x, y), (r, g, b, 255) if keep else (0, 0, 0, 0))
+os.makedirs(f"{NA}/textures/block", exist_ok=True)
+out.save(f"{NA}/textures/block/natural_resin.png")
+write_json(f"{NA}/blockstates/natural_resin.json", {"variants": {"": {"model": "avp:block/natural_resin"}}})
+write_json(f"{NA}/models/block/natural_resin.json", {"parent": "minecraft:block/cube_all", "render_type": "minecraft:cutout_mipped",
+                                                    "textures": {"all": "avp:block/natural_resin", "particle": "avp:block/hiveresin_standard"}})
+write_json(f"{ND}/avp/loot_table/blocks/natural_resin.json", {"type": "minecraft:block", "pools": [{
+    "rolls": 1, "entries": [{"type": "minecraft:item", "name": "avp:hiveresin_standard"}],
+    "conditions": [{"condition": "minecraft:random_chance", "chance": 0.25}]}]})
+add_to_tag(f"{ND}/avp/tags/block/resin_coverable.json", [
+    "#minecraft:base_stone_overworld", "#minecraft:base_stone_nether", "minecraft:dirt", "minecraft:coarse_dirt", "minecraft:rooted_dirt",
+    "minecraft:mud", "minecraft:clay", "minecraft:gravel", "minecraft:sand", "minecraft:red_sand", "minecraft:sandstone", "minecraft:red_sandstone",
+    "minecraft:terracotta", "minecraft:calcite", "minecraft:dripstone_block", "minecraft:cobblestone", "minecraft:mossy_cobblestone",
+    "minecraft:cobbled_deepslate", "minecraft:end_stone", "minecraft:soul_soil", "minecraft:soul_sand", "minecraft:magma_block"])
+add_to_tag(f"{ND}/minecraft/tags/block/mineable/shovel.json", ["avp:natural_resin"])
+lang.update({
+    "block.avp.natural_resin": "Hive Resin",
+    "message.avp.cocoon_freed": "You cut the host free of the resin.",
+    "avp.configuration.hives": "Hives",
+    "avp.configuration.hives.tooltip": "Drones found hives deep underground, coat them in resin and bring hosts back alive.",
+    "avp.configuration.hiveSpacing": "Hive Spacing (blocks)",
+    "avp.configuration.hiveSpacing.tooltip": "Only one hive within this distance; Xenomorphs in range join it instead of starting another.",
+    "avp.configuration.hiveRadius": "Hive Radius (blocks)",
+    "avp.configuration.hiveRadius.tooltip": "How far a hive with a Queen grows from its core. Without a Queen it stays a small nest.",
+    "avp.configuration.resinBuildSpeed": "Resin Building Speed",
+    "avp.configuration.resinBuildSpeed.tooltip": "How fast Drones spread resin (0 = never).",
+    "avp.configuration.resinCoversBuiltBlocks": "Resin Covers Built Blocks",
+    "avp.configuration.resinCoversBuiltBlocks.tooltip": "Resin may coat player-built blocks too. Off: only natural ground (avp:resin_coverable).",
+    "avp.configuration.xenosCocoonHosts": "Cocoon Hosts",
+    "avp.configuration.xenosCocoonHosts.tooltip": "Drones carry worn-down animals and villagers back to the hive and cocoon them for the eggs.",
+    "avp.configuration.royalSuccession": "Royal Succession",
+    "avp.configuration.royalSuccession.tooltip": "A hive without a Queen feeds royal jelly from every kill to an heir until it grows into a Queen.",
+    "avp.configuration.eggmorphing": "Eggmorphing",
+    "avp.configuration.eggmorphing.tooltip": "Cocooned hosts slowly turn into eggs, so a hive can spread without a Queen.",
+    "avp.configuration.eggmorphTicks": "Eggmorphing Time (ticks)",
+    "avp.configuration.eggmorphTicks.tooltip": "How long a cocooned host takes to become an egg (24000 = one day).",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("hive data written")

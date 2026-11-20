@@ -39,6 +39,13 @@ public class Hive
     @Nullable
     private BlockPos digPos;
     private Direction digDir = Direction.NORTH;
+    /** The rooms: the first is the Queen's chamber (the founding dome). */
+    private final java.util.List<Room> rooms = new java.util.ArrayList<>();
+    /** Blocks dug out so far (capped by "Hive Max Dug Blocks"). */
+    private int dug;
+    /** The Drone digging the founding tunnel. */
+    @Nullable
+    private UUID digger;
     /** Royal succession: the member being fed royal jelly to become the next Queen. */
     @Nullable
     private UUID heir;
@@ -140,11 +147,21 @@ public class Hive
         this.digDir = dir;
     }
 
-    /** How far from the core it builds: a Queen's hive grows to the full radius, a queenless one stays a small nest. */
+    /** How far its rooms may reach from the core: the full radius with a Queen, a small nest without one. */
+    public int maxReach(long now, int maxRadius)
+    {
+        return hasQueen(now) ? maxRadius : Math.min(maxRadius, 16);
+    }
+
+    /** How far from the core the hive reaches now (its rooms, at least 8). */
     public int buildRadius(long now, int maxRadius)
     {
-        int cap = hasQueen(now) ? maxRadius : Math.min(maxRadius, 8);
-        return Math.min(cap, 5 + resin / 30);
+        double reach = 8;
+        for (Room room : rooms)
+        {
+            reach = Math.max(reach, Math.sqrt(room.centre().distSqr(core)) + room.radius() + 1);
+        }
+        return (int) Math.min(reach, Math.max(8, maxReach(now, maxRadius)));
     }
 
     @Nullable
@@ -156,6 +173,49 @@ public class Hive
     public void setHeir(@Nullable UUID heir)
     {
         this.heir = heir;
+    }
+
+    public java.util.List<Room> rooms()
+    {
+        return rooms;
+    }
+
+    /** The first room (in order) that still needs digging, if any. */
+    @Nullable
+    public Room project()
+    {
+        return rooms.stream().filter(r -> !r.done()).findFirst().orElse(null);
+    }
+
+    public java.util.Optional<Room> roomAt(BlockPos pos)
+    {
+        return rooms.stream().filter(r -> r.type().isChamber() && r.contains(pos)).findFirst();
+    }
+
+    public java.util.List<Room> rooms(Room.Type type)
+    {
+        return rooms.stream().filter(r -> r.type() == type).toList();
+    }
+
+    public int dug()
+    {
+        return dug;
+    }
+
+    public void addDug(int amount)
+    {
+        dug += amount;
+    }
+
+    @Nullable
+    public UUID digger()
+    {
+        return digger;
+    }
+
+    public void setDigger(@Nullable UUID digger)
+    {
+        this.digger = digger;
     }
 
     public CompoundTag save()
@@ -180,6 +240,14 @@ public class Hive
         {
             tag.putUUID("Heir", heir);
         }
+        if (digger != null)
+        {
+            tag.putUUID("Digger", digger);
+        }
+        tag.putInt("Dug", dug);
+        net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
+        rooms.forEach(r -> list.add(r.save()));
+        tag.put("Rooms", list);
         return tag;
     }
 
@@ -192,6 +260,12 @@ public class Hive
         hive.digPos = NbtUtils.readBlockPos(tag, "Dig").orElse(null);
         hive.digDir = Direction.from2DDataValue(tag.getInt("DigDir"));
         hive.heir = tag.hasUUID("Heir") ? tag.getUUID("Heir") : null;
+        hive.digger = tag.hasUUID("Digger") ? tag.getUUID("Digger") : null;
+        hive.dug = tag.getInt("Dug");
+        for (net.minecraft.nbt.Tag t : tag.getList("Rooms", net.minecraft.nbt.Tag.TAG_COMPOUND))
+        {
+            hive.rooms.add(Room.load((CompoundTag) t));
+        }
         return hive;
     }
 }

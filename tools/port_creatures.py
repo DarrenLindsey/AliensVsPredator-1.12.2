@@ -556,3 +556,14 @@ lang.update({
 })
 write_json(f"{NA}/lang/en_us.json", lang)
 print("cocoon/larder lang written")
+
+# ================================================================ hive rooms
+lang = read_json(f"{NA}/lang/en_us.json", {})
+lang.update({
+    "avp.configuration.hiveMaxDugBlocks": "Hive Max Dug Blocks",
+    "avp.configuration.hiveMaxDugBlocks.tooltip": "Most blocks one hive may dig out for its rooms and galleries.",
+    "avp.configuration.foundingDigSpeed": "Founding Dig Speed",
+    "avp.configuration.foundingDigSpeed.tooltip": "How much faster a Drone digs its founding tunnel (it won't hunt or hunger until the hive is made).",
+})
+write_json(f"{NA}/lang/en_us.json", lang)
+print("hive room lang written")

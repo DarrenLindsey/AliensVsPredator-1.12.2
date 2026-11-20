@@ -89,6 +89,21 @@ public final class AvpCommands
                 + (hive.hasQueen(now) ? "" : ", heir: " + (heir == null ? "none" : heir.getName().getString()
                         + (heir instanceof XenomorphEntity x ? " (" + x.jelly() + " jelly)" : "")))), false);
         source.sendSuccess(() -> Component.literal("  Members: " + members.size() + " " + summary(members)), false);
+        source.sendSuccess(() -> Component.literal("  Dug out: " + hive.dug() + " / " + org.avp.world.hive.HivePlanner.maxDug()
+                + " blocks, reach " + hive.maxReach(now, HiveData.maxRadius())), false);
+        for (org.avp.world.hive.Room room : hive.rooms())
+        {
+            int total = org.avp.world.hive.HivePlanner.digList(room).size();
+            String status = room.done() ? "done" : "digging " + (total == 0 ? 0 : room.cursor() * 100 / total) + "%";
+            source.sendSuccess(() -> Component.literal("    " + room.type().name().toLowerCase(java.util.Locale.ROOT) + " (" + status + ") ")
+                    .append(teleport(room.centre())), false);
+        }
+        if (hive.state() == Hive.State.FOUNDING)
+        {
+            Entity digger = hive.digger() == null ? null : level.getEntity(hive.digger());
+            source.sendSuccess(() -> Component.literal("  Digger: " + (digger == null ? "none (the next Drone to come along takes over)"
+                    : digger.getName().getString() + " at " + digger.blockPosition().toShortString())), false);
+        }
         return 1;
     }
 

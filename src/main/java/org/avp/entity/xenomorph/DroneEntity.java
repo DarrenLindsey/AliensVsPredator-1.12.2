@@ -66,6 +66,7 @@ public class DroneEntity extends XenomorphEntity
         goalSelector.addGoal(1, new HiveGoals.CarryHostGoal(this));
         goalSelector.addGoal(5, new HiveGoals.BurrowGoal(this));
         goalSelector.addGoal(5, new HiveGoals.BuildResinGoal(this));
+        goalSelector.addGoal(5, new HiveGoals.DigHiveGoal(this));
     }
 
     @Override
@@ -122,6 +123,31 @@ public class DroneEntity extends XenomorphEntity
     }
 
     private boolean forceFound;
+
+    /** The founding digger died: the nearest free Drone takes over the tunnel straight away. */
+    @Override
+    public void die(net.minecraft.world.damagesource.DamageSource source)
+    {
+        super.die(source);
+        org.avp.world.hive.Hive hive = hive();
+        if (hive == null || hive.state() != org.avp.world.hive.Hive.State.FOUNDING || !getUUID().equals(hive.digger())
+                || !(level() instanceof net.minecraft.server.level.ServerLevel server))
+        {
+            return;
+        }
+        DroneEntity next = server.getEntitiesOfClass(DroneEntity.class, getBoundingBox().inflate(128),
+                d -> d != this && d.isAlive() && (d.hiveId() == null || d.hiveId().equals(hive.id())))
+                .stream().min(java.util.Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
+        hive.setDigger(null);
+        if (next != null)
+        {
+            next.setHiveId(hive.id());
+            next.setTarget(null);
+            hive.setDigger(next.getUUID());
+            next.setState("TAKING OVER THE DIG");
+        }
+        org.avp.world.hive.HiveData.get(server).changed();
+    }
 
     /** Debug (/avp hive found): start founding a new hive right now, ignoring the hive spacing. */
     public void forceFoundHive()

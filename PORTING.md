@@ -108,6 +108,13 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       eggs or cutting a cocoon free (sneak-use, empty hand) alerts the hive.
       Players can be captured and cocooned too (held on the wall, mash sneak to struggle free, a friend can
       cut them free); the larder: non-host prey is cocooned as food and hungry members feed on it.
+      Rooms (world/hive/HivePlanner): hives grow like an ant colony - when needed, a room is planned within
+      reach and the Drones dig a gallery to it and hollow it out together: Queen's chamber (enlarged when a
+      Queen arrives), hatchery (cocooned hosts + eggs; another when full), larder, midden (remains of meals:
+      bone blocks, skulls), guard post (Warriors/Praetorians gather, towards the entrance), crawlways (1-high
+      ambush tunnels), natural caves broken into are taken over. Resin columns in the chambers. Max 6 rooms
+      with a Queen (2 without), a dug-block cap, never digs next to water/lava. Founding: an urge - the
+      digger ignores prey and hunger and digs 3x faster; if it dies the nearest Drone takes over at once.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.
       Tunnel 2 wide x 4 high; founding chamber a dome 15 wide x 8 high; a Queen only grows in the chamber
       and never spawns naturally (nor do boss forms).

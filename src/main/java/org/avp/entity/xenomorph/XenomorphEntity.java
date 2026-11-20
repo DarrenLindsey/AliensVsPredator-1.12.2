@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.avp.registry.ModItems;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -85,6 +86,19 @@ public abstract class XenomorphEntity extends Monster
         return level() instanceof ServerLevel server && hiveId != null ? org.avp.world.hive.HiveData.get(server).get(hiveId) : null;
     }
 
+    /** Digging the founding tunnel: an urge it can't resist - it doesn't hunt and doesn't get hungry. */
+    private boolean founding;
+
+    public boolean isFounding()
+    {
+        return founding;
+    }
+
+    public void setFounding(boolean founding)
+    {
+        this.founding = founding;
+    }
+
     /** Is this the hive Queen? */
     public boolean isQueen()
     {
@@ -131,6 +145,10 @@ public abstract class XenomorphEntity extends Monster
             hiveId = hive.id();
         }
         hive.touch(now);
+        if (random.nextInt(4) == 0)
+        {
+            org.avp.world.hive.HivePlanner.plan(level, hive);
+        }
         if (random.nextInt(200) == 0)
         {
             data.tidy(now);
@@ -154,6 +172,25 @@ public abstract class XenomorphEntity extends Monster
                 data.changed();
             }
         }
+    }
+
+    /** What's left of a meal from the larder goes to the midden. */
+    private void leaveRemains(ServerLevel level)
+    {
+        org.avp.world.hive.Hive hive = hive();
+        if (hive == null)
+        {
+            return;
+        }
+        hive.rooms(org.avp.world.hive.Room.Type.MIDDEN).stream().filter(org.avp.world.hive.Room::done).findFirst().ifPresent(midden ->
+        {
+            BlockPos spot = org.avp.world.hive.HivePlanner.floorSpot(level, midden, false);
+            if (spot != null)
+            {
+                level.setBlock(spot, random.nextInt(6) == 0 ? net.minecraft.world.level.block.Blocks.SKELETON_SKULL.defaultBlockState()
+                        : net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState(), 3);
+            }
+        });
     }
 
     /** Royal succession: a kill by a member of a queenless hive feeds royal jelly to the heir. */
@@ -578,6 +615,10 @@ public abstract class XenomorphEntity extends Monster
     /** Would it go after this creature right now? (Players: see "Xenos Always Hunt Players".) */
     public boolean wantsToHunt(net.minecraft.world.entity.LivingEntity target)
     {
+        if (founding)
+        {
+            return false; // nothing matters but the hive (it still fights back)
+        }
         if (!isPrey(target))
         {
             return false;
@@ -595,6 +636,10 @@ public abstract class XenomorphEntity extends Monster
     {
         feed(Math.max(5, (int) (victim.getMaxHealth() * 2)));
         feedHeir(level, victim);
+        if (victim.hasData(org.avp.registry.ModAttachments.COCOONED))
+        {
+            leaveRemains(level);
+        }
         return super.killedEntity(level, victim);
     }
 
@@ -670,7 +715,7 @@ public abstract class XenomorphEntity extends Monster
             }
         }
         // hunger: drains slowly; a full Xenomorph stops chasing animals (but still fights back)
-        if (age % org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungerDrainTicks) == 0 && hunger > 0)
+        if (age % org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungerDrainTicks) == 0 && hunger > 0 && !founding)
         {
             hunger--;
         }

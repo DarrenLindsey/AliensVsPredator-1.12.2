@@ -837,5 +837,9 @@
   "avp.configuration.cocoonStruggles": "Struggles to Break Free",
   "avp.configuration.cocoonStruggles.tooltip": "How many sneak presses a cocooned player needs to tear free.",
   "avp.configuration.hiveLarder": "Larder",
-  "avp.configuration.hiveLarder.tooltip": "Drones bring back prey that can't host as food; hungry members feed on it instead of hunting."
+  "avp.configuration.hiveLarder.tooltip": "Drones bring back prey that can't host as food; hungry members feed on it instead of hunting.",
+  "avp.configuration.hiveMaxDugBlocks": "Hive Max Dug Blocks",
+  "avp.configuration.hiveMaxDugBlocks.tooltip": "Most blocks one hive may dig out for its rooms and galleries.",
+  "avp.configuration.foundingDigSpeed": "Founding Dig Speed",
+  "avp.configuration.foundingDigSpeed.tooltip": "How much faster a Drone digs its founding tunnel (it won't hunt or hunger until the hive is made)."
 }

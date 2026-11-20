@@ -192,6 +192,8 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue hiveSpacing;
         public final ModConfigSpec.IntValue hiveRadius;
         public final ModConfigSpec.DoubleValue resinBuildSpeed;
+        public final ModConfigSpec.IntValue hiveMaxDugBlocks;
+        public final ModConfigSpec.DoubleValue foundingDigSpeed;
         public final ModConfigSpec.BooleanValue resinCoversBuiltBlocks;
         public final ModConfigSpec.BooleanValue xenosCocoonHosts;
         public final ModConfigSpec.BooleanValue xenosCocoonPlayers;
@@ -415,8 +417,14 @@ public final class AvpConfig
                     .comment("Only one hive within this many blocks. Xenomorphs inside this range join it instead of starting another.")
                     .defineInRange("hiveSpacing", 256, 32, 4096);
             hiveRadius = b
-                    .comment("How far from its core a hive with a Queen grows (a hive without a Queen stays a small nest, up to 8).")
+                    .comment("How far from its core a hive with a Queen digs its rooms and galleries (a hive without a Queen stays a small nest, up to 16).")
                     .defineInRange("hiveRadius", 24, 6, 64);
+            hiveMaxDugBlocks = b
+                    .comment("Most blocks one hive may dig out for its rooms and galleries (the founding tunnel and chamber don't count).")
+                    .defineInRange("hiveMaxDugBlocks", 6_000, 0, 1_000_000);
+            foundingDigSpeed = b
+                    .comment("How much faster a Drone digs the founding tunnel than normal digging - an urge it can't resist (it doesn't hunt or get hungry while digging).")
+                    .defineInRange("foundingDigSpeed", 3.0, 0.1, 50.0);
             resinBuildSpeed = b
                     .comment("How fast Drones spread resin (1.0 = normal, 0 = never).")
                     .defineInRange("resinBuildSpeed", 1.0, 0.0, 20.0);

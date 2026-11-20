@@ -288,15 +288,28 @@ public class AdultXenomorphEntity extends XenomorphEntity
         OvamorphEntity egg = ModEntities.OVAMORPH.get().create(level());
         if (egg != null)
         {
-            // next to a cocooned host if the hive has one (the egg opens for it), else behind her
+            // next to a cocooned host if the hive has one (the egg opens for it), else in the hatchery, else behind her
             Vec3 at = position().add(Vec3.directionFromRotation(0, yBodyRot).scale(-2.5));
-            java.util.List<LivingEntity> cocooned = level().getEntitiesOfClass(LivingEntity.class,
-                    getBoundingBox().inflate(16), m -> m.hasData(org.avp.registry.ModAttachments.COCOONED)
-                            && org.avp.entity.parasite.FacehuggerEntity.isValidHost(m));
+            org.avp.world.hive.Hive hive = hive();
+            net.minecraft.world.phys.AABB area = hive == null ? getBoundingBox().inflate(16)
+                    : new net.minecraft.world.phys.AABB(hive.core()).inflate(hive.buildRadius(level().getGameTime(), org.avp.world.hive.HiveData.maxRadius()) + 2);
+            java.util.List<LivingEntity> cocooned = level().getEntitiesOfClass(LivingEntity.class, area,
+                    m -> m.hasData(org.avp.registry.ModAttachments.COCOONED) && org.avp.entity.parasite.FacehuggerEntity.isValidHost(m)
+                            && level().getEntitiesOfClass(OvamorphEntity.class, m.getBoundingBox().inflate(2)).isEmpty());
             if (!cocooned.isEmpty())
             {
                 LivingEntity host = cocooned.get(random.nextInt(cocooned.size()));
                 at = host.position().add(random.nextInt(3) - 1, 0, random.nextInt(3) - 1);
+            }
+            else if (hive != null && level() instanceof ServerLevel server)
+            {
+                org.avp.world.hive.Room hatchery = hive.rooms(org.avp.world.hive.Room.Type.HATCHERY).stream()
+                        .filter(org.avp.world.hive.Room::done).findFirst().orElse(null);
+                BlockPos spot = hatchery == null ? null : org.avp.world.hive.HivePlanner.floorSpot(server, hatchery, false);
+                if (spot != null)
+                {
+                    at = Vec3.atBottomCenterOf(spot);
+                }
             }
             egg.moveTo(at.x, at.y, at.z, random.nextFloat() * 360F, 0);
             level().addFreshEntity(egg);

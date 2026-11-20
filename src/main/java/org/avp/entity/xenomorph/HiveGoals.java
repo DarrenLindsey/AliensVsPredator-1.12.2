@@ -65,6 +65,17 @@ public final class HiveGoals
             boolean heir = xeno.getUUID().equals(hive.heir());
             int range = xeno.isQueen() || heir ? 4 : hive.buildRadius(level.getGameTime(), HiveData.maxRadius()) + 8;
             home = hive.core();
+            // Warriors and the like gather at the guard post
+            if (!xeno.isQueen() && !heir && !(xeno instanceof DroneEntity) && xeno instanceof AdultXenomorphEntity)
+            {
+                java.util.Optional<org.avp.world.hive.Room> post = hive.rooms(org.avp.world.hive.Room.Type.GUARD_POST).stream()
+                        .filter(org.avp.world.hive.Room::done).findFirst();
+                if (post.isPresent())
+                {
+                    home = post.get().centre();
+                    range = post.get().radius() + 2;
+                }
+            }
             return xeno.blockPosition().distSqr(home) > range * range;
         }
 
@@ -109,20 +120,27 @@ public final class HiveGoals
                 return false;
             }
             boolean forced = drone.takeForceFound();
-            if (!forced && (drone.getTarget() != null || drone.tickCount % 100 >= 2))
-            {
-                return false;
-            }
             HiveData data = HiveData.get(level);
             Hive mine = drone.hive();
             if (mine != null)
             {
-                // carry on digging the hive's tunnel (if the founder died, another Drone takes over)
-                if (mine.state() == Hive.State.FOUNDING && mine.digPos() != null)
+                // carry on digging the hive's tunnel - this Drone's job, or anyone's if the digger is gone
+                if (mine.state() != Hive.State.FOUNDING || mine.digPos() == null || drone.getTarget() != null)
                 {
+                    return false;
+                }
+                net.minecraft.world.entity.Entity digger = mine.digger() == null ? null : level.getEntity(mine.digger());
+                boolean mineToDo = drone.getUUID().equals(mine.digger()) || digger == null || !digger.isAlive();
+                if (mineToDo)
+                {
+                    mine.setDigger(drone.getUUID());
                     hive = mine;
                     return true;
                 }
+                return false;
+            }
+            if (!forced && (drone.getTarget() != null || drone.tickCount % 100 >= 2))
+            {
                 return false;
             }
             if (!forced && (data.nearest(drone.blockPosition(), HiveData.spacing()).isPresent() || !drone.onGround()))
@@ -133,6 +151,7 @@ public final class HiveGoals
             BlockPos start = drone.blockPosition();
             hive = data.create(new BlockPos(start.getX(), deepslateLevel(level, start), start.getZ()), start, Hive.State.FOUNDING, level.getGameTime());
             hive.setDig(start, drone.getDirection());
+            hive.setDigger(drone.getUUID());
             drone.setHiveId(hive.id());
             data.changed();
             return true;
@@ -164,6 +183,7 @@ public final class HiveGoals
         public void start()
         {
             drone.setState("BURROWING");
+            drone.setFounding(true); // the urge: no hunting, no hunger, until the hive is made
             digTicks = 0;
             stuck = 0;
         }
@@ -231,10 +251,10 @@ public final class HiveGoals
                 if (!s.isAir())
                 {
                     float hardness = Math.max(0.5F, s.getDestroySpeed(level, p));
-                    float speed = (float) (double) AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed);
-                    if (++digTicks % 5 == 0)
+                    float speed = (float) (AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed) * AvpConfig.server(AvpConfig.SERVER.foundingDigSpeed));
+                    if (++digTicks % 3 == 0)
                     {
-                        level.destroyBlockProgress(drone.getId(), p, (int) Math.min(9, digTicks * speed / (hardness * 6)));
+                        level.destroyBlockProgress(drone.getId(), p, (int) Math.min(9, digTicks * speed / (hardness * 4)));
                         drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                     }
                     if (digTicks * speed >= hardness * 40)
@@ -275,6 +295,11 @@ public final class HiveGoals
                     40, 3, 1.5, 3, 0.02);
             hive.setCore(centre.above());
             hive.setDig(null, Direction.NORTH);
+            hive.setDigger(null);
+            if (hive.rooms(org.avp.world.hive.Room.Type.QUEEN).isEmpty())
+            {
+                hive.rooms().add(0, new org.avp.world.hive.Room(org.avp.world.hive.Room.Type.QUEEN, centre, centre, r, height, true));
+            }
             hive.setState(Hive.State.ACTIVE);
             HiveData.get(level).changed();
             level.playSound(null, centre, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1.0F, 0.6F);
@@ -284,6 +309,7 @@ public final class HiveGoals
         @Override
         public void stop()
         {
+            drone.setFounding(false);
             if (hive != null && hive.state() == Hive.State.FOUNDING && stuck >= 400 && drone.level() instanceof ServerLevel level)
             {
                 // couldn't get down (lava, water, bedrock...): found the hive where it got to
@@ -299,6 +325,8 @@ public final class HiveGoals
         private final DroneEntity drone;
         @Nullable
         private BlockPos spot;
+        @Nullable
+        private org.avp.world.hive.Room room;
         private int ticks;
 
         public BuildResinGoal(DroneEntity drone)
@@ -321,14 +349,19 @@ public final class HiveGoals
             {
                 return false;
             }
-            int radius = hive.buildRadius(level.getGameTime(), HiveData.maxRadius());
-            BlockPos core = hive.core();
-            // somewhere in the hive, near where it has got to so far
+            // somewhere in one of its finished rooms (the galleries get coated on the way)
+            java.util.List<org.avp.world.hive.Room> rooms = hive.rooms().stream().filter(r -> r.done() && r.type().isChamber()).toList();
+            if (rooms.isEmpty())
+            {
+                return false;
+            }
+            room = rooms.get(drone.getRandom().nextInt(rooms.size()));
+            int radius = Math.max(2, room.radius());
             for (int tries = 0; tries < 8; tries++)
             {
-                BlockPos p = core.offset(drone.getRandom().nextInt(radius * 2 + 1) - radius, drone.getRandom().nextInt(7) - 3,
+                BlockPos p = room.centre().offset(drone.getRandom().nextInt(radius * 2 + 1) - radius, drone.getRandom().nextInt(4),
                         drone.getRandom().nextInt(radius * 2 + 1) - radius);
-                if (p.distSqr(core) <= radius * radius && level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
+                if (level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
                 {
                     spot = p;
                     return true;
@@ -372,6 +405,11 @@ public final class HiveGoals
                     done++;
                 }
             }
+            // now and then, a ribbed resin column from floor to ceiling
+            if (room != null && room.radius() >= 4 && room.pillars() < 3 && drone.getRandom().nextInt(8) == 0)
+            {
+                done += pillar(level, room);
+            }
             if (done > 0)
             {
                 drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
@@ -384,6 +422,33 @@ public final class HiveGoals
                 }
             }
             spot = null;
+        }
+
+        /** A resin column in the room, floor to ceiling. Returns the blocks placed. */
+        private int pillar(ServerLevel level, org.avp.world.hive.Room room)
+        {
+            int r = (int) (room.radius() * 0.6);
+            BlockPos base = room.centre().offset(drone.getRandom().nextInt(r * 2 + 1) - r, 0, drone.getRandom().nextInt(r * 2 + 1) - r);
+            while (level.getBlockState(base).isAir() && base.getY() > room.centre().getY() - 3)
+            {
+                base = base.below();
+            }
+            base = base.above();
+            int height = 0;
+            while (level.getBlockState(base.above(height)).isAir() && height < room.height() + 3)
+            {
+                height++;
+            }
+            if (height < 2 || height > room.height() + 2 || !level.getBlockState(base.above(height)).isSolid())
+            {
+                return 0; // no ceiling over it
+            }
+            for (int y = 0; y < height; y++)
+            {
+                level.setBlock(base.above(y), org.avp.registry.ModBlocks.HIVERESIN_STANDARD.get().defaultBlockState(), 3);
+            }
+            room.addPillar();
+            return height;
         }
 
         /** Only blocks with a face open to the hive get coated. */
@@ -432,8 +497,11 @@ public final class HiveGoals
             {
                 return;
             }
-            BlockPos core = hive.core();
-            if (drone.blockPosition().distSqr(core) > 16)
+            boolean isHost = org.avp.entity.parasite.FacehuggerEntity.isValidHost(host) || host instanceof net.minecraft.world.entity.player.Player;
+            org.avp.world.hive.Room room = hive.rooms(isHost ? org.avp.world.hive.Room.Type.HATCHERY : org.avp.world.hive.Room.Type.LARDER)
+                    .stream().filter(org.avp.world.hive.Room::done).findFirst().orElse(null);
+            BlockPos core = room != null ? room.centre() : hive.core();
+            if (drone.blockPosition().distSqr(core) > (room != null ? Math.max(9, room.radius() * room.radius()) : 16))
             {
                 if (drone.tickCount % 20 < 2)
                 {
@@ -441,14 +509,14 @@ public final class HiveGoals
                 }
                 return;
             }
-            cocoon((ServerLevel) drone.level(), host, core);
+            cocoon((ServerLevel) drone.level(), host, core, room);
         }
 
         /** Puts the host against a wall near the core and seals it in. */
-        private void cocoon(ServerLevel level, net.minecraft.world.entity.LivingEntity host, BlockPos core)
+        private void cocoon(ServerLevel level, net.minecraft.world.entity.LivingEntity host, BlockPos core, @Nullable org.avp.world.hive.Room room)
         {
-            BlockPos spot = null;
-            for (int tries = 0; tries < 30 && spot == null; tries++)
+            BlockPos spot = room == null ? null : org.avp.world.hive.HivePlanner.floorSpot(level, room, true);
+            for (int tries = 0; tries < 30 && spot == null; tries++) // no room yet: near the core
             {
                 BlockPos p = core.offset(drone.getRandom().nextInt(9) - 4, drone.getRandom().nextInt(3) - 1, drone.getRandom().nextInt(9) - 4);
                 if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && level.getBlockState(p.below()).isSolid())
@@ -492,6 +560,125 @@ public final class HiveGoals
             }
             level.playSound(null, spot, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.HOSTILE, 1.0F, 0.5F);
             drone.setState("COCOONED HOST");
+        }
+    }
+
+    /**
+     * The colony at work: Drones dig the hive's next room (and the gallery to it), several at a
+     * time, the way ants do. Fed Drones dig faster.
+     */
+    public static class DigHiveGoal extends Goal
+    {
+        private final DroneEntity drone;
+        @Nullable
+        private BlockPos block;
+        private float progress;
+        private int ticks;
+
+        public DigHiveGoal(DroneEntity drone)
+        {
+            this.drone = drone;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!enabled() || drone.getTarget() != null || drone.isVehicle() || drone.hunger() < 15 || drone.tickCount % 20 >= 2
+                    || !(drone.level() instanceof ServerLevel level))
+            {
+                return false;
+            }
+            Hive hive = drone.hive();
+            if (hive == null || hive.state() != Hive.State.ACTIVE)
+            {
+                return false;
+            }
+            block = org.avp.world.hive.HivePlanner.nextBlock(level, hive, Math.floorMod(drone.getId(), 3));
+            return block != null;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return block != null && drone.getTarget() == null && ticks < 300;
+        }
+
+        @Override
+        public void start()
+        {
+            progress = 0;
+            ticks = 0;
+            drone.setState("DIGGING THE HIVE");
+            drone.getNavigation().moveTo(block.getX() + 0.5, block.getY(), block.getZ() + 0.5, 0.9);
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick()
+        {
+            return true;
+        }
+
+        @Override
+        public void tick()
+        {
+            if (block == null)
+            {
+                return;
+            }
+            ticks++;
+            ServerLevel level = (ServerLevel) drone.level();
+            Hive hive = drone.hive();
+            if (hive == null || !org.avp.world.hive.HivePlanner.diggable(level, block))
+            {
+                if (hive != null)
+                {
+                    org.avp.world.hive.HivePlanner.advance(level, hive, block, false);
+                }
+                block = null;
+                return;
+            }
+            if (drone.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(block)) > 3.2 * 3.2)
+            {
+                if (ticks % 20 == 0)
+                {
+                    drone.getNavigation().moveTo(block.getX() + 0.5, block.getY(), block.getZ() + 0.5, 0.9);
+                }
+                return;
+            }
+            drone.getNavigation().stop();
+            drone.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(block));
+            BlockState state = level.getBlockState(block);
+            float hardness = Math.max(0.3F, state.getDestroySpeed(level, block));
+            float speed = (float) (double) AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed) * (drone.hunger() > 70 ? 1.5F : 1.0F);
+            progress += speed / (hardness * 20F);
+            if (ticks % 6 == 0)
+            {
+                drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                level.destroyBlockProgress(drone.getId(), block, Math.min(9, (int) (progress * 10)));
+            }
+            if (progress >= 1F)
+            {
+                level.destroyBlockProgress(drone.getId(), block, -1);
+                level.destroyBlock(block, false, drone);
+                org.avp.world.hive.HivePlanner.advance(level, hive, block, true);
+                block = null;
+            }
+        }
+
+        @Override
+        public void stop()
+        {
+            if (block != null && drone.level() instanceof ServerLevel level)
+            {
+                level.destroyBlockProgress(drone.getId(), block, -1);
+                Hive hive = drone.hive();
+                if (hive != null && ticks >= 300)
+                {
+                    org.avp.world.hive.HivePlanner.advance(level, hive, block, false); // couldn't get to it: skip
+                }
+            }
+            block = null;
         }
     }
 

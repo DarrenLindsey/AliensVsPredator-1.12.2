@@ -358,6 +358,7 @@ public final class JoeTerminalService
             s.putIntArray("Radar", radar(selected));
             s.put("Blips", blips(selected));
             s.putFloat("Yaw", selected.getYRot());
+            s.putInt("Line", selected.currentLine());
             data.put("Selected", s);
         }
         org.avp.apollo.ApolloCoreBlockEntity core = org.avp.apollo.ApolloCoreBlockEntity.of(player.server, owner);

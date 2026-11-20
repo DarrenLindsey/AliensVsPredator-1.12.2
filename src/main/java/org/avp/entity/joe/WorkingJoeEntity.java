@@ -575,6 +575,17 @@ public class WorkingJoeEntity extends PathfinderMob
         return source;
     }
 
+    /** The source line it's running (0 if none). */
+    public int currentLine()
+    {
+        if (program == null || halted || program.body.isEmpty())
+        {
+            return 0;
+        }
+        int at = task != null ? taskPc : Math.max(0, pc - 1);
+        return at >= 0 && at < program.body.size() ? program.body.get(at).line : 0;
+    }
+
     /** A remote-control command from a terminal: fwd back left right jump stop dig digup digdown use place ITEM attack pickup drop release. */
     public void drive(String command)
     {

@@ -166,3 +166,12 @@ Glass **PneuPost Tubes** link **Stations** (named: name the item in an anvil, or
 to send a canister - you can watch it shoot through the glass. "A" sets a station to auto-send there (when a stack fills,
 every few seconds, or on a redstone pulse). Hoppers/pipes/Joes put into OUTGOING and take from INCOMING. If a tube on the
 way is broken (or melted), the canister bursts out there and spills.
+
+## Seegson Flow (visual programming)
+The terminal's **FLOW** tab shows a program as blocks, one per line of JOE-SCRIPT:
+- Pick a category (MOVE, WORK, SENSE, TALK, LOGIC, EVENT) and click a block to add it after the selected one.
+  Blocks that open a section (IF, WHILE, REPEAT, FOREVER, FOR, FUNCTION) come with their END; nesting is shown by indent.
+- Click a block to edit its fields underneath; **@** fills a position with where the selected Joe stands.
+- **UP / DN / DUP / DEL** rearrange; **UPLOAD** sends it to the selected Joe; the block it's running glows.
+- **TO CODE / FROM CODE** convert to and from the text editor. Nothing is lost: a line it has no block for is kept as a
+  grey CODE block.

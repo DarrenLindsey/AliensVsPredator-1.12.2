@@ -27,7 +27,7 @@ public class SeegsonTerminalScreen extends Screen
 {
     static final int AMBER = 0xFFFFB000, AMBER_HI = 0xFFFFD27A, DIM = 0xFF7A5200, FAINT = 0xFF3A2800, BG = 0xFF0A0C07, RED = 0xFFFF4A2A,
             GREEN = 0xFF7CFF6A;
-    private static final String[] TABS = { "STATUS", "PROGRAM", "LIBRARY", "DRIVE", "LOG", "APOLLO" };
+    private static final String[] TABS = { "STATUS", "CODE", "FILES", "DRIVE", "LOG", "APOLLO", "FLOW" };
 
     private CompoundTag data;
     private final BlockPos pos;
@@ -45,6 +45,11 @@ public class SeegsonTerminalScreen extends Screen
     private MultiLineEditBox editor;
     private EditBox nameBox, placeBox, sendBox, renameBox, searchBox, countBox, stationBox;
     private String apolloPick = "", search = "";
+    private final FlowEditor flow = new FlowEditor();
+    private boolean flowLoaded;
+    private String flowSync;
+    private int paletteScroll;
+    private final List<EditBox> flowFields = new ArrayList<>();
     private int apolloScroll;
 
     public SeegsonTerminalScreen(CompoundTag data)
@@ -78,6 +83,7 @@ public class SeegsonTerminalScreen extends Screen
         if (fresh.contains("Editor"))
         {
             editorText = fresh.getString("Editor");
+            flowLoaded = false;
             if (editor != null)
             {
                 editor.setValue(editorText);
@@ -143,6 +149,7 @@ public class SeegsonTerminalScreen extends Screen
             search = searchBox.getValue();
         }
         nameBox = placeBox = sendBox = renameBox = searchBox = countBox = stationBox = null;
+        flowFields.clear();
         int rw = left + w - 6 - rightX;
         // tabs
         int tw = rw / TABS.length;
@@ -259,9 +266,127 @@ public class SeegsonTerminalScreen extends Screen
                         send(JoeTerminalActionPayload.APOLLO_DISPATCH, apolloPick + " " + countBox.getValue().trim() + " "
                                 + stationBox.getValue().trim().replace(' ', '_')), false));
             }
+            case 6 ->
+            {
+                if (!flowLoaded || !editorText.equals(flowSync))
+                {
+                    flow.fromText(editorText);
+                    flowSync = editorText;
+                    flowLoaded = true;
+                }
+                int sx = rightX + 82, sw = rw - 82;
+                // inspector: one box per parameter of the selected block
+                if (flow.selected >= 0 && flow.selected < flow.blocks.size())
+                {
+                    FlowEditor.Block b = flow.blocks.get(flow.selected);
+                    List<String> names = FlowEditor.placeholders(b.spec);
+                    int n = Math.max(1, names.size());
+                    int fw = (sw - (names.contains("xyz") ? 18 : 0)) / n - 2;
+                    for (int i = 0; i < names.size(); i++)
+                    {
+                        int index = i;
+                        EditBox box = term(new EditBox(font, sx + i * (fw + 2), by - 34, fw, 14, Component.literal(names.get(i))));
+                        box.setMaxLength(200);
+                        box.setValue(b.params.get(i));
+                        box.setHint(Component.literal(names.get(i).replace("?", "")).withColor(DIM));
+                        box.setResponder(v -> b.params.set(index, v));
+                        addRenderableWidget(box);
+                        flowFields.add(box);
+                    }
+                    if (names.contains("xyz"))
+                    {
+                        addRenderableWidget(new TermButton(sx + sw - 16, by - 34, 16, 14, "@", this::pickHere, false));
+                    }
+                }
+                String[] labels = { "UP", "DN", "DUP", "DEL", "TO CODE", "FROM CODE", "UPLOAD" };
+                Runnable[] acts = { () -> flowEdit(() -> flow.move(-1)), () -> flowEdit(() -> flow.move(1)), () -> flowEdit(flow::duplicate),
+                        () -> flowEdit(flow::delete), () ->
+                        {
+                            editorText = flow.toText();
+                            flowSync = editorText;
+                            tab = 1;
+                            rebuild();
+                        }, () ->
+                        {
+                            flow.fromText(editorText);
+                            flowSync = editorText;
+                            rebuild();
+                        }, () -> send(JoeTerminalActionPayload.UPLOAD, flow.toText()) };
+                int[] widths = { 22, 22, 26, 26, 48, 58, 50 };
+                int bx = sx;
+                for (int i = 0; i < labels.length; i++)
+                {
+                    addRenderableWidget(new TermButton(bx, by - 18, widths[i], 14, labels[i], acts[i], false));
+                    bx += widths[i] + 2;
+                }
+            }
             default ->
             {
             }
+        }
+    }
+
+    private void flowEdit(Runnable change)
+    {
+        change.run();
+        rebuild();
+    }
+
+    /** Fills the selected block's first X Y Z with where the selected Joe stands. */
+    private void pickHere()
+    {
+        CompoundTag unit = unit(selected);
+        if (unit == null || flow.selected < 0)
+        {
+            return;
+        }
+        FlowEditor.Block b = flow.blocks.get(flow.selected);
+        List<String> names = FlowEditor.placeholders(b.spec);
+        for (int i = 0; i < names.size(); i++)
+        {
+            EditBox box = i < flowFields.size() ? flowFields.get(i) : null;
+            if (names.get(i).startsWith("xyz") && (box == null || box.isFocused() || flowFields.stream().noneMatch(EditBox::isFocused)))
+            {
+                b.params.set(i, unit.getString("At"));
+                if (box != null)
+                {
+                    box.setValue(unit.getString("At"));
+                }
+                return;
+            }
+        }
+    }
+
+    private void drawFlow(GuiGraphics g, Font f, CompoundTag sel, int rw)
+    {
+        int by = top + h - 42;
+        // palette: categories, then that category's blocks
+        int px = rightX, py = contentY;
+        for (int i = 0; i < FlowEditor.CATS.length; i++)
+        {
+            int cx = px + (i % 2) * 40, cy = py + (i / 2) * 12;
+            boolean on = FlowEditor.CATS[i].equals(flow.category);
+            g.fill(cx, cy, cx + 38, cy + 11, on ? FlowEditor.CAT_COLOURS[i] : 0xFF181410);
+            g.fill(cx, cy, cx + 2, cy + 11, FlowEditor.CAT_COLOURS[i]);
+            g.drawString(f, FlowEditor.CATS[i], cx + 5, cy + 2, on ? 0xFF000000 : AMBER, false);
+        }
+        List<FlowEditor.Spec> palette = flow.palette();
+        int listY = py + 38, rows = (by - 38 - listY) / 11;
+        paletteScroll = Math.max(0, Math.min(paletteScroll, Math.max(0, palette.size() - rows)));
+        for (int i = paletteScroll; i < palette.size() && i < paletteScroll + rows; i++)
+        {
+            FlowEditor.Spec spec = palette.get(i);
+            int y = listY + (i - paletteScroll) * 11;
+            int col = FlowEditor.colour(spec);
+            g.fill(px, y, px + 78, y + 10, 0xFF181410);
+            g.fill(px, y, px + 3, y + 10, col);
+            g.drawString(f, f.plainSubstrByWidth("+ " + spec.label(), 72), px + 5, y + 1, AMBER, false);
+        }
+        int sx = rightX + 82, sw = rw - 82;
+        flow.renderStack(g, f, sx, contentY, sw, by - 38 - contentY, sel.getInt("Line"), ticks);
+        if (flow.selected < 0)
+        {
+            g.drawString(f, "select a block to edit it", sx, by - 31, DIM, false);
         }
     }
 
@@ -376,6 +501,40 @@ public class SeegsonTerminalScreen extends Screen
                 return true;
             }
         }
+        if (tab == 6)
+        {
+            int rw = left + w - 6 - rightX, by = top + h - 42;
+            // categories
+            for (int i = 0; i < FlowEditor.CATS.length; i++)
+            {
+                int cx = rightX + (i % 2) * 40, cy = contentY + (i / 2) * 12;
+                if (mx >= cx && mx < cx + 38 && my >= cy && my < cy + 11)
+                {
+                    flow.category = FlowEditor.CATS[i];
+                    paletteScroll = 0;
+                    return true;
+                }
+            }
+            // palette
+            int listY = contentY + 38;
+            if (mx >= rightX && mx < rightX + 78 && my >= listY && my < by - 38)
+            {
+                int i = (int) (my - listY) / 11 + paletteScroll;
+                List<FlowEditor.Spec> palette = flow.palette();
+                if (i >= 0 && i < palette.size())
+                {
+                    flowEdit(() -> flow.insert(palette.get(i)));
+                    return true;
+                }
+            }
+            int hit = flow.blockAt(mx, my, rightX + 82, contentY, rw - 82, by - 38 - contentY);
+            if (hit >= 0)
+            {
+                flow.selected = hit;
+                rebuild();
+                return true;
+            }
+        }
         if (tab == 5 && mx >= rightX && mx < left + w - 6 && my >= contentY + 30 && my < top + h - 66)
         {
             int row = (int) (my - contentY - 30) / 10 + apolloScroll;
@@ -418,6 +577,18 @@ public class SeegsonTerminalScreen extends Screen
         if (tab == 5)
         {
             apolloScroll = Math.max(0, apolloScroll - (int) Math.signum(sy));
+            return true;
+        }
+        if (tab == 6)
+        {
+            if (mx < rightX + 80)
+            {
+                paletteScroll = Math.max(0, paletteScroll - (int) Math.signum(sy));
+            }
+            else
+            {
+                flow.scroll = Math.max(0, flow.scroll - (int) Math.signum(sy));
+            }
             return true;
         }
         return super.mouseScrolled(mx, my, sx, sy);
@@ -489,6 +660,7 @@ public class SeegsonTerminalScreen extends Screen
             case 3 -> drawRadar(g, f, sel);
             case 4 -> drawLog(g, f, sel, rw);
             case 5 -> drawApollo(g, f, rw);
+            case 6 -> drawFlow(g, f, sel, rw);
             default ->
             {
             }

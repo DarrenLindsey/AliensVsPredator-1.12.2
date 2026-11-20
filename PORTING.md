@@ -309,6 +309,13 @@ sorting). Full reference: docs/JOE-SCRIPT.md.
 Ideas for later: item lift (vertical conveyor), fluid tank module, Joe-to-Joe item handoff, waypoint markers,
 on-screen camera feed, multiblock factory controller.
 
+Pass 3 (logistics, replacing conveyors as the main system - conveyors stay): Weyland-Yutani ore refining (crusher x2,
+hydro-washer x3, acid leaching vat x4 with Xenomorph acid, electrolytic refinery x6, Nostromo-class fusion refinery x8;
+8 metals x 4 intermediates), Seegson PneuPost (glass tubes, named stations, compressors, visible canisters, breaches),
+APOLLO (station-AI item manifest, data banks, tube dispatch, courier Joes, terminal tab, Special Order 937),
+Seegson Flow visual block editor (terminal FLOW tab, lossless round trip with JOE-SCRIPT, live block highlight).
+Later: W-Y mining rig (seismic drill multiblock), Power Loader exosuit, JEI categories for the refinery.
+
 ## Planned: Working Joe robots (original notes)
 
 Seegson "Working Joe" androids you build and set up as a network:

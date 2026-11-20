@@ -23,6 +23,9 @@ import net.minecraft.server.level.ServerLevel;
 public final class JoeNetwork
 {
     private static final Map<UUID, Set<WorkingJoeEntity>> BY_OWNER = new HashMap<>();
+    /** Chunk loading for Joes with an anchor module. */
+    public static final net.neoforged.neoforge.common.world.chunk.TicketController TICKETS =
+            new net.neoforged.neoforge.common.world.chunk.TicketController(WorkingJoeEntity.id("joe_anchor"));
     private static final Map<UUID, Alarm> ALARMS = new HashMap<>();
 
     private record Alarm(BlockPos pos, long until, long seq)
@@ -79,6 +82,47 @@ public final class JoeNetwork
         }
         ALARMS.put(owner, new Alarm(at.immutable(), now + 600, old == null ? 1 : old.seq() + 1));
         by.report("ALERT: " + what + " detected at " + WorkingJoeEntity.where(at) + ".");
+    }
+
+    /** A message to every Joe on the sender's network (in any dimension). */
+    static synchronized void send(WorkingJoeEntity from, String channel, String message)
+    {
+        if (from.owner() == null)
+        {
+            return;
+        }
+        for (WorkingJoeEntity joe : BY_OWNER.getOrDefault(from.owner(), Set.of()))
+        {
+            if (joe != from && joe.isAlive())
+            {
+                joe.deliver(channel, message, from.joeName());
+            }
+        }
+    }
+
+    /** A message from the owner's terminal to one Joe or all of them. */
+    public static synchronized void sendFromTerminal(UUID owner, @Nullable UUID to, String channel, String message)
+    {
+        for (WorkingJoeEntity joe : BY_OWNER.getOrDefault(owner, Set.of()))
+        {
+            if (joe.isAlive() && (to == null || joe.getUUID().equals(to)))
+            {
+                joe.deliver(channel, message, "terminal");
+            }
+        }
+    }
+
+    @Nullable
+    public static synchronized WorkingJoeEntity find(UUID owner, UUID joe)
+    {
+        for (WorkingJoeEntity j : BY_OWNER.getOrDefault(owner, Set.of()))
+        {
+            if (j.getUUID().equals(joe) && j.isAlive())
+            {
+                return j;
+            }
+        }
+        return null;
     }
 
     /** Where the network's current alarm is (null if none). */

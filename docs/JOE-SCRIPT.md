@@ -1,0 +1,117 @@
+# JOE-SCRIPT v2 — Seegson Working Joe programming reference
+
+A program is plain text, one statement per line, written in a **book and quill** (use it on the Joe),
+the **Seegson Terminal** editor, or a data-pack file `data/<namespace>/joe_programs/<name>.joe`.
+Comments start with `#` or `//`. A program runs top to bottom and starts over at the end
+(unless it reaches `stop`).
+
+## Places
+`X Y Z` coordinates. `~` means "where the Joe stood when the program was loaded": `~ ~ ~5` is 5 blocks
+south of that. `$var` puts a variable in: `goto $fx $fy $fz`.
+
+## Settings
+| statement | meaning |
+|---|---|
+| `name Joe-Lab` | the Joe's name |
+| `home X Y Z` | its home (`goto home`, recall) |
+| `load avp:farmer` | run a data-pack program instead |
+
+## Variables and expressions
+```
+set n = 5
+set n = n * 2 + 1
+set label = "Wheat: " + count(wheat)
+```
+Values are numbers, text and true/false. Operators: `+ - * / %`, `== != < > <= >=`, `and or not`, `( )`.
+Text joins with `+`. Unknown variables are 0.
+
+**Built-in values:** `x y z charge health time night day raining lowpower full empty items slots alarm hurt
+hostile player security name homex homey homez ownerx ownery ownerz found fx fy fz block solid target moved crafted msg sender channel pi`
+
+**Built-in functions:** `count(item)`, `items(X,Y,Z[,item])` (container contents), `block(X,Y,Z)`, `isair(X,Y,Z)`,
+`ripe(X,Y,Z)`, `powered(X,Y,Z)`, `dist(X,Y,Z)`, `light(X,Y,Z)`, `upgrade(id)`, `joes()`, `random(n)`, `chance(pct)`,
+`abs floor ceil round sqrt min max sin cos`, `str num len upper lower contains(s,t) word(s,i) var(name)`.
+
+## Blocks
+```
+if count(iron_ingot) >= 16          while not full          repeat 4
+  ...                                 ...                     ...
+elif night                          end                     end
+  ...
+else                                for i = 1 to 10 step 2  forever
+  ...                                 ...                     ...
+end                                 end                     end
+```
+`break` / `continue` inside loops. One-line forms: `if COND: statement`, `unless COND: statement`.
+Old-style conditions still work: `night`, `has wheat 10`, `powered X Y Z`, `chance 20`.
+
+## Functions
+```
+func restock
+  take ~2 ~ ~ iron_ingot 16
+  if moved == 0: report "Out of iron"
+  return
+end
+call restock
+```
+Up to 32 nested calls. `label NAME` / `jump NAME` also work.
+
+## Movement
+`goto X Y Z` · `goto home|alarm|owner` · `patrol A ; B ; C` · `face X Y Z` · `follow [secs]` ·
+`guard X Y Z [radius] [secs]` · `wait SECS` · `charge`
+
+## Hands (like a ComputerCraft turtle)
+| statement | does |
+|---|---|
+| `dig X Y Z` | breaks a block, keeps the drops (drill module: 5x faster, mines anything) |
+| `place ITEM X Y Z` | places a block from its inventory |
+| `use X Y Z [ITEM]` | right-clicks a block (with an item): bone meal, buttons, buckets... |
+| `take X Y Z [ITEM] [N]` | takes from a container (sets `moved`) |
+| `put X Y Z [ITEM] [N]` | puts into a container (no item = everything) |
+| `drop [ITEM] [N]` | drops items in front of it (onto a conveyor, say) |
+| `pickup [radius]` | collects loose items |
+| `equip ITEM` / `equip nothing` | holds a tool or weapon |
+| `craft ITEM [N]` | crafts from its inventory (fabricator module) |
+| `attack [radius]` | fights the nearest hostile |
+| `haul A -> B [ITEM] [N]` | carries items between containers |
+| `farm A B [-> STORE]` | harvests and replants ripe crops in a box |
+| `maintain A B [<- STORE]` | puts back missing powerlines and lights |
+| `lever X Y Z on/off`, `press`, `open`, `close` | switches and doors |
+
+## Senses
+`scan BLOCK [radius]` (block id or `#tag`) and `find hostile|player|animal|joe|xeno|item|ENTITY [radius]` set
+`found`, `fx fy fz` (and `target`). `inspect X Y Z` sets `block` and `solid`. The radius is capped at 12, or 48
+with a sensor module.
+
+## Talking and the network
+`say "text"` (people nearby) · `report "text"` (owner, over the network) · `print "text"` (terminal log) ·
+`alarm` · `security on|off` · `send CHANNEL "text"` (every Joe you own, any dimension).
+
+## Responses
+`when EVENT: statement` runs whenever the event happens, then the program carries on.
+`when EVENT: call NAME` runs a whole function. Events: `night day alarm hurt lowpower hostile player`,
+`redstone X Y Z`, `message [CHANNEL]` (sets `msg`, `sender`, `channel`).
+
+## Modules (4 bays)
+cargo (+9 slots, x2) · battery (+100%, x2) · drill · fabricator · sensor · plating · servos · anchor (chunk loading).
+Use a module on the Joe to fit it; sneak-use shears to take them all out.
+
+## Example: an iron miner
+```
+name Joe-Miner
+home ~ ~ ~
+when lowpower: charge
+forever
+  scan iron_ore 24
+  if not found
+    report "No more iron nearby."
+    stop
+  end
+  dig $fx $fy $fz
+  pickup 4
+  if full
+    goto home
+    put ~2 ~ ~
+  end
+end
+```

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GRG",
+    "ICI",
+    "GRG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "I": {
+      "item": "avp:part_ic"
+    },
+    "C": {
+      "item": "avp:part_servo"
+    }
+  },
+  "result": {
+    "id": "avp:joe_module_servos",
+    "count": 1
+  }
+}

@@ -218,6 +218,7 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue joeMalfunctionChance;
         public final ModConfigSpec.BooleanValue joesFightXenos;
         public final ModConfigSpec.BooleanValue xenosIgnoreJoes;
+        public final ModConfigSpec.BooleanValue joeChunkLoading;
         public final ModConfigSpec.IntValue highVoltageMultiplier;
         public final ModConfigSpec.IntValue lowVoltageLossPer16;
         public final ModConfigSpec.BooleanValue highVoltageBurnsDevices;
@@ -529,6 +530,9 @@ public final class AvpConfig
             joesFightXenos = b
                     .comment("Joes on security duty also attack Xenomorphs (they mostly lose).")
                     .define("joesFightXenos", false);
+            joeChunkLoading = b
+                    .comment("Joes with a chunk anchor module keep their chunk loaded (so they work anywhere). Off: the module does nothing.")
+                    .define("joeChunkLoading", true);
             xenosIgnoreJoes = b
                     .comment("Xenomorphs ignore Working Joes (nothing alive in them to hunt).")
                     .define("xenosIgnoreJoes", true);

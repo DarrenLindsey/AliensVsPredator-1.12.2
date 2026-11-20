@@ -49,6 +49,7 @@ public class AliensVsPredator
         org.avp.registry.ModRecipes.TYPES.register(modBus);
         org.avp.registry.ModRecipes.SERIALIZERS.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
+        modBus.addListener((net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent e) -> e.register(org.avp.entity.joe.JoeNetwork.TICKETS));
 
         // settings files (config/avp-client.toml and the per-world avp-server.toml)
         container.registerConfig(ModConfig.Type.CLIENT, AvpConfig.CLIENT_SPEC);

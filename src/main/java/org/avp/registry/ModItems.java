@@ -133,6 +133,15 @@ public final class ModItems
         }
     }
 
+    /** Working Joe upgrade modules. */
+    public static final java.util.Map<org.avp.entity.joe.JoeUpgradeItem.Kind, DeferredItem<Item>> JOE_UPGRADES = new java.util.EnumMap<>(org.avp.entity.joe.JoeUpgradeItem.Kind.class);
+    static
+    {
+        for (org.avp.entity.joe.JoeUpgradeItem.Kind kind : org.avp.entity.joe.JoeUpgradeItem.Kind.values())
+        {
+            JOE_UPGRADES.put(kind, ITEMS.register(kind.itemName(), () -> new org.avp.entity.joe.JoeUpgradeItem(kind, new Item.Properties().stacksTo(16))));
+        }
+    }
     /** A boxed Seegson Working Joe (org.avp.entity.joe). */
     public static final DeferredItem<Item> WORKING_JOE = ITEMS.register("working_joe",
             () -> new org.avp.entity.joe.WorkingJoeItem(new Item.Properties().stacksTo(1)));
@@ -145,6 +154,7 @@ public final class ModItems
         Tab.MAIN.add(DRONE_SPAWN_EGG);
         Tab.MAIN.add(BUILDER_DRONE_SPAWN_EGG);
         Tab.MAIN.add(WORKING_JOE);
+        JOE_UPGRADES.values().forEach(Tab.MAIN::add);
         Tab.MAIN.add(COATER_DRONE_SPAWN_EGG);
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);
         Tab.MAIN.add(CHESTBURSTER_SPAWN_EGG);

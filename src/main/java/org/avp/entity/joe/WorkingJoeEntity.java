@@ -110,13 +110,27 @@ public class WorkingJoeEntity extends PathfinderMob
     private boolean security;
     @Nullable
     private BlockPos home;
-    final SimpleContainer inventory = new SimpleContainer(9);
+    final SimpleContainer inventory = new SimpleContainer(27);
+    /** Installed upgrade modules (ids like "cargo", "drill"). */
+    final List<String> upgrades = new ArrayList<>();
+    /** What it holds as a tool or weapon (equip). */
+    ItemStack tool = ItemStack.EMPTY;
+    /** Program variables. */
+    final Map<String, Object> vars = new HashMap<>();
+    /** Return addresses for "call". */
+    final java.util.Deque<Integer> stack = new java.util.ArrayDeque<>();
+    private final java.util.Deque<String> log = new java.util.ArrayDeque<>();
+    private final java.util.Deque<String[]> inbox = new java.util.ArrayDeque<>();
+    final JoeContext context = new JoeContext(this);
+    private int taskPc;
+    private long lastFault = -1000;
+    private long anchoredChunk = Long.MIN_VALUE;
     /** What "maintain" remembers, per program line. */
     private final Map<Integer, Map<BlockPos, BlockState>> snapshots = new HashMap<>();
 
     // running state (not saved: a statement restarts after a reload)
     @Nullable
-    private Task task, interrupt;
+    Task task, interrupt;
     @Nullable
     private BlockPos guardCenter;
     private int guardRadius;
@@ -143,6 +157,130 @@ public class WorkingJoeEntity extends PathfinderMob
         return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH, 40).add(Attributes.ARMOR, 6).add(Attributes.ATTACK_DAMAGE, 7)
                 .add(Attributes.MOVEMENT_SPEED, 0.24).add(Attributes.KNOCKBACK_RESISTANCE, 0.7).add(Attributes.FOLLOW_RANGE, 32)
                 .add(Attributes.STEP_HEIGHT, 1.0);
+    }
+
+    /** Battery size with its battery modules. */
+    public int maxCharge()
+    {
+        return capacity() * (1 + upgradeCount("battery"));
+    }
+
+    public int upgradeCount(String id)
+    {
+        int n = 0;
+        for (String u : upgrades)
+        {
+            if (u.equals(id))
+            {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    public boolean hasUpgrade(String id)
+    {
+        return upgrades.contains(id);
+    }
+
+    public List<String> upgrades()
+    {
+        return List.copyOf(upgrades);
+    }
+
+    /** Fits an upgrade module. Returns an error message, or null if it was fitted. */
+    @Nullable
+    public String install(JoeUpgradeItem.Kind kind)
+    {
+        if (upgrades.size() >= JoeUpgradeItem.SLOTS)
+        {
+            return "All " + JoeUpgradeItem.SLOTS + " upgrade bays are full.";
+        }
+        if (upgradeCount(kind.id) >= kind.max)
+        {
+            return "It can't take another " + kind.id + " module.";
+        }
+        upgrades.add(kind.id);
+        applyUpgrades();
+        return null;
+    }
+
+    /** Removes every module (they drop as items). */
+    public void ejectUpgrades()
+    {
+        for (String id : upgrades)
+        {
+            JoeUpgradeItem.Kind kind = JoeUpgradeItem.Kind.byId(id);
+            if (kind != null)
+            {
+                spawnAtLocation(new ItemStack(kind.item()));
+            }
+        }
+        upgrades.clear();
+        applyUpgrades();
+        // anything beyond the base 9 slots is dropped
+        for (int i = 9; i < inventory.getContainerSize(); i++)
+        {
+            spawnAtLocation(inventory.removeItemNoUpdate(i));
+        }
+        charge = Math.min(charge, maxCharge());
+        releaseChunk();
+    }
+
+    private static final ResourceLocation PLATING_ARMOR = id("joe_plating_armor"), PLATING_HEALTH = id("joe_plating_health"),
+            SERVO_SPEED = id("joe_servo_speed");
+
+    void applyUpgrades()
+    {
+        var armor = getAttribute(Attributes.ARMOR);
+        var health = getAttribute(Attributes.MAX_HEALTH);
+        var speed = getAttribute(Attributes.MOVEMENT_SPEED);
+        armor.removeModifier(PLATING_ARMOR);
+        health.removeModifier(PLATING_HEALTH);
+        speed.removeModifier(SERVO_SPEED);
+        if (hasUpgrade("plating"))
+        {
+            armor.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(PLATING_ARMOR, 10,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+            health.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(PLATING_HEALTH, 20,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+        }
+        if (hasUpgrade("servos"))
+        {
+            speed.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(SERVO_SPEED, 0.35,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+        }
+        if (getHealth() > getMaxHealth())
+        {
+            setHealth(getMaxHealth());
+        }
+    }
+
+    /** The chunk anchor module keeps the chunk it's in loaded, so it works however far away you are. */
+    private void updateChunkAnchor(ServerLevel level)
+    {
+        if (!hasUpgrade("anchor") || !AvpConfig.server(AvpConfig.SERVER.joeChunkLoading))
+        {
+            releaseChunk();
+            return;
+        }
+        long chunk = net.minecraft.world.level.ChunkPos.asLong(blockPosition());
+        if (chunk != anchoredChunk)
+        {
+            releaseChunk();
+            anchoredChunk = chunk;
+            JoeNetwork.TICKETS.forceChunk(level, this, net.minecraft.world.level.ChunkPos.getX(chunk), net.minecraft.world.level.ChunkPos.getZ(chunk), true, true);
+        }
+    }
+
+    void releaseChunk()
+    {
+        if (anchoredChunk != Long.MIN_VALUE && level() instanceof ServerLevel level)
+        {
+            JoeNetwork.TICKETS.forceChunk(level, this, net.minecraft.world.level.ChunkPos.getX(anchoredChunk),
+                    net.minecraft.world.level.ChunkPos.getZ(anchoredChunk), false, true);
+        }
+        anchoredChunk = Long.MIN_VALUE;
     }
 
     public static int capacity()
@@ -197,25 +335,25 @@ public class WorkingJoeEntity extends PathfinderMob
 
     public int chargePercent()
     {
-        return Math.round(100F * charge / Math.max(1, capacity()));
+        return Math.round(100F * charge / Math.max(1, maxCharge()));
     }
 
     public boolean needsCharge()
     {
-        return charge < capacity() * 0.95F;
+        return charge < maxCharge() * 0.95F;
     }
 
     /** A charger gives this Joe power; returns how much it took. */
     public int addCharge(int amount)
     {
-        int take = Math.max(0, Math.min(amount, capacity() - charge));
+        int take = Math.max(0, Math.min(amount, maxCharge() - charge));
         charge += take;
         return take;
     }
 
     public boolean isLowPower()
     {
-        return AvpConfig.server(AvpConfig.SERVER.joeNeedsPower) && charge < capacity() * 0.15F;
+        return AvpConfig.server(AvpConfig.SERVER.joeNeedsPower) && charge < maxCharge() * 0.15F;
     }
 
     // ------------------------------------------------------------------ goals
@@ -413,7 +551,7 @@ public class WorkingJoeEntity extends PathfinderMob
             playSound(SoundEvents.BEACON_DEACTIVATE, 0.6F, 1.6F);
             report("Battery depleted. Powering down at " + where(blockPosition()) + ".");
         }
-        else if (mode == POWERED_DOWN && (charge > capacity() * 0.1F || !AvpConfig.server(AvpConfig.SERVER.joeNeedsPower)))
+        else if (mode == POWERED_DOWN && (charge > maxCharge() * 0.1F || !AvpConfig.server(AvpConfig.SERVER.joeNeedsPower)))
         {
             entityData.set(MODE, ACTIVE);
             playSound(SoundEvents.BEACON_ACTIVATE, 0.6F, 1.6F);
@@ -453,10 +591,14 @@ public class WorkingJoeEntity extends PathfinderMob
             checkEvents(server);
         }
         // show what it carries
-        ItemStack carried = firstCarried();
-        if (!ItemStack.isSameItem(carried, getMainHandItem()))
+        ItemStack shown = !tool.isEmpty() ? tool : firstCarried();
+        if (!ItemStack.isSameItemSameComponents(shown, getMainHandItem()))
         {
-            setItemSlot(EquipmentSlot.MAINHAND, carried.copyWithCount(1));
+            setItemSlot(EquipmentSlot.MAINHAND, shown.isEmpty() ? ItemStack.EMPTY : shown.copyWithCount(1));
+        }
+        if (tickCount % 20 == 0)
+        {
+            updateChunkAnchor(server);
         }
     }
 
@@ -580,6 +722,8 @@ public class WorkingJoeEntity extends PathfinderMob
         program = parsed;
         home = parsed.home;
         pc = 0;
+        vars.clear();
+        stack.clear();
         halted = false;
         task = null;
         interrupt = null;
@@ -644,9 +788,12 @@ public class WorkingJoeEntity extends PathfinderMob
         return t == null ? "running" : t.describe();
     }
 
+    // ------------------------------------------------------------------ the interpreter
+
+    /** Runs instant statements (set, jumps, calls...) until one that takes time starts, or 200 steps. */
     private void runProgram()
     {
-        if (program == null || program.body.isEmpty() && interrupt == null)
+        if (program == null)
         {
             return;
         }
@@ -658,19 +805,157 @@ public class WorkingJoeEntity extends PathfinderMob
             }
             return;
         }
-        if (task == null)
+        for (int steps = 0; task == null && steps < 200; steps++)
         {
-            if (pc >= program.body.size())
+            if (halted)
             {
-                pc = 0; // programs loop
+                return;
             }
+            if (pc >= program.body.size() || pc < 0)
+            {
+                if (!stack.isEmpty())
+                {
+                    pc = stack.pop();
+                    continue;
+                }
+                pc = 0; // programs loop
+                if (program.body.isEmpty())
+                {
+                    return;
+                }
+            }
+            taskPc = pc;
             Instr instr = program.body.get(pc++);
-            task = taskFor(instr);
+            task = execute(instr);
         }
-        if (task == null || task.tick())
+        if (task != null && task.tick())
         {
             task = null;
         }
+    }
+
+    /** Runs one statement: instant ones happen now (returns null); ones that take time return a task. */
+    @Nullable
+    Task execute(Instr instr)
+    {
+        try
+        {
+            if (instr.dynamic)
+            {
+                List<String> problems = new ArrayList<>();
+                Instr real = JoeProgram.reparse(substitute(instr.raw), instr.line, anchor, problems);
+                if (real == null)
+                {
+                    fault(instr.line, problems.isEmpty() ? "bad statement" : problems.get(0));
+                    return null;
+                }
+                instr = real;
+            }
+            switch (instr.op)
+            {
+                case SET ->
+                {
+                    vars.put(instr.text, instr.expr.eval(context));
+                    if (vars.size() > 256)
+                    {
+                        fault(instr.line, "too many variables (256 at most)");
+                    }
+                    return null;
+                }
+                case BRANCH ->
+                {
+                    if (!JoeExpr.truthy(instr.expr.eval(context)))
+                    {
+                        pc = instr.target;
+                    }
+                    return null;
+                }
+                case GOTOPC ->
+                {
+                    pc = instr.target;
+                    return null;
+                }
+                case CALL ->
+                {
+                    if (stack.size() >= 32)
+                    {
+                        fault(instr.line, "too many nested calls (32 at most)");
+                        return null;
+                    }
+                    stack.push(pc);
+                    pc = instr.target;
+                    return null;
+                }
+                case RETURN ->
+                {
+                    pc = stack.isEmpty() ? program.body.size() : stack.pop();
+                    return null;
+                }
+                case IF, UNLESS ->
+                {
+                    return JoeExpr.truthy(instr.expr.eval(context)) ? execute(instr.inner) : null;
+                }
+                default ->
+                {
+                    return taskFor(instr);
+                }
+            }
+        }
+        catch (JoeExpr.ExprError e)
+        {
+            fault(instr.line, e.getMessage());
+            return null;
+        }
+    }
+
+    /** A runtime error: logged, reported now and then, and the statement is skipped. */
+    void fault(int line, String message)
+    {
+        log("ERROR line " + line + ": " + message);
+        if (level().getGameTime() - lastFault > 200)
+        {
+            lastFault = level().getGameTime();
+            report("Program error on line " + line + ": " + message);
+        }
+    }
+
+    /** Puts $variable values into a statement. */
+    String substitute(String raw)
+    {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < raw.length(); i++)
+        {
+            char c = raw.charAt(i);
+            if (c == '$' && i + 1 < raw.length() && (Character.isLetter(raw.charAt(i + 1)) || raw.charAt(i + 1) == '_'))
+            {
+                int j = i + 1;
+                while (j < raw.length() && (Character.isLetterOrDigit(raw.charAt(j)) || raw.charAt(j) == '_'))
+                {
+                    j++;
+                }
+                out.append(JoeExpr.text(context.variable(raw.substring(i + 1, j).toLowerCase(java.util.Locale.ROOT))));
+                i = j - 1;
+            }
+            else
+            {
+                out.append(c);
+            }
+        }
+        return out.toString();
+    }
+
+    void log(String line)
+    {
+        log.addLast("[" + (level().getDayTime() / 20) % 1200 / 60 + ":" + String.format("%02d", (level().getDayTime() / 20) % 60) + "] " + line);
+        while (log.size() > 40)
+        {
+            log.removeFirst();
+        }
+    }
+
+    public List<String> logLines()
+    {
+        return new ArrayList<>(log);
     }
 
     /** "when" handlers. */
@@ -707,16 +992,16 @@ public class WorkingJoeEntity extends PathfinderMob
                     redstoneWas.put(i, on);
                     yield on && !was;
                 }
+                case MESSAGE -> takeMessage(h.channel());
                 default -> false;
             };
             if (fire)
             {
                 cooldown.put(i, level().getGameTime());
-                interrupt = taskFor(h.action());
-                handled = interrupt != null;
+                respond(h.action());
+                handled = true;
             }
         }
-        // a Joe on security with no alarm response of its own goes to see
         if (!handled && newAlarm && security && program.handlers.stream().noneMatch(h -> h.event() == Cond.ALARM))
         {
             BlockPos at = JoeNetwork.alarmPos(owner);
@@ -729,9 +1014,68 @@ public class WorkingJoeEntity extends PathfinderMob
         wasLow = low;
     }
 
+    /** Runs a response: "call" jumps into the function (then carries on where it was); anything else runs on its own. */
+    private void respond(Instr action)
+    {
+        if (action.op == JoeProgram.Op.CALL && action.target >= 0)
+        {
+            if (stack.size() < 32)
+            {
+                stack.push(task != null ? taskPc : pc); // redo what it was doing afterwards
+                task = null;
+                getNavigation().stop();
+                pc = action.target;
+            }
+            return;
+        }
+        interrupt = execute(action);
+    }
+
+    private boolean takeMessage(String channel)
+    {
+        for (var it = inbox.iterator(); it.hasNext();)
+        {
+            String[] m = it.next();
+            if (channel.isEmpty() || channel.equals(m[0]))
+            {
+                it.remove();
+                vars.put("channel", m[0]);
+                vars.put("msg", m[1]);
+                vars.put("sender", m[2]);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** A message from another Joe on the network. */
+    void deliver(String channel, String message, String from)
+    {
+        inbox.addLast(new String[] { channel, message, from });
+        while (inbox.size() > 16)
+        {
+            inbox.removeFirst();
+        }
+    }
+
     private boolean ready(int handler, int ticks)
     {
         return level().getGameTime() - cooldown.getOrDefault(handler, -100_000L) > ticks;
+    }
+
+    boolean hasHostileNear()
+    {
+        return nearestHostile(12) != null;
+    }
+
+    boolean hasStrangerNear()
+    {
+        return strangerNear();
+    }
+
+    public boolean security()
+    {
+        return security;
     }
 
     private boolean strangerNear()
@@ -746,7 +1090,7 @@ public class WorkingJoeEntity extends PathfinderMob
         return false;
     }
 
-    private boolean powered(@Nullable BlockPos pos)
+    boolean powered(@Nullable BlockPos pos)
     {
         if (pos == null || !level().isLoaded(pos))
         {
@@ -757,30 +1101,15 @@ public class WorkingJoeEntity extends PathfinderMob
                 || state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT);
     }
 
-    private boolean test(Instr instr)
+    /** Slots it may use (9, plus 9 per cargo module). */
+    int usableSlots()
     {
-        return switch (instr.cond)
-        {
-            case NIGHT -> level().isNight();
-            case DAY -> !level().isNight();
-            case LOWPOWER -> isLowPower();
-            case FULL -> !hasRoom();
-            case EMPTY -> firstCarried().isEmpty();
-            case ALARM -> JoeNetwork.alarmPos(owner) != null;
-            case HURT -> getHealth() < getMaxHealth() * 0.5F;
-            case RAINING -> level().isRaining();
-            case PLAYER -> strangerNear();
-            case HOSTILE -> nearestHostile(12) != null;
-            case POWERED -> powered(instr.a);
-            case HAS -> count(instr.item) >= instr.n;
-            case CHANCE -> random.nextInt(100) < instr.n;
-            default -> false;
-        };
+        return Math.min(inventory.getContainerSize(), 9 + 9 * upgradeCount("cargo"));
     }
 
-    private boolean hasRoom()
+    boolean hasRoom()
     {
-        for (int i = 0; i < inventory.getContainerSize(); i++)
+        for (int i = 0; i < usableSlots(); i++)
         {
             if (inventory.getItem(i).isEmpty())
             {
@@ -790,7 +1119,32 @@ public class WorkingJoeEntity extends PathfinderMob
         return false;
     }
 
-    private int count(@Nullable Item item)
+    /** Adds to its inventory; returns what didn't fit. */
+    ItemStack store(ItemStack stack)
+    {
+        for (int i = 0; i < usableSlots() && !stack.isEmpty(); i++)
+        {
+            ItemStack in = inventory.getItem(i);
+            if (!in.isEmpty() && ItemStack.isSameItemSameComponents(in, stack) && in.getCount() < in.getMaxStackSize())
+            {
+                int move = Math.min(stack.getCount(), in.getMaxStackSize() - in.getCount());
+                in.grow(move);
+                stack.shrink(move);
+            }
+        }
+        for (int i = 0; i < usableSlots() && !stack.isEmpty(); i++)
+        {
+            if (inventory.getItem(i).isEmpty())
+            {
+                inventory.setItem(i, stack.copy());
+                stack.setCount(0);
+            }
+        }
+        inventory.setChanged();
+        return stack;
+    }
+
+    int count(@Nullable Item item)
     {
         int n = 0;
         for (int i = 0; i < inventory.getContainerSize(); i++)
@@ -802,6 +1156,32 @@ public class WorkingJoeEntity extends PathfinderMob
             }
         }
         return n;
+    }
+
+    /** Takes up to n of an item (any item if null) out of its inventory. */
+    ItemStack removeItems(@Nullable Item item, int n)
+    {
+        ItemStack out = ItemStack.EMPTY;
+        for (int i = 0; i < inventory.getContainerSize() && n > 0; i++)
+        {
+            ItemStack in = inventory.getItem(i);
+            if (in.isEmpty() || item != null && !in.is(item) || !out.isEmpty() && !ItemStack.isSameItemSameComponents(in, out))
+            {
+                continue;
+            }
+            int take = Math.min(n, in.getCount());
+            if (out.isEmpty())
+            {
+                out = in.copyWithCount(take);
+            }
+            else
+            {
+                out.grow(take);
+            }
+            in.shrink(take);
+            n -= take;
+        }
+        return out;
     }
 
     @Nullable
@@ -830,12 +1210,24 @@ public class WorkingJoeEntity extends PathfinderMob
             }
             case SAY ->
             {
-                say(instr.text);
+                say(substitute(instr.text));
                 return null;
             }
             case REPORT ->
             {
-                report(instr.text);
+                String text = substitute(instr.text);
+                report(text);
+                log("REPORT " + text);
+                return null;
+            }
+            case PRINT ->
+            {
+                log(substitute(instr.text));
+                return null;
+            }
+            case SEND ->
+            {
+                JoeNetwork.send(this, instr.text, substitute(instr.extra));
                 return null;
             }
             case HAUL ->
@@ -882,7 +1274,7 @@ public class WorkingJoeEntity extends PathfinderMob
                 JoeNetwork.raiseAlarm(this, blockPosition(), "an alarm");
                 return null;
             }
-            case LABEL ->
+            case LABEL, NOP ->
             {
                 return null;
             }
@@ -895,25 +1287,25 @@ public class WorkingJoeEntity extends PathfinderMob
             {
                 halted = true;
                 pc = 0;
+                stack.clear();
                 report("Program complete.");
                 return null;
             }
-            case IF, UNLESS ->
+            default ->
             {
-                boolean yes = test(instr) == (instr.op == JoeProgram.Op.IF);
-                return yes ? taskFor(instr.inner) : null;
+                return JoeActions.task(this, instr);
             }
         }
-        return null;
     }
 
     @Nullable
-    private Player ownerPlayer()
+    Player ownerPlayer()
     {
         return owner == null ? null : level().getPlayerByUUID(owner);
     }
 
     // ------------------------------------------------------------------ tasks
+
 
     /** A running statement. tick() returns true when it's finished. */
     interface Task
@@ -924,7 +1316,7 @@ public class WorkingJoeEntity extends PathfinderMob
     }
 
     /** Walks to within range of a spot; gives up (and reports) if it can't get there. */
-    private class Walker
+    class Walker
     {
         private BlockPos to = BlockPos.ZERO;
         private int tries;
@@ -1133,7 +1525,7 @@ public class WorkingJoeEntity extends PathfinderMob
                         continue;
                     }
                     ItemStack taken = from.extractItem(slot, Math.min(wanted, in.getMaxStackSize()), true);
-                    ItemStack left = inventory.addItem(taken.copy());
+                    ItemStack left = store(taken.copy());
                     int moved = taken.getCount() - left.getCount();
                     if (moved > 0)
                     {
@@ -1245,7 +1637,7 @@ public class WorkingJoeEntity extends PathfinderMob
                         drop.shrink(1);
                         replanted = true;
                     }
-                    ItemStack left = inventory.addItem(drop);
+                    ItemStack left = store(drop);
                     if (!left.isEmpty())
                     {
                         spawnAtLocation(left);
@@ -1445,7 +1837,7 @@ public class WorkingJoeEntity extends PathfinderMob
                 }
                 else
                 {
-                    inventory.addItem(new ItemStack(part));
+                    store(new ItemStack(part));
                     snapshots.get(instr.line).remove(job);
                 }
                 swing(InteractionHand.MAIN_HAND);
@@ -1506,7 +1898,7 @@ public class WorkingJoeEntity extends PathfinderMob
                     if (want > 0)
                     {
                         ItemStack got = from.extractItem(slot, want, false);
-                        ItemStack left = inventory.addItem(got);
+                        ItemStack left = store(got);
                         if (!left.isEmpty())
                         {
                             from.insertItem(slot, left, false);
@@ -1740,6 +2132,32 @@ public class WorkingJoeEntity extends PathfinderMob
             }
             return InteractionResult.PASS;
         }
+        if (stack.getItem() instanceof JoeUpgradeItem upgrade)
+        {
+            if (!mine)
+            {
+                say("I am sorry. You are not authorised to modify this unit.");
+                return InteractionResult.CONSUME;
+            }
+            String problem = install(upgrade.kind);
+            if (problem != null)
+            {
+                player.displayClientMessage(Component.literal(problem).withStyle(ChatFormatting.RED), true);
+            }
+            else
+            {
+                stack.consume(1, player);
+                playSound(SoundEvents.SMITHING_TABLE_USE, 0.8F, 1.3F);
+                say("Module installed: " + upgrade.kind.id + ".");
+            }
+            return InteractionResult.CONSUME;
+        }
+        if (stack.is(Items.SHEARS) && mine && player.isShiftKeyDown() && !upgrades.isEmpty())
+        {
+            ejectUpgrades();
+            say("All modules removed.");
+            return InteractionResult.CONSUME;
+        }
         if (stack.is(Items.WRITABLE_BOOK) || stack.is(Items.WRITTEN_BOOK))
         {
             if (!mine)
@@ -1760,7 +2178,7 @@ public class WorkingJoeEntity extends PathfinderMob
         }
         if (stack.is(Items.REDSTONE_BLOCK) && mine)
         {
-            addCharge(capacity() / 4);
+            addCharge(maxCharge() / 4);
             stack.consume(1, player);
             playSound(SoundEvents.BEACON_POWER_SELECT, 0.6F, 1.6F);
             return InteractionResult.CONSUME;
@@ -1802,6 +2220,15 @@ public class WorkingJoeEntity extends PathfinderMob
         {
             lines.add(Component.literal("Program: " + program.body.size() + " instructions, " + program.handlers.size() + " responses, at line "
                     + (pc > 0 && pc <= program.body.size() ? program.body.get(pc - 1).line : 1)).withStyle(ChatFormatting.GRAY));
+        }
+        if (!upgrades.isEmpty())
+        {
+            lines.add(Component.literal("Modules: " + String.join(", ", upgrades) + " (" + upgrades.size() + "/" + JoeUpgradeItem.SLOTS + ")")
+                    .withStyle(ChatFormatting.DARK_AQUA));
+        }
+        if (!tool.isEmpty())
+        {
+            lines.add(Component.literal("Holding: " + tool.getHoverName().getString()).withStyle(ChatFormatting.GRAY));
         }
         StringBuilder carrying = new StringBuilder();
         for (int i = 0; i < inventory.getContainerSize(); i++)
@@ -1891,6 +2318,16 @@ public class WorkingJoeEntity extends PathfinderMob
         {
             spawnAtLocation(inventory.removeItemNoUpdate(i));
         }
+        spawnAtLocation(tool);
+        tool = ItemStack.EMPTY;
+        for (String id : upgrades)
+        {
+            JoeUpgradeItem.Kind kind = JoeUpgradeItem.Kind.byId(id);
+            if (kind != null && random.nextBoolean())
+            {
+                spawnAtLocation(new ItemStack(kind.item()));
+            }
+        }
         spawnAtLocation(new ItemStack(ModItems.PART_SERVO.get(), 1 + random.nextInt(2)));
         if (random.nextBoolean())
         {
@@ -1950,6 +2387,16 @@ public class WorkingJoeEntity extends PathfinderMob
     }
 
     @Override
+    public void remove(RemovalReason reason)
+    {
+        if (reason.shouldDestroy())
+        {
+            releaseChunk();
+        }
+        super.remove(reason);
+    }
+
+    @Override
     public void onRemovedFromLevel()
     {
         super.onRemovedFromLevel();
@@ -1991,6 +2438,31 @@ public class WorkingJoeEntity extends PathfinderMob
         tag.putBoolean("Security", security);
         tag.putByte("Mode", mode());
         tag.put("Inventory", inventory.createTag(registryAccess()));
+        ListTag ups = new ListTag();
+        upgrades.forEach(u -> ups.add(net.minecraft.nbt.StringTag.valueOf(u)));
+        tag.put("Upgrades", ups);
+        if (!tool.isEmpty())
+        {
+            tag.put("Tool", tool.save(registryAccess()));
+        }
+        CompoundTag v = new CompoundTag();
+        vars.forEach((k, val) ->
+        {
+            if (val instanceof Double d)
+            {
+                v.putDouble(k, d);
+            }
+            else if (val instanceof Boolean b)
+            {
+                v.putBoolean(k, b);
+            }
+            else
+            {
+                v.putString(k, String.valueOf(val));
+            }
+        });
+        tag.put("Vars", v);
+        tag.putIntArray("Stack", stack.stream().mapToInt(Integer::intValue).toArray());
         ListTag snaps = new ListTag();
         snapshots.forEach((line, map) ->
         {
@@ -2020,6 +2492,13 @@ public class WorkingJoeEntity extends PathfinderMob
         security = tag.getBoolean("Security");
         entityData.set(MODE, tag.getByte("Mode"));
         inventory.fromTag(tag.getList("Inventory", Tag.TAG_COMPOUND), registryAccess());
+        upgrades.clear();
+        for (Tag u : tag.getList("Upgrades", Tag.TAG_STRING))
+        {
+            upgrades.add(u.getAsString());
+        }
+        applyUpgrades();
+        tool = tag.contains("Tool") ? ItemStack.parseOptional(registryAccess(), tag.getCompound("Tool")) : ItemStack.EMPTY;
         if (!source.isEmpty())
         {
             JoeProgram parsed = JoeProgram.parse(source, anchor);
@@ -2028,6 +2507,17 @@ public class WorkingJoeEntity extends PathfinderMob
                 install(parsed);
                 pc = Math.min(tag.getInt("PC"), parsed.body.size());
                 halted = tag.getBoolean("Halted");
+                CompoundTag v = tag.getCompound("Vars");
+                for (String k : v.getAllKeys())
+                {
+                    Tag t = v.get(k);
+                    vars.put(k, t instanceof net.minecraft.nbt.NumericTag n && t.getId() == Tag.TAG_BYTE ? (Object) (n.getAsByte() != 0)
+                            : t instanceof net.minecraft.nbt.NumericTag n ? (Object) n.getAsDouble() : t.getAsString());
+                }
+                for (int ret : tag.getIntArray("Stack"))
+                {
+                    stack.addLast(ret);
+                }
             }
         }
         snapshots.clear();

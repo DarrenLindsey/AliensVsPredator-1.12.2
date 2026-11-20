@@ -1030,5 +1030,13 @@
   "item.avp.working_joe.programmed": "Programmed",
   "entity.avp.working_joe": "Working Joe",
   "block.avp.joe_charger": "Joe Charger",
-  "message.avp.joe_charger": "Joe Charger: %s FE stored"
+  "message.avp.joe_charger": "Joe Charger: %s FE stored",
+  "item.avp.joe_module_cargo": "Cargo Module",
+  "item.avp.joe_module_battery": "Battery Pack Module",
+  "item.avp.joe_module_drill": "Mining Drill Module",
+  "item.avp.joe_module_fabricator": "Fabricator Module",
+  "item.avp.joe_module_sensor": "Sensor Suite Module",
+  "item.avp.joe_module_plating": "Armour Plating Module",
+  "item.avp.joe_module_servos": "Servo Booster Module",
+  "item.avp.joe_module_anchor": "Chunk Anchor Module"
 }

@@ -222,6 +222,9 @@ public final class AvpConfig
         public final ModConfigSpec.DoubleValue conveyorSpeed;
         public final ModConfigSpec.DoubleValue capsuleSpeed;
         public final ModConfigSpec.IntValue apolloPower;
+        public final ModConfigSpec.IntValue queenCellPower;
+        public final ModConfigSpec.IntValue queenCellEggTicks;
+        public final ModConfigSpec.IntValue xenoReactorOutput;
         public final ModConfigSpec.IntValue splineMaxLength;
         public final ModConfigSpec.IntValue hoseRate;
         public final ModConfigSpec.IntValue drillMaxRadius;
@@ -566,6 +569,15 @@ public final class AvpConfig
             hoseRate = b
                     .comment("mB per tick a hose carries.")
                     .defineInRange("hoseRate", 250, 1, 100_000);
+            queenCellPower = b
+                    .comment("FE per tick a Queen Containment Cell draws.")
+                    .defineInRange("queenCellPower", 512, 0, 1_000_000);
+            queenCellEggTicks = b
+                    .comment("Ticks between eggs a contained (fed, powered) Queen lays.")
+                    .defineInRange("queenCellEggTicks", 2400, 20, 1_000_000);
+            xenoReactorOutput = b
+                    .comment("FE per tick the Xeno Bio-Reactor makes while burning (an egg burns for 5 minutes).")
+                    .defineInRange("xenoReactorOutput", 8192, 1, 10_000_000);
             apolloPower = b
                     .comment("FE per tick the APOLLO core draws.")
                     .defineInRange("apolloPower", 32, 0, 100_000);

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ODO",
+    "FRF",
+    "OPO"
+  ],
+  "key": {
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "D": {
+      "item": "minecraft:diamond_block"
+    },
+    "F": {
+      "item": "avp:fusion_reactor"
+    },
+    "R": {
+      "item": "avp:royaljelly"
+    },
+    "P": {
+      "item": "avp:part_powersupply"
+    }
+  },
+  "result": {
+    "id": "avp:xeno_reactor",
+    "count": 1
+  }
+}

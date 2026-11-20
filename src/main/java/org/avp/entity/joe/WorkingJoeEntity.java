@@ -410,6 +410,10 @@ public class WorkingJoeEntity extends PathfinderMob
         {
             return owner != null && !isOwner(player) && !player.isAlliedTo(this) && distanceTo(player) < 10;
         }
+        if (e instanceof org.avp.entity.xenomorph.XenomorphEntity x && x.isBonded())
+        {
+            return false;
+        }
         return e instanceof Enemy && !e.getType().is(org.avp.registry.ModTags.XENOMORPHS)
                 || e.getType().is(org.avp.registry.ModTags.XENOMORPHS) && AvpConfig.server(AvpConfig.SERVER.joesFightXenos);
     }

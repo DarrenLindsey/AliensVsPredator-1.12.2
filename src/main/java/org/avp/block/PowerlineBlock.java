@@ -88,6 +88,9 @@ public class PowerlineBlock extends BaseEntityBlock
                 || state.getBlock() instanceof org.avp.pneumatic.CompressorBlock
                 || state.getBlock() instanceof org.avp.apollo.ApolloCoreBlock
                 || state.getBlock() instanceof org.avp.mining.SeismicDrillBlock
+                || state.getBlock() instanceof org.avp.entity.xenomorph.lab.LabBlock
+                || state.getBlock() instanceof org.avp.entity.xenomorph.lab.QueenCellBlock
+                || state.getBlock() instanceof org.avp.entity.xenomorph.lab.XenoReactorBlock
                 || state.getBlock() instanceof org.avp.block.conveyor.spline.SplineAnchorBlock a && a.kind == org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.CABLE
                 || state.getBlock() instanceof org.avp.block.conveyor.ConveyorBlock c && c.kind == org.avp.block.conveyor.ConveyorBlock.Kind.PROCESSING)
         {

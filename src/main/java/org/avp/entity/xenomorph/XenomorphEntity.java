@@ -67,6 +67,54 @@ public abstract class XenomorphEntity extends Monster
     /** The hive it belongs to (HiveData), or null. */
     @Nullable
     private java.util.UUID hiveId;
+    /** Lab-grown and bonded to someone (see org.avp.entity.xenomorph.lab.XenoBond). */
+    @Nullable
+    private org.avp.entity.xenomorph.lab.XenoBond bond;
+
+    @Nullable
+    public org.avp.entity.xenomorph.lab.XenoBond bond()
+    {
+        return bond;
+    }
+
+    public boolean isBonded()
+    {
+        return bond != null;
+    }
+
+    /** Makes it a bonded pet of this player. */
+    public org.avp.entity.xenomorph.lab.XenoBond bondTo(java.util.UUID owner)
+    {
+        bond = new org.avp.entity.xenomorph.lab.XenoBond(this, owner);
+        bond.install();
+        return bond;
+    }
+
+    @Override
+    protected net.minecraft.world.InteractionResult mobInteract(net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand)
+    {
+        if (bond != null)
+        {
+            net.minecraft.world.InteractionResult r = bond.interact(player, hand);
+            if (r != net.minecraft.world.InteractionResult.PASS)
+            {
+                return r;
+            }
+        }
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
+    public boolean isAlliedTo(net.minecraft.world.entity.Entity other)
+    {
+        return bond != null && bond.allied(other) || super.isAlliedTo(other);
+    }
+
+    @Override
+    public boolean removeWhenFarAway(double distance)
+    {
+        return bond == null && super.removeWhenFarAway(distance);
+    }
 
     @Nullable
     public java.util.UUID hiveId()
@@ -805,7 +853,11 @@ public abstract class XenomorphEntity extends Monster
             updateStuck();
         }
         // watch for water and lava getting into the hive
-        if (tickCount % 40 == Math.floorMod(getId(), 40) && level() instanceof ServerLevel server && hiveId != null)
+        if (bond != null && level() instanceof ServerLevel bonded)
+        {
+            bond.serverTick(bonded);
+        }
+        if (tickCount % 40 == Math.floorMod(getId(), 40) && level() instanceof ServerLevel server && hiveId != null && bond == null)
         {
             org.avp.world.hive.Hive hive = hive();
             if (hive != null && blockPosition().distSqr(hive.core()) <= Math.pow(hive.buildRadius(server.getGameTime(),
@@ -814,7 +866,7 @@ public abstract class XenomorphEntity extends Monster
                 hive.checkForLeaks(server, blockPosition(), 5);
             }
         }
-        if (tickCount % 100 == Math.floorMod(getId(), 100) && level() instanceof ServerLevel server)
+        if (tickCount % 100 == Math.floorMod(getId(), 100) && level() instanceof ServerLevel server && bond == null)
         {
             updateHive(server);
         }
@@ -1058,6 +1110,10 @@ public abstract class XenomorphEntity extends Monster
         {
             tag.putUUID("PackLeader", packLeader);
         }
+        if (bond != null)
+        {
+            tag.put("Bond", bond.save());
+        }
     }
 
     @Override
@@ -1072,6 +1128,11 @@ public abstract class XenomorphEntity extends Monster
         }
         packLeader = tag.hasUUID("PackLeader") ? tag.getUUID("PackLeader") : null;
         hiveId = tag.hasUUID("Hive") ? tag.getUUID("Hive") : null;
+        if (tag.contains("Bond"))
+        {
+            bond = org.avp.entity.xenomorph.lab.XenoBond.load(this, tag.getCompound("Bond"));
+            bond.install();
+        }
     }
 
     /** Walks to royal jelly it can see nearby (when not busy fighting). */

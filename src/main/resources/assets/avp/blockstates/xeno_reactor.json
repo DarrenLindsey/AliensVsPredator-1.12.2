@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "avp:block/xeno_reactor"
+    },
+    "lit=true": {
+      "model": "avp:block/xeno_reactor_on"
+    }
+  }
+}

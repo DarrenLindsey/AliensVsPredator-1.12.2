@@ -270,7 +270,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
         {
             bossBar.setProgress(getHealth() / getMaxHealth());
         }
-        if (getTarget() != null || hunger() < 40 || ++eggTimer < AvpConfig.server(AvpConfig.SERVER.queenEggTicks))
+        if (isNoAi() || getTarget() != null || hunger() < 40 || ++eggTimer < AvpConfig.server(AvpConfig.SERVER.queenEggTicks)) // a contained Queen lays into her cell
         {
             return;
         }

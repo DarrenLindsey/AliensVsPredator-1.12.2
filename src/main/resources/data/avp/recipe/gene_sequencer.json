@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "QPQ",
+    "MSM",
+    "IHI"
+  ],
+  "key": {
+    "Q": {
+      "item": "minecraft:quartz_block"
+    },
+    "P": {
+      "item": "avp:part_processor"
+    },
+    "M": {
+      "item": "avp:part_motherboard"
+    },
+    "S": {
+      "item": "avp:seegson_terminal"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "H": {
+      "item": "avp:bio_syringe"
+    }
+  },
+  "result": {
+    "id": "avp:gene_sequencer",
+    "count": 1
+  }
+}

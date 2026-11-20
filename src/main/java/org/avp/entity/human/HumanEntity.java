@@ -102,6 +102,10 @@ public class HumanEntity extends PathfinderMob
         {
             return joe.isRogue();
         }
+        if (e instanceof org.avp.entity.xenomorph.XenomorphEntity x && x.isBonded())
+        {
+            return false;
+        }
         if (e instanceof HumanEntity || e.getType().is(ModTags.XENOMORPHS) && e instanceof org.avp.entity.xenomorph.OvamorphEntity)
         {
             return false;

@@ -108,7 +108,7 @@ public class DroneEntity extends XenomorphEntity
     public void tick()
     {
         super.tick();
-        if (!level().isClientSide && tickCount % 100 == 37 && level() instanceof net.minecraft.server.level.ServerLevel server)
+        if (!level().isClientSide && tickCount % 100 == 37 && !isBonded() && level() instanceof net.minecraft.server.level.ServerLevel server)
         {
             takeUpCaste(server);
             if (isRemoved())

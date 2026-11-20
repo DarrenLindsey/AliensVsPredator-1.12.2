@@ -211,6 +211,7 @@ public final class ClientSetup
         event.register(ModMenus.PNEUMATIC_STATION.get(), org.avp.client.screen.PneumaticStationScreen::new);
         event.register(ModMenus.SEISMIC_DRILL.get(), org.avp.client.screen.SeismicDrillScreen::new);
         event.register(ModMenus.CRAFTING_BELT.get(), org.avp.client.screen.CraftingBeltScreen::new);
+        event.register(ModMenus.XENO_LAB.get(), org.avp.client.screen.LabScreen::new);
     }
 
     /** Wrap the slope/corner/... models so they can show a copied block's texture. */

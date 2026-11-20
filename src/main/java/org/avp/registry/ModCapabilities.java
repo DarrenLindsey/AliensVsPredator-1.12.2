@@ -58,6 +58,12 @@ public final class ModCapabilities
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.CONVEYOR.get(), (be, side) -> be.input);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.CONVEYOR.get(), (be, side) -> be.energyFor());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.BELT_ANCHOR.get(), (be, side) -> be.input);
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.XENO_LAB.get(), (be, side) -> be.energyFor());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.XENO_LAB.get(), (be, side) -> be.items);
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.QUEEN_CELL.get(), (be, side) -> be.energyFor());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.QUEEN_CELL.get(), (be, side) -> be.handler);
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.XENO_REACTOR.get(), (be, side) -> be.energyFor());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.XENO_REACTOR.get(), (be, side) -> be.fuel);
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.HOSE_ANCHOR.get(), (be, side) -> be.tank);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.REFINERY.get(), (be, side) -> be.energyFor());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.PNEUMATIC_STATION.get(), (be, side) -> be.automation);

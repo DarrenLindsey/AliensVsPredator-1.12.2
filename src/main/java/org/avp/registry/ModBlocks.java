@@ -308,6 +308,14 @@ public final class ModBlocks
             () -> new org.avp.block.conveyor.spline.SplineAnchorBlock(org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.HOSE,
                     BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(2.0F, 6.0F).noOcclusion()));
 
+    // ---- Weyland-Yutani genetics (org.avp.entity.xenomorph.lab) ----
+    public static final DeferredBlock<org.avp.entity.xenomorph.lab.QueenCellBlock> QUEEN_CELL = register("queen_cell", Tab.BLOCKS,
+            () -> new org.avp.entity.xenomorph.lab.QueenCellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
+                    .strength(10F, 1200F).requiresCorrectToolForDrops().lightLevel(s -> 6)));
+    public static final DeferredBlock<org.avp.entity.xenomorph.lab.XenoReactorBlock> XENO_REACTOR = register("xeno_reactor", Tab.BLOCKS,
+            () -> new org.avp.entity.xenomorph.lab.XenoReactorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL)
+                    .strength(8F, 30F).requiresCorrectToolForDrops().lightLevel(s -> s.getValue(org.avp.entity.xenomorph.lab.XenoReactorBlock.LIT) ? 11 : 3)));
+
     // ---- Seegson PneuPost (org.avp.pneumatic) ----
     public static final DeferredBlock<org.avp.pneumatic.TubeBlock> PNEUMATIC_TUBE = register("pneumatic_tube", Tab.BLOCKS,
             () -> new org.avp.pneumatic.TubeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).sound(SoundType.GLASS).strength(0.6F).noOcclusion()));

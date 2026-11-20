@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "OBO",
+    "BRB",
+    "OBO"
+  ],
+  "key": {
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "B": {
+      "item": "minecraft:iron_bars"
+    },
+    "R": {
+      "item": "avp:fusion_reactor"
+    }
+  },
+  "result": {
+    "id": "avp:queen_cell",
+    "count": 1
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "avp:block/gene_sequencer_front",
+    "side": "avp:block/lab_side",
+    "top": "avp:block/lab_top"
+  }
+}

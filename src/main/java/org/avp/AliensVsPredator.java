@@ -37,6 +37,7 @@ public class AliensVsPredator
         org.avp.registry.ModGear.load();
         org.avp.refining.Refining.load();
         org.avp.pneumatic.Pneumatics.load();
+        org.avp.entity.xenomorph.lab.XenoLab.load();
         org.avp.registry.ModFluids.load();
         org.avp.registry.ModFluids.TYPES.register(modBus);
         org.avp.registry.ModFluids.FLUIDS.register(modBus);

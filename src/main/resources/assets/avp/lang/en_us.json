@@ -1111,5 +1111,12 @@
   "item.avp.belt_spool": "Belt Spool",
   "item.avp.express_belt_spool": "Express Belt Spool",
   "item.avp.cable_spool": "Power Cable Spool",
-  "item.avp.hose_spool": "Hose Spool"
+  "item.avp.hose_spool": "Hose Spool",
+  "block.avp.gene_sequencer": "W-Y Gene Sequencer",
+  "block.avp.incubation_tank": "W-Y Incubation Tank",
+  "block.avp.queen_cell": "Queen Containment Cell",
+  "block.avp.xeno_reactor": "Xeno Bio-Reactor",
+  "item.avp.bio_syringe": "Bio-Sampling Syringe",
+  "item.avp.xeno_dna_sample": "Xenomorph DNA Sample",
+  "item.avp.xeno_embryo_template": "Xenomorph Embryo Template"
 }

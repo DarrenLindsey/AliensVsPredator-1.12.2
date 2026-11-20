@@ -395,3 +395,9 @@ The 1.12.2 mod needed MDXLib. It is **not** included: it has no open-source lice
 author asks that it isn't packaged with other mods, and it only works on 1.12.2 anyway. Instead,
 the port has its own code that does the same jobs (e.g. `tools/convert_models.py` and
 `org.avp.client.render`), using MDXLib's source only as a reference for how things behaved.
+
+## Xeno genetics, Queen containment, Bio-Reactor
+- Package `org.avp.entity.xenomorph.lab`: Gene Sequencer and Incubation Tank (LabBlock/LabBlockEntity/LabMenu/LabScreen), Bio-Sampling Syringe, DNA sample, embryo template, XenoTrait, XenoBond (bonded pets: follow/stay/guard/work), XenoWorker (JOE-SCRIPT subset).
+- QueenCellBlock(Entity): capture or lab-grown Queen, power plus meat, integrity and breakout, egg and royal jelly output.
+- XenoReactorBlock(Entity): eggs to 8,192 FE/t, water cooling, facehugger hatch and scram.
+- Player guide: docs/XENO-GENETICS.md.

@@ -32,6 +32,9 @@ public final class ModMenus
     public static final DeferredHolder<MenuType<?>, MenuType<org.avp.block.conveyor.CraftingBeltMenu>> CRAFTING_BELT = MENUS.register("crafting_belt",
             () -> IMenuTypeExtension.create(org.avp.block.conveyor.CraftingBeltMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<org.avp.entity.xenomorph.lab.LabMenu>> XENO_LAB = MENUS.register("xeno_lab",
+            () -> IMenuTypeExtension.create(org.avp.entity.xenomorph.lab.LabMenu::new));
+
     private ModMenus()
     {
     }

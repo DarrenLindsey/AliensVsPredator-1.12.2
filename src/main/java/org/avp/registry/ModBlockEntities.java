@@ -72,6 +72,14 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.conveyor.spline.HoseAnchorBlockEntity>> HOSE_ANCHOR = BLOCK_ENTITIES.register("hose_anchor",
             () -> BlockEntityType.Builder.of(org.avp.block.conveyor.spline.HoseAnchorBlockEntity::new, ModBlocks.HOSE_ANCHOR.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.entity.xenomorph.lab.LabBlockEntity>> XENO_LAB = BLOCK_ENTITIES.register("xeno_lab",
+            () -> BlockEntityType.Builder.of(org.avp.entity.xenomorph.lab.LabBlockEntity::new,
+                    org.avp.entity.xenomorph.lab.XenoLab.BLOCKS.values().stream().map(b -> (net.minecraft.world.level.block.Block) b.get()).toArray(net.minecraft.world.level.block.Block[]::new)).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.entity.xenomorph.lab.QueenCellBlockEntity>> QUEEN_CELL = BLOCK_ENTITIES.register("queen_cell",
+            () -> BlockEntityType.Builder.of(org.avp.entity.xenomorph.lab.QueenCellBlockEntity::new, ModBlocks.QUEEN_CELL.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.entity.xenomorph.lab.XenoReactorBlockEntity>> XENO_REACTOR = BLOCK_ENTITIES.register("xeno_reactor",
+            () -> BlockEntityType.Builder.of(org.avp.entity.xenomorph.lab.XenoReactorBlockEntity::new, ModBlocks.XENO_REACTOR.get()).build(null));
+
     /** Lockers and supply crates (64-slot inventory). */
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",

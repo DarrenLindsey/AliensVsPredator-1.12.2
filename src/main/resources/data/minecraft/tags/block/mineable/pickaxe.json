@@ -160,6 +160,10 @@
     "avp:conveyor_extractor",
     "avp:belt_anchor",
     "avp:cable_pylon",
-    "avp:hose_anchor"
+    "avp:hose_anchor",
+    "avp:gene_sequencer",
+    "avp:incubation_tank",
+    "avp:queen_cell",
+    "avp:xeno_reactor"
   ]
 }

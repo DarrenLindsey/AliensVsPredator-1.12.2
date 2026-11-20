@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "avp:block/xeno_reactor_on",
+    "top": "avp:block/xeno_reactor_top",
+    "bottom": "avp:block/xeno_reactor_top"
+  }
+}

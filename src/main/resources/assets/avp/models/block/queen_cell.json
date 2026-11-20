@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "avp:block/queen_cell_side",
+    "top": "avp:block/queen_cell_top",
+    "bottom": "avp:block/queen_cell_side"
+  }
+}

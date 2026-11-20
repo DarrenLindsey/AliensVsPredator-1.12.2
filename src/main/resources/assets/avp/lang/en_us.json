@@ -1098,5 +1098,11 @@
   "block.avp.seismic_drill": "Weyland-Yutani Seismic Drill",
   "block.avp.drill_casing": "Seismic Drill Casing",
   "item.avp.power_loader": "Power Loader",
-  "entity.avp.power_loader": "Power Loader"
+  "entity.avp.power_loader": "Power Loader",
+  "block.avp.conveyor_logic": "Logic Belt (programmable)",
+  "block.avp.conveyor_processing": "Processing Belt",
+  "block.avp.conveyor_crafting": "Crafting Belt",
+  "block.avp.conveyor_storage": "Storage Belt",
+  "block.avp.conveyor_extractor": "Extractor Belt",
+  "message.avp.extractor_filter": "Extractor: only pulls %s (sneak-use to clear)"
 }

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    {
+      "item": "avp:conveyor"
+    },
+    {
+      "item": "avp:part_processor"
+    },
+    {
+      "item": "minecraft:comparator"
+    }
+  ],
+  "result": {
+    "id": "avp:conveyor_logic",
+    "count": 1
+  }
+}

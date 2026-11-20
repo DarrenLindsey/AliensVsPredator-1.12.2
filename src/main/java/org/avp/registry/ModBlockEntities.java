@@ -47,7 +47,8 @@ public final class ModBlockEntities
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.conveyor.ConveyorBlockEntity>> CONVEYOR = BLOCK_ENTITIES.register("conveyor",
             () -> BlockEntityType.Builder.of(org.avp.block.conveyor.ConveyorBlockEntity::new, ModBlocks.CONVEYOR.get(), ModBlocks.CONVEYOR_EXPRESS.get(),
-                    ModBlocks.CONVEYOR_SORTING.get()).build(null));
+                    ModBlocks.CONVEYOR_SORTING.get(), ModBlocks.CONVEYOR_LOGIC.get(), ModBlocks.CONVEYOR_PROCESSING.get(), ModBlocks.CONVEYOR_CRAFTING.get(),
+                    ModBlocks.CONVEYOR_STORAGE.get(), ModBlocks.CONVEYOR_EXTRACTOR.get()).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.refining.RefineryBlockEntity>> REFINERY = BLOCK_ENTITIES.register("refinery",
             () -> BlockEntityType.Builder.of(org.avp.refining.RefineryBlockEntity::new,

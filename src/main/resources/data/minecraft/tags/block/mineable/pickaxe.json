@@ -152,6 +152,11 @@
     "avp:apollo_core",
     "avp:apollo_bank",
     "avp:seismic_drill",
-    "avp:drill_casing"
+    "avp:drill_casing",
+    "avp:conveyor_logic",
+    "avp:conveyor_processing",
+    "avp:conveyor_crafting",
+    "avp:conveyor_storage",
+    "avp:conveyor_extractor"
   ]
 }

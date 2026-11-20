@@ -188,3 +188,33 @@ Use the crate on the ground; right-click to climb in; sneak-click to open its 27
 maintenance jack to crate it again. Runs on a battery (charge it at a Joe Charger or feed it lithium ingots).
 Inside: you mine 4x faster, 3x3 at a time, and everything goes into the hold; empty-handed attacks are 16-damage loader
 punches; empty-handed right-click on a block lifts it (chests keep their contents) and right-click again sets it down.
+
+## Smart belts
+Every belt carries items, mobs and players; at the end of a line items go into whatever container is there; hoppers,
+pipes and Joes can put items on a belt; redstone stops a belt. The smart belts (each crafted from a Conveyor Belt):
+
+| belt | does |
+|---|---|
+| Sorting Belt | items matching its filter (use an item on it) go left |
+| **Logic Belt** | runs a **BeltScript** for every item (right-click to edit) - route it left/right/straight/back, or store it; keeps variables; drives a redstone signal |
+| **Processing Belt** | holds each item in the middle and SMELTs, BLASTs, CRUSHes or WASHes it (right-click to change); 16 FE/t |
+| **Crafting Belt** | set a 3x3 recipe (right-click); it takes the ingredients that pass (up to 4 crafts' worth), crafts, and sends the result on; everything else rides past |
+| **Storage Belt** | keeps what arrives (27 slots x 1,024); a redstone signal releases it a stack at a time; hoppers/Joes can take from it |
+| **Extractor Belt** | pulls items out of the container behind it onto the line (use an item on it to filter) |
+
+### BeltScript
+```
+# runs top to bottom for every item; the first route wins
+set n = n + 1                 # variables keep their values
+if tag("c:ores"): left        # item tags
+if is("cobblestone"): store   # item ids (minecraft: optional)
+if count >= 32: right
+if contains(name, "Diamond"): back
+if n % 3 == 0: left           # every third item
+unless redstone: straight
+signal n % 16                 # redstone output 0-15
+straight                      # default
+```
+Values: `item` (id), `name`, `count`, `n` (items seen), `redstone`, `time`, your variables.
+Functions: `is(id)`, `tag(t)`, `contains(a, b)`, `random(n)`, `chance(pct)`, `min max abs floor`.
+Routes: `left right straight back store`.

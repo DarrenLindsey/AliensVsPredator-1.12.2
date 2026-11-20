@@ -207,6 +207,7 @@ public final class ClientSetup
         event.register(ModMenus.REFINERY.get(), org.avp.client.screen.RefineryScreen::new);
         event.register(ModMenus.PNEUMATIC_STATION.get(), org.avp.client.screen.PneumaticStationScreen::new);
         event.register(ModMenus.SEISMIC_DRILL.get(), org.avp.client.screen.SeismicDrillScreen::new);
+        event.register(ModMenus.CRAFTING_BELT.get(), org.avp.client.screen.CraftingBeltScreen::new);
     }
 
     /** Wrap the slope/corner/... models so they can show a copied block's texture. */

@@ -3,14 +3,23 @@ package org.avp.block.conveyor;
 import javax.annotation.Nullable;
 
 import org.avp.config.AvpConfig;
+import org.avp.registry.ModBlockEntities;
 
 import com.mojang.serialization.MapCodec;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -19,11 +28,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -32,9 +44,11 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /**
- * A conveyor belt: carries items, mobs and players along. At the end it feeds items into a container;
- * hoppers and pipes (and Joes' "put") can load it from the side or top. A redstone signal stops it.
- * The sorting kind sends items matching its filter off to its left.
+ * A conveyor belt: carries items, mobs and players along; at the end it feeds items into a container.
+ * Kinds: NORMAL and EXPRESS carry; SORTING sends its filter item left; LOGIC runs a BeltScript for each
+ * item; PROCESSING smelts / blasts / crushes / washes items in passing; CRAFTING collects a 3x3 recipe's
+ * ingredients and crafts; STORAGE keeps what arrives (redstone releases it); EXTRACTOR pulls items out
+ * of the container behind it. A redstone signal stops a belt (except STORAGE, where it means release).
  */
 public class ConveyorBlock extends BaseEntityBlock
 {
@@ -44,13 +58,18 @@ public class ConveyorBlock extends BaseEntityBlock
 
     public enum Kind
     {
-        NORMAL(1.0), EXPRESS(2.2), SORTING(1.0);
+        NORMAL(1.0), EXPRESS(2.2), SORTING(1.0), LOGIC(1.0), PROCESSING(1.0), CRAFTING(1.0), STORAGE(1.0), EXTRACTOR(1.0);
 
         final double speed;
 
         Kind(double speed)
         {
             this.speed = speed;
+        }
+
+        boolean handlesItems()
+        {
+            return this == SORTING || this == LOGIC || this == CRAFTING || this == STORAGE;
         }
     }
 
@@ -101,36 +120,26 @@ public class ConveyorBlock extends BaseEntityBlock
         return new ConveyorBlockEntity(pos, state);
     }
 
+    @Nullable
     @Override
-    protected net.minecraft.world.ItemInteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos,
-            Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit)
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
     {
-        if (kind != Kind.SORTING || !(level.getBlockEntity(pos) instanceof ConveyorBlockEntity be))
-        {
-            return net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-        if (!level.isClientSide)
-        {
-            be.setFilter(stack);
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.conveyor_filter", stack.getHoverName()), true);
-        }
-        return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide || kind != Kind.STORAGE && kind != Kind.EXTRACTOR ? null
+                : createTickerHelper(type, ModBlockEntities.CONVEYOR.get(), ConveyorBlockEntity::serverTick);
+    }
+
+    // ------------------------------------------------------------------ redstone
+
+    @Override
+    protected boolean isSignalSource(BlockState state)
+    {
+        return kind == Kind.LOGIC;
     }
 
     @Override
-    protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
-            net.minecraft.world.phys.BlockHitResult hit)
+    protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir)
     {
-        if (kind == Kind.SORTING && level.getBlockEntity(pos) instanceof ConveyorBlockEntity be && !level.isClientSide)
-        {
-            if (player.isShiftKeyDown())
-            {
-                be.setFilter(net.minecraft.world.item.ItemStack.EMPTY);
-            }
-            player.displayClientMessage(be.filter().isEmpty() ? net.minecraft.network.chat.Component.translatable("message.avp.conveyor_no_filter")
-                    : net.minecraft.network.chat.Component.translatable("message.avp.conveyor_filter", be.filter().getHoverName()), true);
-        }
-        return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide);
+        return kind == Kind.LOGIC && level.getBlockEntity(pos) instanceof ConveyorBlockEntity be ? be.signal() : 0;
     }
 
     @Override
@@ -143,29 +152,140 @@ public class ConveyorBlock extends BaseEntityBlock
         }
     }
 
-    /** Where an item on this belt goes next: straight on, or (sorting) off to the left when it matches. */
-    Direction exitFor(Level level, BlockPos pos, BlockState state, Entity entity)
+    // ------------------------------------------------------------------ using it
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
+            BlockHitResult hit)
     {
-        Direction facing = state.getValue(FACING);
-        if (kind == Kind.SORTING && entity instanceof ItemEntity item && level.getBlockEntity(pos) instanceof ConveyorBlockEntity be
-                && be.matches(item.getItem()))
+        if (kind != Kind.SORTING && kind != Kind.EXTRACTOR || !(level.getBlockEntity(pos) instanceof ConveyorBlockEntity be))
         {
-            return facing.getCounterClockWise();
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        return facing;
+        if (!level.isClientSide)
+        {
+            be.setFilter(stack);
+            player.displayClientMessage(Component.translatable(kind == Kind.SORTING ? "message.avp.conveyor_filter" : "message.avp.extractor_filter",
+                    stack.getHoverName()), true);
+        }
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
+    {
+        if (level.isClientSide || !(level.getBlockEntity(pos) instanceof ConveyorBlockEntity be))
+        {
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+        switch (kind)
+        {
+            case SORTING, EXTRACTOR ->
+            {
+                if (player.isShiftKeyDown())
+                {
+                    be.setFilter(ItemStack.EMPTY);
+                }
+                player.displayClientMessage(be.filter().isEmpty() ? Component.translatable("message.avp.conveyor_no_filter")
+                        : Component.translatable(kind == Kind.SORTING ? "message.avp.conveyor_filter" : "message.avp.extractor_filter", be.filter().getHoverName()), true);
+            }
+            case PROCESSING ->
+            {
+                be.cycleProcess();
+                player.displayClientMessage(Component.literal("Processing belt: " + be.process()).withStyle(ChatFormatting.GOLD), true);
+            }
+            case LOGIC ->
+            {
+                if (player instanceof ServerPlayer sp)
+                {
+                    ConveyorPayloads.open(sp, be);
+                }
+            }
+            case CRAFTING ->
+            {
+                player.openMenu(new net.minecraft.world.SimpleMenuProvider((id, inv, p) -> new CraftingBeltMenu(id, inv, be),
+                        Component.translatable("block.avp.conveyor_crafting")), buf -> buf.writeBlockPos(pos));
+            }
+            case STORAGE ->
+            {
+                int total = 0, kinds = 0;
+                for (int i = 0; i < be.buffer.getSlots(); i++)
+                {
+                    if (!be.buffer.getStackInSlot(i).isEmpty())
+                    {
+                        total += be.buffer.getStackInSlot(i).getCount();
+                        kinds++;
+                    }
+                }
+                player.displayClientMessage(Component.literal("Storage belt: " + total + " items in " + kinds + "/27 slots"
+                        + (state.getValue(POWERED) ? " - RELEASING" : " - storing (redstone to release)")).withStyle(ChatFormatting.GOLD), true);
+            }
+            default ->
+            {
+            }
+        }
+        return InteractionResult.CONSUME;
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving)
+    {
+        if (!state.is(next.getBlock()) && level.getBlockEntity(pos) instanceof ConveyorBlockEntity be)
+        {
+            for (int i = 0; i < be.buffer.getSlots(); i++)
+            {
+                ItemStack s = be.buffer.getStackInSlot(i);
+                while (!s.isEmpty())
+                {
+                    Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), s.split(64));
+                }
+            }
+        }
+        super.onRemove(state, level, pos, next, moving);
+    }
+
+    // ------------------------------------------------------------------ moving things
 
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity)
     {
-        if (state.getValue(POWERED) || entity.getY() > pos.getY() + 0.5 || entity.isShiftKeyDown() || entity instanceof Player p && p.getAbilities().flying)
+        boolean stopped = state.getValue(POWERED) && kind != Kind.STORAGE;
+        if (stopped || entity.getY() > pos.getY() + 0.5 || entity.isShiftKeyDown() || entity instanceof Player p && p.getAbilities().flying)
         {
             return;
         }
-        Direction dir = exitFor(level, pos, state, entity);
-        double speed = 0.08 * kind.speed * AvpConfig.server(AvpConfig.SERVER.conveyorSpeed);
+        Direction facing = state.getValue(FACING);
+        Direction dir = facing;
         Vec3 centre = Vec3.atCenterOf(pos);
-        // push along, and pull towards the middle of the belt
+        if (entity instanceof ItemEntity item && level.getBlockEntity(pos) instanceof ConveyorBlockEntity be)
+        {
+            var data = item.getPersistentData();
+            boolean handledHere = data.getLong("avpBeltAt") == pos.asLong() && level.getGameTime() - data.getLong("avpBeltTime") < 200;
+            double off = Math.abs(item.getX() - centre.x) + Math.abs(item.getZ() - centre.z);
+            if (!level.isClientSide && kind == Kind.PROCESSING && off < 0.3 && be.process(item))
+            {
+                item.setPos(centre.x, item.getY(), centre.z);
+                item.setDeltaMovement(0, item.getDeltaMovement().y, 0);
+                return;
+            }
+            if (!level.isClientSide && kind.handlesItems() && !handledHere && off < 0.3)
+            {
+                Direction to = be.onItem(item, facing);
+                data.putLong("avpBeltAt", pos.asLong());
+                data.putLong("avpBeltTime", level.getGameTime());
+                data.putInt("avpBeltDir", to == null ? -1 : to.get3DDataValue());
+                if (to == null || !item.isAlive())
+                {
+                    return;
+                }
+                handledHere = true;
+            }
+            if (handledHere && data.getInt("avpBeltDir") >= 2)
+            {
+                dir = Direction.from3DDataValue(data.getInt("avpBeltDir"));
+            }
+        }
+        double speed = 0.08 * kind.speed * AvpConfig.server(AvpConfig.SERVER.conveyorSpeed);
         double along = dir.getAxis() == Direction.Axis.X ? entity.getX() - centre.x : entity.getZ() - centre.z;
         double side = dir.getAxis() == Direction.Axis.X ? centre.z - entity.getZ() : centre.x - entity.getX();
         Vec3 push = new Vec3(dir.getStepX() * speed, 0, dir.getStepZ() * speed);

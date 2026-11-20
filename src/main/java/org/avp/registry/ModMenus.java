@@ -29,6 +29,9 @@ public final class ModMenus
     public static final DeferredHolder<MenuType<?>, MenuType<org.avp.mining.SeismicDrillMenu>> SEISMIC_DRILL = MENUS.register("seismic_drill",
             () -> IMenuTypeExtension.create(org.avp.mining.SeismicDrillMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<org.avp.block.conveyor.CraftingBeltMenu>> CRAFTING_BELT = MENUS.register("crafting_belt",
+            () -> IMenuTypeExtension.create(org.avp.block.conveyor.CraftingBeltMenu::new));
+
     private ModMenus()
     {
     }

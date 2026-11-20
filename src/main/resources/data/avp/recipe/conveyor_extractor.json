@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    {
+      "item": "avp:conveyor"
+    },
+    {
+      "item": "minecraft:hopper"
+    },
+    {
+      "item": "avp:part_servo"
+    }
+  ],
+  "result": {
+    "id": "avp:conveyor_extractor",
+    "count": 1
+  }
+}

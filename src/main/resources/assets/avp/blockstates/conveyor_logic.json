@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,powered=false": {
+      "model": "avp:block/conveyor_logic"
+    },
+    "facing=east,powered=false": {
+      "model": "avp:block/conveyor_logic",
+      "y": 90
+    },
+    "facing=south,powered=false": {
+      "model": "avp:block/conveyor_logic",
+      "y": 180
+    },
+    "facing=west,powered=false": {
+      "model": "avp:block/conveyor_logic",
+      "y": 270
+    },
+    "facing=north,powered=true": {
+      "model": "avp:block/conveyor_logic"
+    },
+    "facing=east,powered=true": {
+      "model": "avp:block/conveyor_logic",
+      "y": 90
+    },
+    "facing=south,powered=true": {
+      "model": "avp:block/conveyor_logic",
+      "y": 180
+    },
+    "facing=west,powered=true": {
+      "model": "avp:block/conveyor_logic",
+      "y": 270
+    }
+  }
+}

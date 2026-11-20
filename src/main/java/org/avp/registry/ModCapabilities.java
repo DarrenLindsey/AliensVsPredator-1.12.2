@@ -56,6 +56,7 @@ public final class ModCapabilities
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.JOE_CHARGER.get(), (be, side) -> be.energyFor());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.SEEGSON_TERMINAL.get(), (be, side) -> be.energyFor());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.CONVEYOR.get(), (be, side) -> be.input);
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.CONVEYOR.get(), (be, side) -> be.energyFor());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.REFINERY.get(), (be, side) -> be.energyFor());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.PNEUMATIC_STATION.get(), (be, side) -> be.automation);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.COMPRESSOR.get(), (be, side) -> be.energyFor());

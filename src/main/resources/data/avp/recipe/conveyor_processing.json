@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    {
+      "item": "avp:conveyor"
+    },
+    {
+      "item": "minecraft:blast_furnace"
+    },
+    {
+      "item": "avp:part_powersupply"
+    }
+  ],
+  "result": {
+    "id": "avp:conveyor_processing",
+    "count": 1
+  }
+}

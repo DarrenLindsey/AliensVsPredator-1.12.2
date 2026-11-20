@@ -115,6 +115,15 @@ public final class ModNetwork
         });
         registrar.playToClient(org.avp.pneumatic.StationPayloads.Info.TYPE, org.avp.pneumatic.StationPayloads.Info.CODEC,
                 (payload, context) -> org.avp.client.screen.PneumaticStationScreen.info(payload.data()));
+        registrar.playToServer(org.avp.block.conveyor.ConveyorPayloads.Save.TYPE, org.avp.block.conveyor.ConveyorPayloads.Save.CODEC, (payload, context) ->
+        {
+            if (context.player() instanceof net.minecraft.server.level.ServerPlayer player)
+            {
+                org.avp.block.conveyor.ConveyorPayloads.handle(player, payload);
+            }
+        });
+        registrar.playToClient(org.avp.block.conveyor.ConveyorPayloads.Info.TYPE, org.avp.block.conveyor.ConveyorPayloads.Info.CODEC,
+                (payload, context) -> org.avp.client.screen.LogicBeltScreen.info(payload.data()));
         registrar.playToClient(VisionModePayload.TYPE, VisionModePayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.visionMode(payload.mode()));
     }

@@ -281,6 +281,22 @@ public final class ModBlocks
             () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.SORTING,
                     BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
 
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR_LOGIC = register("conveyor_logic", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.LOGIC,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR_PROCESSING = register("conveyor_processing", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.PROCESSING,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR_CRAFTING = register("conveyor_crafting", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.CRAFTING,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR_STORAGE = register("conveyor_storage", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.STORAGE,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.ConveyorBlock> CONVEYOR_EXTRACTOR = register("conveyor_extractor", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.EXTRACTOR,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
+
     // ---- Seegson PneuPost (org.avp.pneumatic) ----
     public static final DeferredBlock<org.avp.pneumatic.TubeBlock> PNEUMATIC_TUBE = register("pneumatic_tube", Tab.BLOCKS,
             () -> new org.avp.pneumatic.TubeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).sound(SoundType.GLASS).strength(0.6F).noOcclusion()));

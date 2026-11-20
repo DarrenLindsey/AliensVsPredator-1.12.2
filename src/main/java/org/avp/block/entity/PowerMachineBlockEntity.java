@@ -92,7 +92,8 @@ public class PowerMachineBlockEntity extends BlockEntity
     private long netCapacity;
     private int netMaking;
     private int netLoad, netLoadCap;
-    private boolean netOverload;
+    private boolean netOverload, netHigh;
+    private int netLoss;
 
     /** Status-message details: solar array size, linked power cells. */
     private int arrayPanels = 1;
@@ -459,8 +460,8 @@ public class PowerMachineBlockEntity extends BlockEntity
     /** Totals up the network attached to any powerline touching the terminal. */
     private void scanNetwork(Level level, BlockPos pos)
     {
-        int lines = -1, devices = 0, making = 0, load = 0, loadCap = PowerNetwork.capacity();
-        boolean overload = false;
+        int lines = -1, devices = 0, making = 0, load = 0, loadCap = PowerNetwork.capacity(), loss = 0;
+        boolean overload = false, high = false;
         long stored = 0, capacity = 0;
         for (Direction dir : Direction.values())
         {
@@ -472,6 +473,9 @@ public class PowerMachineBlockEntity extends BlockEntity
             lines = network.conductors().size();
             load = PowerNetwork.lastLoad(level, network);
             overload = PowerNetwork.isOverloaded(level, network);
+            loadCap = PowerNetwork.capacity(network);
+            high = network.highVoltage();
+            loss = Math.round(network.loss() * 100);
             for (PowerNetwork.Target target : network.targets())
             {
                 devices++;
@@ -489,7 +493,7 @@ public class PowerMachineBlockEntity extends BlockEntity
             break;
         }
         if (lines != netLines || devices != netDevices || stored != netStored || capacity != netCapacity || making != netMaking
-                || Math.abs(load - netLoad) > 16 || overload != netOverload || loadCap != netLoadCap)
+                || Math.abs(load - netLoad) > 16 || overload != netOverload || loadCap != netLoadCap || high != netHigh || loss != netLoss)
         {
             netLines = lines;
             netDevices = devices;
@@ -499,6 +503,8 @@ public class PowerMachineBlockEntity extends BlockEntity
             netLoad = load;
             netLoadCap = loadCap;
             netOverload = overload;
+            netHigh = high;
+            netLoss = loss;
             sync();
         }
     }
@@ -518,6 +524,8 @@ public class PowerMachineBlockEntity extends BlockEntity
         lines.add(Component.translatable("terminal.avp.network", netLines, netDevices));
         lines.add(Component.translatable("terminal.avp.stored", String.format("%,d", netStored), String.format("%,d", netCapacity)));
         lines.add(Component.translatable("terminal.avp.making", netMaking));
+        lines.add(netHigh ? Component.translatable("terminal.avp.voltage_high").withStyle(net.minecraft.ChatFormatting.GOLD)
+                : Component.translatable("terminal.avp.voltage_low", netLoss));
         lines.add(Component.translatable("terminal.avp.load", String.format("%,d", netLoad), String.format("%,d", netLoadCap)));
         if (netOverload)
         {
@@ -682,6 +690,8 @@ public class PowerMachineBlockEntity extends BlockEntity
         tag.putInt("NetLoad", netLoad);
         tag.putInt("NetLoadCap", netLoadCap);
         tag.putBoolean("NetOverload", netOverload);
+        tag.putBoolean("NetHigh", netHigh);
+        tag.putInt("NetLoss", netLoss);
         return tag;
     }
 
@@ -698,6 +708,8 @@ public class PowerMachineBlockEntity extends BlockEntity
         netLoad = tag.getInt("NetLoad");
         netLoadCap = tag.getInt("NetLoadCap");
         netOverload = tag.getBoolean("NetOverload");
+        netHigh = tag.getBoolean("NetHigh");
+        netLoss = tag.getInt("NetLoss");
     }
 
     @Override

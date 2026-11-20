@@ -1018,5 +1018,7 @@
   "message.avp.breaker_open": "Breaker open - line cut",
   "message.avp.reactor_status": "Lithium: %s | Burn: %ss | Stored: %s FE | Core heat: %s%%",
   "terminal.avp.load": "LINE LOAD: %s / %s FE/t",
-  "terminal.avp.overload": "!! LINE OVERLOAD !!"
+  "terminal.avp.overload": "!! LINE OVERLOAD !!",
+  "terminal.avp.voltage_high": "LINE: HIGH VOLTAGE - step down before use",
+  "terminal.avp.voltage_low": "LINE: LOW VOLTAGE (%s%% loss)"
 }

@@ -209,6 +209,9 @@ public final class AvpConfig
         public final ModConfigSpec.BooleanValue biomaskNightVision;
         public final ModConfigSpec.BooleanValue grenadesBreakBlocks;
         public final ModConfigSpec.IntValue powerlineCapacity;
+        public final ModConfigSpec.IntValue highVoltageMultiplier;
+        public final ModConfigSpec.IntValue lowVoltageLossPer16;
+        public final ModConfigSpec.BooleanValue highVoltageBurnsDevices;
         public final ModConfigSpec.BooleanValue powerlinesBurnOut;
         public final ModConfigSpec.BooleanValue xenosCutPower;
         public final ModConfigSpec.IntValue reactorOutput;
@@ -305,7 +308,7 @@ public final class AvpConfig
                     .defineInRange("repulsionOutputPerMagnet", 10, 0, 100_000);
             transformerRate = b
                     .comment("Most FE per tick a transformer passes from its back to its front.")
-                    .defineInRange("transformerRate", 4096, 1, 1_000_000);
+                    .defineInRange("transformerRate", 16384, 1, 1_000_000);
             stepdownTransformerRate = b
                     .comment("Most FE per tick a step-down transformer passes (use it to limit how much power flows).")
                     .defineInRange("stepdownTransformerRate", 256, 1, 1_000_000);
@@ -492,6 +495,15 @@ public final class AvpConfig
             powerlineCapacity = b
                     .comment("FE per tick one powerline network can carry. Forcing more through it overloads it: it sparks, arcs, and may burn out (a breaker trips instead).")
                     .defineInRange("powerlineCapacity", 4096, 64, 1_000_000);
+            highVoltageMultiplier = b
+                    .comment("A line fed by a step-up transformer's front is high voltage: it carries this many times more, loses nothing over distance - and fries any device on it that isn't a transformer or power cell. Step it down to use it.")
+                    .defineInRange("highVoltageMultiplier", 4, 1, 64);
+            lowVoltageLossPer16 = b
+                    .comment("Percent of power lost per 16 powerlines on a low-voltage line (up to 50%). 0 = no loss.")
+                    .defineInRange("lowVoltageLossPer16", 2, 0, 50);
+            highVoltageBurnsDevices = b
+                    .comment("Devices left on a high-voltage line can burn out (break) instead of only sparking and refusing the power.")
+                    .define("highVoltageBurnsDevices", false);
             powerlinesBurnOut = b
                     .comment("Overloaded powerlines can burn out (a section breaks).")
                     .define("powerlinesBurnOut", true);

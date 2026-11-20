@@ -45,8 +45,52 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 public final class PowerNetwork
 {
     /** One connected run of powerlines and the blocks it can feed. */
-    public record Network(Set<BlockPos> conductors, List<Target> targets, boolean tooBig)
+    public record Network(Set<BlockPos> conductors, List<Target> targets, boolean tooBig, boolean highVoltage)
     {
+        /** Power lost on the way along a low-voltage line (long low-voltage runs waste power; high voltage doesn't). */
+        public float loss()
+        {
+            if (highVoltage)
+            {
+                return 0F;
+            }
+            return Math.min(0.5F, conductors.size() / 16 * AvpConfig.server(AvpConfig.SERVER.lowVoltageLossPer16) / 100F);
+        }
+    }
+
+    /**
+     * Whether a device may draw from a high-voltage line: only transformers and power cells can.
+     * Anything else would be fried by it.
+     */
+    public static boolean takesHighVoltage(Level level, BlockPos pos)
+    {
+        return level.getBlockEntity(pos) instanceof PowerMachineBlockEntity machine
+                && (machine.kind().isTransformer() || machine.kind() == PowerMachineBlock.Kind.POWERCELL);
+    }
+
+    /** A step-up transformer whose output (front) faces into the line makes the whole line high voltage. */
+    private static boolean feedsHighVoltage(Level level, Target target)
+    {
+        BlockState state = level.getBlockState(target.pos());
+        return state.getBlock() instanceof PowerMachineBlock block && block.kind() == PowerMachineBlock.Kind.TRANSFORMER
+                && state.getValue(PowerMachineBlock.FACING) == target.side();
+    }
+
+    /** A device on a high-voltage line that can't take it: sparks, refuses the power, and may burn out. */
+    private static void fry(Level level, BlockPos pos)
+    {
+        if (level.random.nextInt(40) != 0 || !(level instanceof net.minecraft.server.level.ServerLevel server))
+        {
+            return;
+        }
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5,
+                8, 0.3, 0.2, 0.3, 0.1);
+        server.playSound(null, pos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 1.5F);
+        if (AvpConfig.server(AvpConfig.SERVER.highVoltageBurnsDevices) && level.random.nextInt(10) == 0)
+        {
+            level.destroyBlock(pos, true);
+            invalidate(level);
+        }
     }
 
     /** A block next to the network and the side of it that touches the powerline. */
@@ -74,6 +118,12 @@ public final class PowerNetwork
     public static int capacity()
     {
         return AvpConfig.server(AvpConfig.SERVER.powerlineCapacity);
+    }
+
+    /** High-voltage lines carry several times more. */
+    public static int capacity(Network network)
+    {
+        return network.highVoltage() ? capacity() * AvpConfig.server(AvpConfig.SERVER.highVoltageMultiplier) : capacity();
     }
 
     /** FE carried through this network in the last tick, for terminals. */
@@ -230,7 +280,16 @@ public final class PowerNetwork
                 }
             }
         }
-        Network network = new Network(conductors, new ArrayList<>(targets.values()), tooBig);
+        boolean high = false;
+        for (Target target : targets.values())
+        {
+            if (feedsHighVoltage(level, target))
+            {
+                high = true;
+                break;
+            }
+        }
+        Network network = new Network(conductors, new ArrayList<>(targets.values()), tooBig, high);
         for (BlockPos pos : conductors)
         {
             cache.byConductor.put(pos, network);
@@ -382,12 +441,20 @@ public final class PowerNetwork
             IEnergyStorage storage = level.getCapability(Capabilities.EnergyStorage.BLOCK, target.pos(), target.side());
             if (storage != null && storage.canReceive())
             {
+                if (network.highVoltage() && !takesHighVoltage(level, target.pos()))
+                {
+                    if (!simulate)
+                    {
+                        fry(level, target.pos());
+                    }
+                    continue;
+                }
                 receivers.add(storage);
             }
         }
         // the line carries only so much per tick; trying to force more through strains it
         long[] load = loadOf(level, network);
-        int room = (int) Math.max(0, capacity() - load[1]);
+        int room = (int) Math.max(0, capacity(network) - load[1]);
         // what the far end would actually draw (a generator offers its whole buffer; that alone is no overload)
         long demand = 0;
         for (IEnergyStorage receiver : receivers)
@@ -416,17 +483,22 @@ public final class PowerNetwork
             }
         }
         // share evenly; whatever one block can't take is offered to the ones after it
-        int remaining = amount;
+        // a long low-voltage run loses some on the way: the sender pays for it
+        float loss = network.loss();
+        int deliverable = (int) (amount * (1F - loss));
+        int remaining = deliverable;
         for (int i = 0; i < receivers.size() && remaining > 0; i++)
         {
             int share = (remaining + (receivers.size() - i) - 1) / (receivers.size() - i);
             remaining -= receivers.get(i).receiveEnergy(share, simulate);
         }
+        int delivered = deliverable - remaining;
+        int paid = loss <= 0F ? delivered : Math.min(amount, (int) Math.ceil(delivered / (1F - loss)));
         if (!simulate)
         {
-            load[1] += amount - remaining;
+            load[1] += paid;
         }
-        return amount - remaining;
+        return paid;
     }
 
     public static boolean isPowercell(Level level, BlockPos pos)

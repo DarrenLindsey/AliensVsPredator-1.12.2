@@ -1,0 +1,99 @@
+{
+  "has_precipitation": false,
+  "temperature": 1.2,
+  "downfall": 0.0,
+  "effects": {
+    "fog_color": 328450,
+    "sky_color": 1709064,
+    "water_color": 16777062,
+    "water_fog_color": 7039786,
+    "grass_color": 3813408,
+    "foliage_color": 3813408,
+    "mood_sound": {
+      "block_search_extent": 8,
+      "offset": 2.0,
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000
+    }
+  },
+  "carvers": {
+    "air": [
+      "minecraft:cave",
+      "minecraft:cave_extra_underground",
+      "minecraft:canyon"
+    ]
+  },
+  "features": [
+    [],
+    [
+      "avp:varda_lake_blackgoo"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "avp:unistone_gravel",
+      "avp:unistone_coal",
+      "avp:unistone_iron",
+      "avp:unistone_diamond",
+      "avp:unistone_lithium"
+    ],
+    [],
+    [],
+    [
+      "avp:varda_stalagmites",
+      "avp:varda_ground_ferns"
+    ],
+    []
+  ],
+  "spawn_costs": {},
+  "spawners": {
+    "monster": [
+      {
+        "type": "avp:hammerpede",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "avp:goo_mutant",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "avp:babyhead",
+        "weight": 4,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "avp:trilobite",
+        "weight": 3,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "avp:yautja_mutant",
+        "weight": 2,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ],
+    "creature": [],
+    "water_creature": [
+      {
+        "type": "avp:deacon_shark",
+        "weight": 5,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ],
+    "ambient": [],
+    "axolotls": [],
+    "misc": [],
+    "underground_water_creature": [],
+    "water_ambient": []
+  }
+}

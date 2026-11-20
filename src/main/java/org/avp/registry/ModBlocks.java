@@ -248,6 +248,24 @@ public final class ModBlocks
     /** Hardened resin mixed with digested rock: what builder Drones lay hive floors, bridges and seals with. */
     public static final DeferredBlock<Block> HIVESTONE = simple("hivestone", Kind.STONE, 3.0F, 9.0F);
 
+    // ---- Portals to the dimensions (org.avp.world.dimension) ----
+    public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
+            org.avp.world.dimension.ModDimensions.VARDA);
+    public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_ACHERON = portal("portal_acheron",
+            org.avp.world.dimension.ModDimensions.ACHERON);
+
+    private static DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> portal(String id,
+            net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension)
+    {
+        DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> block = BLOCKS.register(id, () -> new org.avp.world.dimension.DimensionPortalBlock(
+                dimension, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(-1F, 3_600_000F).noLootTable().lightLevel(s -> 11)
+                        .noOcclusion().noCollission().sound(SoundType.GLASS)));
+        net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.Item> item = ModItems.ITEMS.register(id,
+                () -> new org.avp.world.dimension.DimensionPortalBlock.PortalItem(block.get(), new net.minecraft.world.item.Item.Properties()));
+        Tab.BLOCKS.add(item);
+        return block;
+    }
+
     /** Hive resin spread by Drones over other blocks (NaturalResinBlock). */
     public static final DeferredBlock<org.avp.block.NaturalResinBlock> NATURAL_RESIN = BLOCKS.register("natural_resin",
             () -> new org.avp.block.NaturalResinBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()

@@ -39,7 +39,8 @@ public final class ModEntityEvents
         event.register(ModEntities.DRONE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Monster::checkMonsterSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
         // catalog creatures with natural spawns (see tools/port_creatures.py)
-        for (String id : NATURAL)
+        // every catalog creature (they also spawn from the dimensions' biomes)
+        for (String id : ModEntities.CATALOG.keySet())
         {
             register(event, ModEntities.CATALOG.get(id).get(), id);
         }

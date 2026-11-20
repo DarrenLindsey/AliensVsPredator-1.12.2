@@ -1,0 +1,11 @@
+{
+  "type": "avp:acheron",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "avp:acheron",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "avp:acheron"
+    }
+  }
+}

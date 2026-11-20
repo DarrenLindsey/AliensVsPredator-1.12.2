@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:artifact_tech",
+      "count": 8
+    },
+    {
+      "item": "minecraft:ender_eye",
+      "count": 4
+    },
+    {
+      "item": "avp:part_processor",
+      "count": 2
+    },
+    {
+      "item": "avp:royaljelly",
+      "count": 4
+    },
+    {
+      "item": "minecraft:obsidian",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "avp:portal_acheron",
+    "count": 1
+  }
+}

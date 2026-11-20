@@ -62,7 +62,11 @@ If something fails, copy the **first** error from the console (or `run/logs/late
 - [ ] Later: network rack (with the Working Joe network), stasis mechanism (with creatures),
       schematics still waiting for their items (guns, armour, Predator gear - listed by tools/port_batch_d.py)
 - [ ] Batch D3 - Make the power system unique and robust (see "Planned: power system" below)
-- [ ] Batch E - Black goo / mist fluids, Varda / Acheron portals
+- [x] Batch E - Black goo fluid (E1: bucket, mutations, phials, leaking ampules), Varda / Acheron dimensions and portals
+      (E2: tools/port_dimensions.py - data-driven: overworld-shaped terrain in unistone/unidirt; Varda forest/badlands
+      with unidentified trees, ferns, stalagmites, black goo lakes, yellow water, Varda wildlife; Acheron always night,
+      barren, Xenomorph-infested; portals (Assembler, Engineer tech) build a return portal beside you).
+      Not ported: the mist fluid (unused in 1.12.2), the Paradise dimension (never finished in 1.12.2).
 - [x] Hive resin, supply crate parachute drop (with the creatures/entities)
 - [x] Ore generation: bauxite, copper, silicon, monazite (overworld), lithium (oceans/beaches/rivers),
       cobalt (jungles), each with a new deepslate version. Data-driven (data/avp/worldgen +
@@ -158,7 +162,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
         chute beacons (unbranded / USCM / Seegson: a drop drifts down and lands as a stocked supply crate,
         data/avp/loot_table/supply/*). MK50 / pressure / Xeno armour are in F2; the maintenance jack already pries
         blast doors. Left for later: spore pod (with the black goo, batch E), NBT drive (with the network rack).
-- [ ] Step 5 - Dimensions (Varda, Acheron) and world generation
+- [x] Step 5 - Dimensions (Varda, Acheron) and world generation (first pass; Acheron derelicts/structures later)
 
 Registry names changed from `shippanel.foo` style to `shippanel_foo` (modern convention).
 Worlds from 1.12.2 can't be loaded in 1.21.1 anyway, so this doesn't break anything.

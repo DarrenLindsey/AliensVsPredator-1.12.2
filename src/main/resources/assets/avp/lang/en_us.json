@@ -1002,5 +1002,14 @@
   "avp.configuration.blackGooMutation": "Black Goo Mutation",
   "avp.configuration.blackGooMutation.tooltip": "Black goo mutates creatures in it (villagers -> goo mutants, silverfish -> Hammerpedes, livestock -> babyheads).",
   "avp.configuration.ampuleLeakChance": "Ampule Leak Chance",
-  "avp.configuration.ampuleLeakChance.tooltip": "Chance an Engineer ampule cracks and leaks each time a phial is filled from it."
+  "avp.configuration.ampuleLeakChance.tooltip": "Chance an Engineer ampule cracks and leaks each time a phial is filled from it.",
+  "block.avp.portal_varda": "Varda Portal",
+  "biome.avp.varda": "Varda",
+  "block.avp.portal_acheron": "Acheron Portal",
+  "biome.avp.acheron": "Acheron",
+  "tooltip.avp.portal_varda": "Engineer technology. Step in to travel to Varda - and back.",
+  "tooltip.avp.portal_acheron": "Engineer technology. Step in to travel to Acheron (LV-426) - and back.",
+  "biome.avp.varda_forest": "Varda Forest",
+  "biome.avp.varda_badlands": "Varda Badlands",
+  "message.avp.portal_arrived": "You arrive on %s."
 }

@@ -1,0 +1,33 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:artifact_tech",
+      "count": 2
+    },
+    {
+      "item": "minecraft:diamond_helmet",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 2
+    },
+    {
+      "item": "avp:part_led_display",
+      "count": 2
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 2
+    },
+    {
+      "item": "avp:part_processor",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:helm_celtic",
+    "count": 1
+  }
+}

@@ -33,6 +33,9 @@ public class AliensVsPredator
     public AliensVsPredator(IEventBus modBus, ModContainer container)
     {
         ModBlocks.BLOCKS.register(modBus);
+        org.avp.registry.ModArmor.load();
+        org.avp.registry.ModGear.load();
+        org.avp.registry.ModArmor.MATERIALS.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModMenus.MENUS.register(modBus);

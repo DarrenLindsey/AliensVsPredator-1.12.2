@@ -80,6 +80,7 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.BUILDER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
         event.registerEntityRenderer(ModEntities.COATER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
         event.registerEntityRenderer(ModEntities.CREATURE_PROJECTILE.get(), NoopRenderer::new); // particles only
+        event.registerEntityRenderer(ModEntities.GRENADE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         ModEntities.CATALOG.forEach((id, type) -> registerCreature(event, type.get(), id));
         event.registerBlockEntityRenderer(ModBlockEntities.POWERED.get(), PoweredBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.BLAST_DOOR.get(), BlastDoorRenderer::new);
@@ -148,7 +149,7 @@ public final class ClientSetup
             public net.minecraft.client.model.HumanoidModel.ArmPose getArmPose(net.minecraft.world.entity.LivingEntity entity,
                     net.minecraft.world.InteractionHand hand, net.minecraft.world.item.ItemStack stack)
             {
-                boolean twoHanded = stack.getItem() instanceof org.avp.item.firearm.FirearmItem gun && gun.firearm().twoHanded();
+                boolean twoHanded = stack.getItem() instanceof org.avp.item.ModelledItem gun && gun.twoHanded();
                 if (twoHanded)
                 {
                     return net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_HOLD; // rifles are held up, ready
@@ -157,7 +158,7 @@ public final class ClientSetup
                         : net.minecraft.client.model.HumanoidModel.ArmPose.ITEM;
             }
         };
-        event.registerItem(guns, org.avp.registry.ModItems.FIREARMS.values().stream().map(net.neoforged.neoforge.registries.DeferredItem::get)
+        event.registerItem(guns, net.minecraft.core.registries.BuiltInRegistries.ITEM.stream().filter(i -> i instanceof org.avp.item.ModelledItem)
                 .toArray(Item[]::new));
     }
 

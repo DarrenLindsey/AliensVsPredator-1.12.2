@@ -5,8 +5,7 @@ import java.util.Map;
 
 import org.avp.AliensVsPredator;
 import org.avp.client.model.GeneratedModel;
-import org.avp.item.firearm.Firearm;
-import org.avp.item.firearm.FirearmItem;
+import org.avp.item.ModelledItem;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -25,7 +24,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Draws a gun item with its 1.12.2 model. The models have their muzzle towards +Z and "up"
+ * Draws a gun (or other modelled item: flamethrower, motion tracker...) with its 1.12.2 model. The models have their muzzle towards +Z and "up"
  * towards -Y; each view turns that the right way: side-on with the muzzle to the right in
  * inventories and item frames, pointing forward out of the hand when held. The model is measured
  * once so it's centred and (in inventories) sized to fit the slot.
@@ -36,7 +35,7 @@ public class FirearmRenderer extends BlockEntityWithoutLevelRenderer
     {
     }
 
-    private final Map<Firearm, Baked> cache = new HashMap<>();
+    private final Map<String, Baked> cache = new HashMap<>();
 
     public FirearmRenderer()
     {
@@ -49,9 +48,9 @@ public class FirearmRenderer extends BlockEntityWithoutLevelRenderer
         cache.clear();
     }
 
-    private Baked bake(Firearm firearm)
+    private Baked bake(ModelledItem f)
     {
-        return cache.computeIfAbsent(firearm, f ->
+        return cache.computeIfAbsent(f.model() + "|" + f.texture(), key ->
         {
             try
             {
@@ -93,11 +92,11 @@ public class FirearmRenderer extends BlockEntityWithoutLevelRenderer
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay)
     {
-        if (!(stack.getItem() instanceof FirearmItem item))
+        if (!(stack.getItem() instanceof ModelledItem item))
         {
             return;
         }
-        Baked gun = bake(item.firearm());
+        Baked gun = bake(item);
         pose.pushPose();
         pose.translate(0.5F, 0.5F, 0.5F);
         switch (context)

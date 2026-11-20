@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "minecraft:wool",
+      "count": 3
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 2
+    },
+    {
+      "item": "avp:part_led_display",
+      "count": 2
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 2
+    },
+    {
+      "item": "avp:part_processor",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:helm_marine",
+    "count": 1
+  }
+}

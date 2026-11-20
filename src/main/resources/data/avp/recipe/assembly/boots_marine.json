@@ -1,0 +1,17 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "minecraft:wool",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:boots_marine",
+    "count": 1
+  }
+}

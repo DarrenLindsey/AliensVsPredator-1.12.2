@@ -76,6 +76,13 @@ public final class ModNetwork
             }
         });
 
+        registrar.playToServer(GearActionPayload.TYPE, GearActionPayload.CODEC, (payload, context) ->
+        {
+            if (context.player() instanceof net.minecraft.server.level.ServerPlayer player)
+            {
+                org.avp.item.gear.GearActions.handle(player, payload.action());
+            }
+        });
         registrar.playToServer(TurretSettingPayload.TYPE, TurretSettingPayload.CODEC, (payload, context) ->
         {
             Player player = context.player();

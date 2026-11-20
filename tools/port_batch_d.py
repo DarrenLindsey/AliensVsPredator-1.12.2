@@ -335,10 +335,22 @@ NAMES = {  # 1.12.2 field -> 1.21 ingredient / result id
     # firearms (batch F1): the M41A and the magazines keep their 1.12.2 schematics
     "itemM41A": "avp:gun_m41a", "itemAmmoPistol": "avp:ammo_pistol", "itemAmmoAR": "avp:ammo_ar",
     "itemAmmoSMG": "avp:ammo_smg", "itemAmmoSniper": "avp:ammo_sniper",
+    "itemGrenade": "avp:grenade_m40", "itemIncendiaryGrenade": "avp:grenade_incendiary", "itemMotionTracker": "avp:motiontracker",
+    "itemM240ICU": "avp:gun_m240icu", "helmMarine": "avp:helm_marine", "plateMarine": "avp:body_marine",
+    "legsMarine": "avp:legs_marine", "bootsMarine": "avp:boots_marine",
+    "biomaskCeltic": "avp:helm_celtic", "chestplateCeltic": "avp:body_celtic", "legsCeltic": "avp:legs_celtic",
+    "bootsCeltic": "avp:boots_celtic", "axeCeltic": "avp:tool_celtic_axe", "pickaxeCeltic": "avp:tool_celtic_pickaxe",
+    "hoeCeltic": "avp:tool_celtic_hoe", "shovelCeltic": "avp:tool_celtic_shovel", "swordCeltic": "avp:tool_celtic_sword",
+    "itemWristbracer": "avp:wristbracer", "itemWristbracerBlades": "avp:wristbracer_blades", "itemProximityMine": "avp:mine_laser",
+    "itemDisc": "avp:smartdisc", "itemShuriken": "avp:shuriken", "itemSpear": "avp:tool_celtic_spear",
+    "itemM41A": "avp:gun_m41a", "turret": "avp:turret",
+    "DIAMOND_HELMET": "minecraft:diamond_helmet", "DIAMOND_CHESTPLATE": "minecraft:diamond_chestplate",
 }
 AVP_IDS = set(re.findall(r'\("([a-z0-9_]+)"', open("src/main/java/org/avp/registry/ModBlocks.java").read()
                          + open("src/main/java/org/avp/registry/ModItems.java").read()))
 # items registered in loops (firearms: org.avp.item.firearm.Firearms / AmmoType)
+AVP_IDS |= set(re.findall(r'item\("([a-z0-9_]+)"', open("src/main/java/org/avp/registry/ModGear.java").read()))
+AVP_IDS |= {f"{p}_{k}" for p in ("helm", "body", "legs", "boots") for k in ("marine", "celtic", "mk50", "pressure", "xeno")}
 AVP_IDS |= {"gun_pistol", "gun_m4", "gun_ak47", "gun_m41a", "gun_m56sg", "gun_sniper", "ammo_pistol", "ammo_ar", "ammo_smg", "ammo_sniper"}
 
 

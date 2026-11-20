@@ -47,8 +47,26 @@ import net.minecraft.world.phys.Vec3;
  * rifle would otherwise waste 2 rounds in 3). The M56 Smartgun steers its rounds onto threats near
  * the crosshair, as in Aliens.
  */
-public class FirearmItem extends Item
+public class FirearmItem extends Item implements org.avp.item.ModelledItem
 {
+    @Override
+    public String model()
+    {
+        return firearm.model();
+    }
+
+    @Override
+    public String texture()
+    {
+        return firearm.texture();
+    }
+
+    @Override
+    public boolean twoHanded()
+    {
+        return firearm.twoHanded();
+    }
+
     private final Firearm firearm;
     /** Last time each shooter's firing sound started (fast guns play it once per burst). */
     private static final Map<LivingEntity, Long> LAST_SOUND = new WeakHashMap<>();

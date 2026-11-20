@@ -207,6 +207,9 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue eggmorphTicks;
         public final ModConfigSpec.BooleanValue yautjaHonourCode;
         public final ModConfigSpec.BooleanValue biomaskNightVision;
+        public final ModConfigSpec.BooleanValue grenadesBreakBlocks;
+        public final ModConfigSpec.BooleanValue flamethrowerIgnites;
+        public final ModConfigSpec.BooleanValue helmetLamp;
         public final ModConfigSpec.BooleanValue yautjaCloak;
         public final ModConfigSpec.BooleanValue marinesAlliedToPlayers;
         public final ModConfigSpec.DoubleValue marineRifleDamage;
@@ -465,6 +468,15 @@ public final class AvpConfig
             eggmorphTicks = b
                     .comment("How long a cocooned host takes to turn into an egg (ticks; 24000 = one day).")
                     .defineInRange("eggmorphTicks", 24_000, 200, 1_728_000);
+            grenadesBreakBlocks = b
+                    .comment("Grenades blow up blocks (off: they only hurt creatures).")
+                    .define("grenadesBreakBlocks", false);
+            flamethrowerIgnites = b
+                    .comment("Flamethrowers set blocks alight where the flames land (they always burn hive resin).")
+                    .define("flamethrowerIgnites", true);
+            helmetLamp = b
+                    .comment("The Colonial Marine helmet's lamp lights up the dark where you look.")
+                    .define("helmetLamp", true);
             biomaskNightVision = b
                     .comment("Wearing a Yautja biomask gives night vision (Yautja vision; more vision modes come with the Predator gear).")
                     .define("biomaskNightVision", true);

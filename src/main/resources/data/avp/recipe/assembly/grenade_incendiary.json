@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 1
+    },
+    {
+      "item": "minecraft:blaze_powder",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:grenade_incendiary",
+    "count": 2
+  }
+}

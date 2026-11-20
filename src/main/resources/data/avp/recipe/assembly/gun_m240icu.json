@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 4
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 3
+    },
+    {
+      "item": "minecraft:blaze_rod",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 6
+    }
+  ],
+  "result": {
+    "id": "avp:gun_m240icu",
+    "count": 1
+  }
+}

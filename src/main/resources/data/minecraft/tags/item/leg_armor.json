@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "avp:legs_marine",
+    "avp:legs_celtic",
+    "avp:legs_mk50",
+    "avp:legs_pressure",
+    "avp:legs_xeno"
+  ]
+}

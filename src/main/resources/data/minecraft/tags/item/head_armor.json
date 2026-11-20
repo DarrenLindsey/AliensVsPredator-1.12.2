@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "avp:helm_marine",
+    "avp:helm_celtic",
+    "avp:helm_mk50",
+    "avp:helm_pressure",
+    "avp:helm_xeno"
+  ]
+}

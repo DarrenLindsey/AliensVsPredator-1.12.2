@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:artifact_tech",
+      "count": 1
+    },
+    {
+      "item": "minecraft:diamond_chestplate",
+      "count": 1
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 3
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 3
+    }
+  ],
+  "result": {
+    "id": "avp:body_celtic",
+    "count": 1
+  }
+}

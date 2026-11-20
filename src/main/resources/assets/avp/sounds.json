@@ -339,5 +339,23 @@
     "sounds": [
       "avp:items/weapons/cooldown"
     ]
+  },
+  "weapons.flamethrower": {
+    "subtitle": "subtitles.avp.weapons.flamethrower",
+    "sounds": [
+      "avp:items/weapons/flamethrower/shoot0"
+    ]
+  },
+  "motiontracker.ping": {
+    "subtitle": "subtitles.avp.motiontracker",
+    "sounds": [
+      "avp:items/motiontracker/ping"
+    ]
+  },
+  "motiontracker.pong": {
+    "subtitle": "subtitles.avp.motiontracker",
+    "sounds": [
+      "avp:items/motiontracker/pong"
+    ]
   }
 }

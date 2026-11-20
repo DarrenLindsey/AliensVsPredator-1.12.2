@@ -23,7 +23,8 @@ public final class BiomaskEvents
     public static boolean isBiomask(ItemStack stack)
     {
         return stack.is(ModBlocks.BIOMASK_CLASSIC.asItem()) || stack.is(ModBlocks.BIOMASK_BERSERKER.asItem())
-                || stack.is(ModBlocks.BIOMASK_FALCONER.asItem()) || stack.is(ModBlocks.BIOMASK_TRACKER.asItem());
+                || stack.is(ModBlocks.BIOMASK_FALCONER.asItem()) || stack.is(ModBlocks.BIOMASK_TRACKER.asItem())
+                || stack.is(org.avp.registry.ModArmor.SETS.get("celtic").get(0).get()); // the Celtic helmet is a biomask
     }
 
     @SubscribeEvent

@@ -145,7 +145,11 @@ If something fails, copy the **first** error from the console (or `run/logs/late
         recoil, sneak-use / automatic reload, hitscan rounds (shatter glass, tear resin), ammo bar + red HUD counter,
         3D models (FirearmRenderer); Assembler schematics (gun parts dropped - they never had icons); Marines carry
         the M41A, synthetics the Smartgun. tools/port_batch_f.py
-  - [ ] F2 Marine kit: M41A grenade launcher, M40 grenades, M240 incinerator, motion tracker, Marine armour (+ helmet lamp)
+  - [x] F2 Marine kit: M40 + incendiary grenades (thrown, bounce, 2.5 s fuse) and the M41A grenade launcher (G key),
+        M240 incinerator + Sevastopol flamethrower (propane tanks; burn resin), M314 motion tracker (HUD sweep, ping/pong),
+        armour sets: Marine (helmet lamp), Celtic (helmet = biomask), MK50 + pressure suit (sealed: water breathing),
+        Xeno chitin (acid-proof). Gear keys: org.avp.client.GearKeys / GearActionPayload.
+  - [x] Builders clear blocks placed inside a finished room's or gallery's space.
   - [ ] F3 Yautja gear: wrist blades, plasma caster, smart disc, shuriken, spear, wristbracer (self-destruct, cloak),
         biomask vision modes, Celtic armour
   - [ ] F4 W-Y and other kit: MK50, pressure suit, anti-vacuum armour, Xeno armour, stun baton, maintenance jack,

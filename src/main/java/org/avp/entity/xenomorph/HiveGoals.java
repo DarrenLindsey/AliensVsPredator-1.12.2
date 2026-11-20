@@ -696,7 +696,8 @@ public final class HiveGoals
     }
 
     /**
-     * Builder Drones: they secrete hivestone to make the hive whole - floors over holes and drops,
+     * Builder Drones: they keep the hive to its plan - clearing anything placed where a room or gallery
+ * should be open - and secrete hivestone to make it whole: floors over holes and drops,
      * floors under galleries that cross open space, seals over water and lava leaking in, a roof
      * over any room open to the sky - and pave the room floors in it.
      */
@@ -705,6 +706,8 @@ public final class HiveGoals
         private final DroneEntity drone;
         @Nullable
         private BlockPos job;
+        /** The job is clearing a block out of the hive's planned space (not placing hivestone). */
+        private boolean clearing;
         private int ticks;
 
         public BuildHiveGoal(DroneEntity drone)
@@ -740,6 +743,25 @@ public final class HiveGoals
                 return null;
             }
             net.minecraft.util.RandomSource random = drone.getRandom();
+            clearing = false;
+            // something placed where a finished room or gallery should be open (a player's wall, say): clear it
+            for (int probe = 0; probe < 12; probe++)
+            {
+                org.avp.world.hive.Room room = rooms.get(random.nextInt(rooms.size()));
+                java.util.List<BlockPos> space = org.avp.world.hive.HivePlanner.digList(room);
+                if (!room.done() || space.isEmpty())
+                {
+                    continue;
+                }
+                BlockPos p = space.get(random.nextInt(space.size()));
+                BlockState s = level.getBlockState(p);
+                if (!s.isAir() && !s.is(org.avp.registry.ModBlocks.HIVERESIN_STANDARD.get()) // resin columns are meant to be there
+                        && org.avp.world.hive.HivePlanner.diggable(level, p) && org.avp.world.hive.HivePlanner.openSide(level, p) != null)
+                {
+                    clearing = true;
+                    return p;
+                }
+            }
             BlockPos paving = null;
             for (int probe = 0; probe < 24; probe++)
             {
@@ -834,6 +856,21 @@ public final class HiveGoals
             ServerLevel level = (ServerLevel) drone.level();
             drone.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(job));
             drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            if (clearing)
+            {
+                // tear it out (no drops: it's crushed and carried off)
+                if (org.avp.world.hive.HivePlanner.diggable(level, job))
+                {
+                    level.destroyBlock(job, false, drone);
+                    Hive hive = drone.hive();
+                    if (hive != null)
+                    {
+                        hive.checkForLeaks(level, job, 1);
+                    }
+                }
+                job = null;
+                return;
+            }
             level.setBlock(job, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
             level.playSound(null, job, SoundEvents.MUD_PLACE, SoundSource.HOSTILE, 0.8F, 0.6F);
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.ITEM_SLIME, job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 4, 0.3, 0.1, 0.3, 0.02);

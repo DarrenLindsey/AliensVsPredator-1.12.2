@@ -4,6 +4,9 @@
     "avp:biomask_classic",
     "avp:biomask_berserker",
     "avp:biomask_falconer",
-    "avp:biomask_tracker"
+    "avp:biomask_tracker",
+    "avp:helm_celtic",
+    "avp:helm_pressure",
+    "avp:helm_mk50"
   ]
 }

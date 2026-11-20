@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "avp:helm_marine",
+    "avp:helm_celtic",
+    "avp:helm_mk50",
+    "avp:helm_pressure",
+    "avp:helm_xeno",
+    "avp:body_marine",
+    "avp:body_celtic",
+    "avp:body_mk50",
+    "avp:body_pressure",
+    "avp:body_xeno",
+    "avp:legs_marine",
+    "avp:legs_celtic",
+    "avp:legs_mk50",
+    "avp:legs_pressure",
+    "avp:legs_xeno",
+    "avp:boots_marine",
+    "avp:boots_celtic",
+    "avp:boots_mk50",
+    "avp:boots_pressure",
+    "avp:boots_xeno"
+  ]
+}

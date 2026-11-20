@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "avp:boots_marine",
+    "avp:boots_celtic",
+    "avp:boots_mk50",
+    "avp:boots_pressure",
+    "avp:boots_xeno"
+  ]
+}

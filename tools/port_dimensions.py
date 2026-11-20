@@ -128,7 +128,7 @@ biome("varda_forest", temperature=0.7, sky=0x0b1420, fog=0x020206, water=0xFFFF6
       monsters=VARDA_MOBS, water_creatures=[("avp:deacon_shark", 5, 1, 1)],
       particle={"options": {"type": "minecraft:white_ash"}, "probability": 0.003})
 biome("varda_badlands", temperature=1.2, sky=0x1a1408, fog=0x050302, water=0xFFFF66, water_fog=0x6b6b2a, grass=0x3a3020,
-      features={1: ["avp:varda_lake_blackgoo"], 6: UNI_ORES, 9: ["avp:varda_stalagmites", "avp:varda_ground_ferns"]},
+      features={1: ["avp:varda_lake_blackgoo"], 6: UNI_ORES, 9: ["avp:varda_ground_ferns", "avp:varda_stalagmites"]},  # same order as the forest (the game requires it)
       monsters=VARDA_MOBS[2:], water_creatures=[("avp:deacon_shark", 5, 1, 1)])
 biome("acheron", temperature=0.2, sky=0x05070a, fog=0x000308, water=0x2a3540, water_fog=0x050a10, grass=0x303030,
       features={6: UNI_ORES, 9: ["avp:acheron_stalagmites"]}, precipitation=True,

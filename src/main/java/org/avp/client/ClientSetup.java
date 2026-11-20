@@ -52,6 +52,7 @@ public final class ClientSetup
         AllModelLayers.register(event);
         event.registerLayerDefinition(BlastDoorRenderer.ALARM_LAYER, BlastDoorRenderer::createAlarmLight);
         event.registerLayerDefinition(org.avp.client.render.HumanRenderer.LAYER, org.avp.client.render.HumanRenderer::createLayer);
+        event.registerLayerDefinition(org.avp.client.render.PowerLoaderRenderer.LAYER, org.avp.client.render.PowerLoaderRenderer::createLayer);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -80,6 +81,7 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.BUILDER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
         event.registerEntityRenderer(ModEntities.WORKING_JOE.get(), org.avp.client.render.WorkingJoeRenderer::new);
         event.registerEntityRenderer(ModEntities.CAPSULE.get(), org.avp.client.render.CapsuleRenderer::new);
+        event.registerEntityRenderer(ModEntities.POWER_LOADER.get(), org.avp.client.render.PowerLoaderRenderer::new);
         event.registerEntityRenderer(ModEntities.COATER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
         event.registerEntityRenderer(ModEntities.CREATURE_PROJECTILE.get(), NoopRenderer::new); // particles only
         event.registerEntityRenderer(ModEntities.GRENADE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
@@ -204,6 +206,7 @@ public final class ClientSetup
         event.register(ModMenus.TURRET.get(), org.avp.client.screen.TurretScreen::new);
         event.register(ModMenus.REFINERY.get(), org.avp.client.screen.RefineryScreen::new);
         event.register(ModMenus.PNEUMATIC_STATION.get(), org.avp.client.screen.PneumaticStationScreen::new);
+        event.register(ModMenus.SEISMIC_DRILL.get(), org.avp.client.screen.SeismicDrillScreen::new);
     }
 
     /** Wrap the slope/corner/... models so they can show a copied block's texture. */

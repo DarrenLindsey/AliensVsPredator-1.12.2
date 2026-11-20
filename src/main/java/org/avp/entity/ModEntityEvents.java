@@ -23,6 +23,7 @@ public final class ModEntityEvents
         event.put(ModEntities.FACEHUGGER.get(), FacehuggerEntity.createAttributes().build());
         event.put(ModEntities.DRONE.get(), org.avp.entity.xenomorph.DroneEntity.createAttributes().build());
         event.put(ModEntities.WORKING_JOE.get(), org.avp.entity.joe.WorkingJoeEntity.createAttributes().build());
+        event.put(ModEntities.POWER_LOADER.get(), org.avp.mining.PowerLoaderEntity.createAttributes().build());
         event.put(ModEntities.BUILDER_DRONE.get(), org.avp.entity.xenomorph.BuilderDroneEntity.createAttributes().build());
         event.put(ModEntities.COATER_DRONE.get(), org.avp.entity.xenomorph.CoaterDroneEntity.createAttributes().build());
         event.put(ModEntities.OVAMORPH.get(), org.avp.entity.xenomorph.OvamorphEntity.createAttributes().build());

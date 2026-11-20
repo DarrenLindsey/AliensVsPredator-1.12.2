@@ -60,6 +60,8 @@ public final class ModCapabilities
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.PNEUMATIC_STATION.get(), (be, side) -> be.automation);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.COMPRESSOR.get(), (be, side) -> be.energyFor());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.APOLLO_CORE.get(), (be, side) -> be.energyFor());
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.SEISMIC_DRILL.get(), (be, side) -> be.energyFor());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.SEISMIC_DRILL.get(), (be, side) -> be.output());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.APOLLO_CORE.get(), (be, side) -> be.handler);
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.REFINERY.get(), (be, side) -> be.itemsFor(side));
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.REFINERY.get(), (be, side) -> be.fluidsFor());

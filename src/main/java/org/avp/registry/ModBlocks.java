@@ -297,6 +297,14 @@ public final class ModBlocks
             () -> new org.avp.apollo.ApolloBankBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(4.0F, 10.0F)
                     .requiresCorrectToolForDrops()));
 
+    // ---- Weyland-Yutani mining (org.avp.mining) ----
+    public static final DeferredBlock<org.avp.mining.SeismicDrillBlock> SEISMIC_DRILL = register("seismic_drill", Tab.BLOCKS,
+            () -> new org.avp.mining.SeismicDrillBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(6.0F, 20.0F)
+                    .requiresCorrectToolForDrops()));
+    public static final DeferredBlock<org.avp.mining.DrillCasingBlock> DRILL_CASING = register("drill_casing", Tab.BLOCKS,
+            () -> new org.avp.mining.DrillCasingBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).sound(SoundType.METAL).strength(4.0F, 12.0F)
+                    .requiresCorrectToolForDrops()));
+
     // ---- Portals to the dimensions (org.avp.world.dimension) ----
     public static final DeferredBlock<org.avp.world.dimension.DimensionPortalBlock> PORTAL_VARDA = portal("portal_varda",
             org.avp.world.dimension.ModDimensions.VARDA);

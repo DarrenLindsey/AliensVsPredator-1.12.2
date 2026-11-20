@@ -26,6 +26,9 @@ public final class ModMenus
     public static final DeferredHolder<MenuType<?>, MenuType<org.avp.pneumatic.PneumaticStationMenu>> PNEUMATIC_STATION = MENUS.register("pneumatic_station",
             () -> IMenuTypeExtension.create(org.avp.pneumatic.PneumaticStationMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<org.avp.mining.SeismicDrillMenu>> SEISMIC_DRILL = MENUS.register("seismic_drill",
+            () -> IMenuTypeExtension.create(org.avp.mining.SeismicDrillMenu::new));
+
     private ModMenus()
     {
     }

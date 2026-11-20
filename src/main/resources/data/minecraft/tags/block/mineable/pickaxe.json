@@ -150,6 +150,8 @@
     "avp:pneumatic_station",
     "avp:pneumatic_compressor",
     "avp:apollo_core",
-    "avp:apollo_bank"
+    "avp:apollo_bank",
+    "avp:seismic_drill",
+    "avp:drill_casing"
   ]
 }

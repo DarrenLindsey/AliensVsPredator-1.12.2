@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "DMD",
+    "CHC"
+  ],
+  "key": {
+    "P": {
+      "item": "avp:part_processor"
+    },
+    "S": {
+      "item": "avp:part_sensor_array"
+    },
+    "D": {
+      "item": "minecraft:diamond_pickaxe"
+    },
+    "M": {
+      "item": "avp:part_motherboard"
+    },
+    "C": {
+      "item": "avp:drill_casing"
+    },
+    "H": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "id": "avp:seismic_drill",
+    "count": 1
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "avp:block/seismic_drill_side",
+    "top": "avp:block/seismic_drill_top",
+    "bottom": "avp:block/seismic_drill_bottom"
+  }
+}

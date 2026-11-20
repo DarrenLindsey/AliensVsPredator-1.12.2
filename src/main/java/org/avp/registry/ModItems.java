@@ -142,6 +142,9 @@ public final class ModItems
             JOE_UPGRADES.put(kind, ITEMS.register(kind.itemName(), () -> new org.avp.entity.joe.JoeUpgradeItem(kind, new Item.Properties().stacksTo(16))));
         }
     }
+    /** A crated Power Loader (org.avp.mining). */
+    public static final DeferredItem<Item> POWER_LOADER = ITEMS.register("power_loader",
+            () -> new org.avp.mining.PowerLoaderItem(new Item.Properties().stacksTo(1)));
     /** The Seegson field tablet (remote terminal). */
     public static final DeferredItem<Item> JOE_TABLET = ITEMS.register("joe_tablet",
             () -> new org.avp.entity.joe.JoeTabletItem(new Item.Properties().stacksTo(1)));
@@ -158,6 +161,7 @@ public final class ModItems
         Tab.MAIN.add(BUILDER_DRONE_SPAWN_EGG);
         Tab.MAIN.add(WORKING_JOE);
         Tab.MAIN.add(JOE_TABLET);
+        Tab.MAIN.add(POWER_LOADER);
         JOE_UPGRADES.values().forEach(Tab.MAIN::add);
         Tab.MAIN.add(COATER_DRONE_SPAWN_EGG);
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);

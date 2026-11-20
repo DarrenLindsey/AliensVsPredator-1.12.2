@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IPI",
+    "SCS",
+    "B B"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "P": {
+      "item": "avp:part_powersupply"
+    },
+    "S": {
+      "item": "avp:part_servo"
+    },
+    "C": {
+      "item": "minecraft:chest"
+    },
+    "B": {
+      "item": "minecraft:piston"
+    }
+  },
+  "result": {
+    "id": "avp:power_loader",
+    "count": 1
+  }
+}

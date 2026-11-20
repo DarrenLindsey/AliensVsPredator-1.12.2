@@ -67,7 +67,8 @@ public final class PowerNetwork
         return level.getBlockEntity(pos) instanceof PowerMachineBlockEntity machine
                 && (machine.kind().isTransformer() || machine.kind() == PowerMachineBlock.Kind.POWERCELL)
                 || level.getBlockEntity(pos) instanceof org.avp.block.entity.AtmosphereProcessorBlockEntity // heavy industrial plant
-                || level.getBlockEntity(pos) instanceof org.avp.refining.RefineryBlockEntity refinery && refinery.kind.highVoltage();
+                || level.getBlockEntity(pos) instanceof org.avp.refining.RefineryBlockEntity refinery && refinery.kind.highVoltage()
+                || level.getBlockEntity(pos) instanceof org.avp.mining.SeismicDrillBlockEntity;
     }
 
     /** A step-up transformer whose output (front) faces into the line makes the whole line high voltage. */

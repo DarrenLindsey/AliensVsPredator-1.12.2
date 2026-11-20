@@ -1094,5 +1094,9 @@
   "item.avp.pneumatic_canister": "PneuPost Canister",
   "entity.avp.pneumatic_capsule": "PneuPost Canister",
   "block.avp.apollo_core": "APOLLO Core",
-  "block.avp.apollo_bank": "APOLLO Data Bank"
+  "block.avp.apollo_bank": "APOLLO Data Bank",
+  "block.avp.seismic_drill": "Weyland-Yutani Seismic Drill",
+  "block.avp.drill_casing": "Seismic Drill Casing",
+  "item.avp.power_loader": "Power Loader",
+  "entity.avp.power_loader": "Power Loader"
 }

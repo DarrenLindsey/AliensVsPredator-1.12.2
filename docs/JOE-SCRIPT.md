@@ -175,3 +175,16 @@ The terminal's **FLOW** tab shows a program as blocks, one per line of JOE-SCRIP
 - **UP / DN / DUP / DEL** rearrange; **UPLOAD** sends it to the selected Joe; the block it's running glows.
 - **TO CODE / FROM CODE** convert to and from the text editor. Nothing is lost: a line it has no block for is kept as a
   grey CODE block.
+
+## Weyland-Yutani Seismic Drill
+Build a 3x3 platform of **Seismic Drill Casing** and put the **Seismic Drill** on its centre. Power it (400 FE per block,
+times hardness; it may sit on high voltage). In its panel: **START/STOP**, area **- / +** (up to 33x33), **MODE**
+(QUARRY digs everything; ORE-BORE pulls only ore and backfills with stone, for 3x the power), **SURVEY** (a seismic count
+of the six commonest ores below), **R** to reset. It works top-down to the bottom of the world and pushes its haul into
+any container beside it - a PneuPost station or the APOLLO core make good ones - or holds 27 slots itself.
+
+## Power Loader
+Use the crate on the ground; right-click to climb in; sneak-click to open its 27-slot hold; sneak-click with a
+maintenance jack to crate it again. Runs on a battery (charge it at a Joe Charger or feed it lithium ingots).
+Inside: you mine 4x faster, 3x3 at a time, and everything goes into the hold; empty-handed attacks are 16-damage loader
+punches; empty-handed right-click on a block lifts it (chests keep their contents) and right-click again sets it down.

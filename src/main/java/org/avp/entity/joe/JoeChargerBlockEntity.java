@@ -122,6 +122,13 @@ public class JoeChargerBlockEntity extends BlockEntity
                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, joe.getX(), joe.getY() + 0.3, joe.getZ(), 3, 0.3, 0.2, 0.3, 0.05);
             }
         }
+        for (org.avp.mining.PowerLoaderEntity loader : level.getEntitiesOfClass(org.avp.mining.PowerLoaderEntity.class, new AABB(pos).inflate(1.5, 2, 1.5)))
+        {
+            if (loader.needsCharge())
+            {
+                charger.energy.drain(loader.addCharge(Math.min(rate, charger.energy.getEnergyStored())));
+            }
+        }
         charger.setChanged();
     }
 

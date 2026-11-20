@@ -20,6 +20,10 @@ public final class ModDamageTypes
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "electricity"));
 
     /** Sentry turret rounds. */
+    /** A firearm round (player guns). */
+    public static final ResourceKey<DamageType> BULLET = ResourceKey.create(Registries.DAMAGE_TYPE,
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(org.avp.AliensVsPredator.MOD_ID, "bullet"));
+
     public static final ResourceKey<DamageType> SENTRY = ResourceKey.create(Registries.DAMAGE_TYPE,
             ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "sentry"));
 

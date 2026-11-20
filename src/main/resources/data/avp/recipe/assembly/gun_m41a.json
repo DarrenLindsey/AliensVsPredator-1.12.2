@@ -1,0 +1,37 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "item": "avp:polycarbonate",
+      "count": 8
+    },
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 8
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 6
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 6
+    },
+    {
+      "item": "minecraft:gold_ingot",
+      "count": 4
+    },
+    {
+      "item": "avp:part_ic",
+      "count": 2
+    },
+    {
+      "item": "avp:part_led_display",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:gun_m41a",
+    "count": 1
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 7
+    },
+    {
+      "tag": "minecraft:planks",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 2
+    },
+    {
+      "item": "avp:part_servo",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:gun_ak47",
+    "count": 1
+  }
+}

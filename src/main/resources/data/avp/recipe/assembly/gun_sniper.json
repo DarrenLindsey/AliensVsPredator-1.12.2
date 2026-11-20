@@ -1,0 +1,29 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 6
+    },
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "item": "avp:polycarbonate",
+      "count": 3
+    },
+    {
+      "item": "avp:part_servo",
+      "count": 1
+    },
+    {
+      "item": "minecraft:spyglass",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:gun_sniper",
+    "count": 1
+  }
+}

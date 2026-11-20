@@ -332,9 +332,14 @@ NAMES = {  # 1.12.2 field -> 1.21 ingredient / result id
     "invertedCorner": "avp:invertedcorner", "ridge": "avp:ridge", "pyramid": "avp:pyramid", "invertedRidge": "avp:invertedridge",
     "invertedPyramid": "avp:invertedpyramid", "medpod": "avp:medpod", "universalGenerator": "avp:universalgenerator",
     "cryoTube": "avp:cryostasistube", "itemDoritosCoolRanch": "avp:food_doritos_coolranch",
+    # firearms (batch F1): the M41A and the magazines keep their 1.12.2 schematics
+    "itemM41A": "avp:gun_m41a", "itemAmmoPistol": "avp:ammo_pistol", "itemAmmoAR": "avp:ammo_ar",
+    "itemAmmoSMG": "avp:ammo_smg", "itemAmmoSniper": "avp:ammo_sniper",
 }
 AVP_IDS = set(re.findall(r'\("([a-z0-9_]+)"', open("src/main/java/org/avp/registry/ModBlocks.java").read()
                          + open("src/main/java/org/avp/registry/ModItems.java").read()))
+# items registered in loops (firearms: org.avp.item.firearm.Firearms / AmmoType)
+AVP_IDS |= {"gun_pistol", "gun_m4", "gun_ak47", "gun_m41a", "gun_m56sg", "gun_sniper", "ammo_pistol", "ammo_ar", "ammo_smg", "ammo_sniper"}
 
 
 def new_id(field):
@@ -389,6 +394,15 @@ NEW = {
     "satellitedish": ([("#c:ingots/aluminum", 5), ("avp:part_ic", 1), ("avp:part_servo", 1), ("minecraft:iron_block", 1)], 1),
     "tool_securitytuner": ([("avp:part_led_display", 1), ("avp:part_processor", 1), ("avp:polycarbonate", 5),
                             ("minecraft:stone_button", 2)], 1),
+    # firearms (batch F1): 1.12.2 built these from stock/barrel/action parts that never had icons;
+    # the Assembler now fabricates them whole from W-Y components
+    "gun_pistol": ([("#c:ingots/iron", 4), ("#c:ingots/aluminum", 2), ("avp:polycarbonate", 1), ("avp:part_servo", 1)], 1),
+    "gun_m4": ([("#c:ingots/iron", 6), ("#c:ingots/aluminum", 4), ("avp:polycarbonate", 3), ("avp:part_servo", 1)], 1),
+    "gun_ak47": ([("#c:ingots/iron", 7), ("#minecraft:planks", 2), ("#c:ingots/copper", 2), ("avp:part_servo", 1)], 1),
+    "gun_sniper": ([("#c:ingots/iron", 6), ("#c:ingots/aluminum", 4), ("avp:polycarbonate", 3), ("avp:part_servo", 1),
+                    ("minecraft:spyglass", 1)], 1),
+    "gun_m56sg": ([("#c:ingots/iron", 8), ("#c:ingots/aluminum", 8), ("avp:polycarbonate", 6), ("avp:part_servo", 2),
+                   ("avp:part_sensor_array", 1), ("avp:part_processor", 2), ("avp:part_led_display", 1)], 1),
 }
 for result, (ings, count) in NEW.items():
     write_json(f"{assembly_dir}/{result}.json", {"type": "avp:assembly",

@@ -300,5 +300,44 @@
       "avp:items/weapons/pulserifle/shoot2",
       "avp:items/weapons/pulserifle/shoot3"
     ]
+  },
+  "weapons.pistol": {
+    "subtitle": "subtitles.avp.weapons.pistol",
+    "sounds": [
+      "avp:items/weapons/pistol/shoot0",
+      "avp:items/weapons/pistol/shoot1"
+    ]
+  },
+  "weapons.sniper": {
+    "subtitle": "subtitles.avp.weapons.sniper",
+    "sounds": [
+      "avp:items/weapons/sniper/shoot0"
+    ]
+  },
+  "weapons.ak47": {
+    "subtitle": "subtitles.avp.weapons.ak47",
+    "sounds": [
+      "avp:items/weapons/ak47/shoot0"
+    ]
+  },
+  "weapons.m4": {
+    "subtitle": "subtitles.avp.weapons.m4",
+    "sounds": [
+      "avp:items/weapons/m4/shoot0"
+    ]
+  },
+  "weapons.m56sg": {
+    "subtitle": "subtitles.avp.weapons.m56sg",
+    "sounds": [
+      "avp:items/weapons/smartgun/shoot0",
+      "avp:items/weapons/smartgun/shoot1",
+      "avp:items/weapons/smartgun/shoot2"
+    ]
+  },
+  "weapons.reload": {
+    "subtitle": "subtitles.avp.weapons.reload",
+    "sounds": [
+      "avp:items/weapons/cooldown"
+    ]
   }
 }

@@ -39,6 +39,12 @@ public final class ModSounds
     public static final DeferredHolder<SoundEvent, SoundEvent> TURRET_FIRE = sound("blocks.turret.fire");
 
     public static final DeferredHolder<SoundEvent, SoundEvent> PULSE_RIFLE = sound("weapons.pulserifle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PISTOL = sound("weapons.pistol");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SNIPER = sound("weapons.sniper");
+    public static final DeferredHolder<SoundEvent, SoundEvent> AK47 = sound("weapons.ak47");
+    public static final DeferredHolder<SoundEvent, SoundEvent> M4 = sound("weapons.m4");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SMARTGUN = sound("weapons.m56sg");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GUN_RELOAD = sound("weapons.reload");
 
     /** Sound sets of the catalog creatures (CreatureSpec.sounds): "set.event" -> sound. */
     private static final java.util.Map<String, DeferredHolder<SoundEvent, SoundEvent>> CREATURE = new java.util.HashMap<>();

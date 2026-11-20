@@ -127,6 +127,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       springs are filled up to their source (a hivestone pillar), lakes get a hivestone skin. Currents don't
       push Xenomorphs.
 - [ ] Hive pass 2 (later): tuning from play-testing (digging pace, worker count vs castes, room layouts).
+      Bug: a Drone carrying a captured bat (host) stands still - check CarryHostGoal pathing while carrying.
       Builder Drones: lay hivestone (new block) over holes in room floors, under
       galleries that cross open space, over water/lava leaking in, roof rooms open to the sky, pave floors.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.
@@ -139,6 +140,16 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       centre the model on its hitbox (the Drone needed this: its head stuck out 1.3 blocks). The catalog
       renderer auto-centres on the model bounds (tail excluded) as a first pass; animations are generic.
 - [ ] Step 4 - Other creatures, guns, armour, tile entities
+  - [x] F1 firearms (org.avp.item.firearm): 88 Mod 4 pistol, M4, AK-47, M41A pulse rifle, M56 Smartgun (aim assist),
+        sniper rifle; magazines (pistol, rifle, smartgun drum, sniper); hold-use automatic fire at the 1.12.2 rate,
+        recoil, sneak-use / automatic reload, hitscan rounds (shatter glass, tear resin), ammo bar + red HUD counter,
+        3D models (FirearmRenderer); Assembler schematics (gun parts dropped - they never had icons); Marines carry
+        the M41A, synthetics the Smartgun. tools/port_batch_f.py
+  - [ ] F2 Marine kit: M41A grenade launcher, M40 grenades, M240 incinerator, motion tracker, Marine armour (+ helmet lamp)
+  - [ ] F3 Yautja gear: wrist blades, plasma caster, smart disc, shuriken, spear, wristbracer (self-destruct, cloak),
+        biomask vision modes, Celtic armour
+  - [ ] F4 W-Y and other kit: MK50, pressure suit, anti-vacuum armour, Xeno armour, stun baton, maintenance jack,
+        laser mine, spore pod, supply chute
 - [ ] Step 5 - Dimensions (Varda, Acheron) and world generation
 
 Registry names changed from `shippanel.foo` style to `shippanel_foo` (modern convention).

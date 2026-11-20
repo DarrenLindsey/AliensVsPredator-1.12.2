@@ -108,6 +108,26 @@ public final class ModItems
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.OVAMORPH, 0x5A4E3C, 0x2B2620, new Item.Properties()));
     public static final DeferredItem<Item> DRONE_SPAWN_EGG = ITEMS.register("drone_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.DRONE, 0x1A1C20, 0x3B4048, new Item.Properties()));
+    // ---- Firearms (org.avp.item.firearm) ----
+    public static final java.util.Map<String, DeferredItem<Item>> FIREARMS = new java.util.LinkedHashMap<>();
+    public static final java.util.Map<org.avp.item.firearm.AmmoType, DeferredItem<Item>> MAGAZINES = new java.util.EnumMap<>(org.avp.item.firearm.AmmoType.class);
+
+    static
+    {
+        for (org.avp.item.firearm.AmmoType type : org.avp.item.firearm.AmmoType.values())
+        {
+            DeferredItem<Item> mag = ITEMS.register(type.magazine, () -> new org.avp.item.firearm.AmmoItem(type, new Item.Properties()));
+            MAGAZINES.put(type, mag);
+            Tab.MAIN.add(mag);
+        }
+        for (org.avp.item.firearm.Firearm firearm : org.avp.item.firearm.Firearms.ALL.values())
+        {
+            DeferredItem<Item> gun = ITEMS.register(firearm.id(), () -> new org.avp.item.firearm.FirearmItem(firearm, new Item.Properties()));
+            FIREARMS.put(firearm.id(), gun);
+            Tab.MAIN.add(gun);
+        }
+    }
+
     public static final DeferredItem<Item> BUILDER_DRONE_SPAWN_EGG = ITEMS.register("builder_drone_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.BUILDER_DRONE, 0x1A1C20, 0x5A5048, new Item.Properties()));
     public static final DeferredItem<Item> COATER_DRONE_SPAWN_EGG = ITEMS.register("coater_drone_spawn_egg",

@@ -1,0 +1,21 @@
+{
+  "type": "avp:assembly",
+  "ingredients": [
+    {
+      "tag": "c:ingots/aluminum",
+      "count": 4
+    },
+    {
+      "item": "minecraft:gunpowder",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/copper",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "avp:ammo_pistol",
+    "count": 3
+  }
+}

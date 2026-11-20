@@ -38,6 +38,7 @@ public class AliensVsPredator
         ModMenus.MENUS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModSounds.SOUNDS.register(modBus);
+        org.avp.registry.ModDataComponents.COMPONENTS.register(modBus);
         org.avp.registry.ModAttachments.ATTACHMENTS.register(modBus);
         org.avp.registry.ModRecipes.TYPES.register(modBus);
         org.avp.registry.ModRecipes.SERIALIZERS.register(modBus);

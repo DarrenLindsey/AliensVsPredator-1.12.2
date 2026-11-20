@@ -129,6 +129,36 @@ public final class ClientSetup
         event.registerItem(beItems, Arrays.stream(ModBlocks.powerMachines()).filter(b -> b != ModBlocks.REDSTONEEMITTER.get())
                 .map(Block::asItem).toArray(Item[]::new));
         event.registerItem(beItems, ModBlocks.POWERLINE.get().asItem(), ModBlocks.TURRET.get().asItem());
+        // guns: their 3D model, held up and aimed in third person
+        IClientItemExtensions guns = new IClientItemExtensions()
+        {
+            private BlockEntityWithoutLevelRenderer renderer;
+
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer()
+            {
+                if (renderer == null)
+                {
+                    renderer = new org.avp.client.render.FirearmRenderer();
+                }
+                return renderer;
+            }
+
+            @Override
+            public net.minecraft.client.model.HumanoidModel.ArmPose getArmPose(net.minecraft.world.entity.LivingEntity entity,
+                    net.minecraft.world.InteractionHand hand, net.minecraft.world.item.ItemStack stack)
+            {
+                boolean twoHanded = stack.getItem() instanceof org.avp.item.firearm.FirearmItem gun && gun.firearm().twoHanded();
+                if (twoHanded)
+                {
+                    return net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_HOLD; // rifles are held up, ready
+                }
+                return entity.isUsingItem() ? net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW // pistol raised to fire
+                        : net.minecraft.client.model.HumanoidModel.ArmPose.ITEM;
+            }
+        };
+        event.registerItem(guns, org.avp.registry.ModItems.FIREARMS.values().stream().map(net.neoforged.neoforge.registries.DeferredItem::get)
+                .toArray(Item[]::new));
     }
 
     @SubscribeEvent

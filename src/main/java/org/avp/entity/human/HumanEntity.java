@@ -110,6 +110,18 @@ public class HumanEntity extends PathfinderMob
                 || e instanceof Enemy && !(e instanceof net.minecraft.world.entity.monster.Creeper && e.distanceTo(this) < 6);
     }
 
+    /** Marines carry the M41A pulse rifle, synthetics the M56 Smartgun (what they're shown holding). */
+    @Override
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
+            net.minecraft.world.DifficultyInstance difficulty, net.minecraft.world.entity.MobSpawnType reason,
+            @javax.annotation.Nullable net.minecraft.world.entity.SpawnGroupData data)
+    {
+        String gun = isSynthetic() ? "gun_m56sg" : "gun_m41a";
+        setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(org.avp.registry.ModItems.FIREARMS.get(gun).get()));
+        setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0.05F);
+        return super.finalizeSpawn(level, difficulty, reason, data);
+    }
+
     @Override
     public boolean isAlliedTo(Entity other)
     {

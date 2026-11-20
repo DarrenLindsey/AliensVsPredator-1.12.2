@@ -222,6 +222,8 @@ public final class AvpConfig
         public final ModConfigSpec.DoubleValue conveyorSpeed;
         public final ModConfigSpec.DoubleValue capsuleSpeed;
         public final ModConfigSpec.IntValue apolloPower;
+        public final ModConfigSpec.IntValue splineMaxLength;
+        public final ModConfigSpec.IntValue hoseRate;
         public final ModConfigSpec.IntValue drillMaxRadius;
         public final ModConfigSpec.IntValue drillSpeed;
         public final ModConfigSpec.IntValue drillPowerPerBlock;
@@ -558,6 +560,12 @@ public final class AvpConfig
             loaderBattery = b
                     .comment("Power Loader battery (FE). Walking uses 6 FE/t, mining and punching more.")
                     .defineInRange("loaderBattery", 300_000, 1000, 100_000_000);
+            splineMaxLength = b
+                    .comment("Longest belt / cable / hose span between two anchors (blocks).")
+                    .defineInRange("splineMaxLength", 48, 4, 256);
+            hoseRate = b
+                    .comment("mB per tick a hose carries.")
+                    .defineInRange("hoseRate", 250, 1, 100_000);
             apolloPower = b
                     .comment("FE per tick the APOLLO core draws.")
                     .defineInRange("apolloPower", 32, 0, 100_000);

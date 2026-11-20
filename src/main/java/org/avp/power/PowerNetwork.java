@@ -224,7 +224,8 @@ public final class PowerNetwork
     {
         return state.getBlock() instanceof PowerlineBlock
                 || state.getBlock() instanceof RedstoneSensorBlock && state.getValue(RedstoneSensorBlock.POWERED)
-                || state.getBlock() instanceof org.avp.block.BreakerBlock && state.getValue(org.avp.block.BreakerBlock.CLOSED);
+                || state.getBlock() instanceof org.avp.block.BreakerBlock && state.getValue(org.avp.block.BreakerBlock.CLOSED)
+                || state.getBlock() instanceof org.avp.block.conveyor.spline.SplineAnchorBlock a && a.kind == org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.CABLE;
     }
 
     /** Something next to a powerline changed: forget the cached networks of this world. */
@@ -259,6 +260,23 @@ public final class PowerNetwork
         while (!queue.isEmpty())
         {
             BlockPos pos = queue.poll();
+            // cable spans: a pylon reaches the pylons strung to it
+            if (level.getBlockEntity(pos) instanceof org.avp.block.conveyor.spline.CablePylonBlockEntity pylon)
+            {
+                List<BlockPos> spans = new ArrayList<>(pylon.incoming());
+                if (pylon.target() != null)
+                {
+                    spans.add(pylon.target());
+                }
+                for (BlockPos far : spans)
+                {
+                    if (!conductors.contains(far) && level.isLoaded(far) && isConductor(level.getBlockState(far)) && conductors.size() < limit)
+                    {
+                        conductors.add(far.immutable());
+                        queue.add(far.immutable());
+                    }
+                }
+            }
             for (Direction dir : Direction.values())
             {
                 BlockPos next = pos.relative(dir);

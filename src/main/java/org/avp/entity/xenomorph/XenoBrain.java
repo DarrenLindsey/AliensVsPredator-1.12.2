@@ -837,7 +837,8 @@ public final class XenoBrain
         private static boolean isLight(BlockState state)
         {
             return state.getBlock() instanceof TorchBlock || state.getBlock() instanceof LanternBlock || state.is(Blocks.JACK_O_LANTERN)
-                    || AvpConfig.server(AvpConfig.SERVER.xenosCutPower) && state.getBlock() instanceof org.avp.block.PowerlineBlock; // "they cut the power"
+                    || AvpConfig.server(AvpConfig.SERVER.xenosCutPower) && (state.getBlock() instanceof org.avp.block.PowerlineBlock
+                    || state.getBlock() instanceof org.avp.block.conveyor.spline.SplineAnchorBlock a && a.kind == org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.CABLE); // "they cut the power"
         }
 
         @Override

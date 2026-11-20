@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "avp:block/cable_pylon"
+    },
+    "facing=east": {
+      "model": "avp:block/cable_pylon",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "avp:block/cable_pylon",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "avp:block/cable_pylon",
+      "y": 270
+    }
+  }
+}

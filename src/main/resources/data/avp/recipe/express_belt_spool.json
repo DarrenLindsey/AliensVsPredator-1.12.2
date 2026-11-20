@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "BSB",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "avp:belt_spool"
+    },
+    "S": {
+      "item": "avp:part_servo"
+    }
+  },
+  "result": {
+    "id": "avp:express_belt_spool",
+    "count": 8
+  }
+}

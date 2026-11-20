@@ -65,6 +65,13 @@ public final class ModBlockEntities
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.mining.SeismicDrillBlockEntity>> SEISMIC_DRILL = BLOCK_ENTITIES.register("seismic_drill",
             () -> BlockEntityType.Builder.of(org.avp.mining.SeismicDrillBlockEntity::new, ModBlocks.SEISMIC_DRILL.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.conveyor.spline.BeltAnchorBlockEntity>> BELT_ANCHOR = BLOCK_ENTITIES.register("belt_anchor",
+            () -> BlockEntityType.Builder.of(org.avp.block.conveyor.spline.BeltAnchorBlockEntity::new, ModBlocks.BELT_ANCHOR.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.conveyor.spline.CablePylonBlockEntity>> CABLE_PYLON = BLOCK_ENTITIES.register("cable_pylon",
+            () -> BlockEntityType.Builder.of(org.avp.block.conveyor.spline.CablePylonBlockEntity::new, ModBlocks.CABLE_PYLON.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<org.avp.block.conveyor.spline.HoseAnchorBlockEntity>> HOSE_ANCHOR = BLOCK_ENTITIES.register("hose_anchor",
+            () -> BlockEntityType.Builder.of(org.avp.block.conveyor.spline.HoseAnchorBlockEntity::new, ModBlocks.HOSE_ANCHOR.get()).build(null));
+
     /** Lockers and supply crates (64-slot inventory). */
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageBlockEntity>> STORAGE = BLOCK_ENTITIES.register("storage",

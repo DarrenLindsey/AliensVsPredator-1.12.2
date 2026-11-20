@@ -1104,5 +1104,12 @@
   "block.avp.conveyor_crafting": "Crafting Belt",
   "block.avp.conveyor_storage": "Storage Belt",
   "block.avp.conveyor_extractor": "Extractor Belt",
-  "message.avp.extractor_filter": "Extractor: only pulls %s (sneak-use to clear)"
+  "message.avp.extractor_filter": "Extractor: only pulls %s (sneak-use to clear)",
+  "block.avp.belt_anchor": "Belt Anchor",
+  "block.avp.cable_pylon": "Weyland-Yutani Cable Pylon",
+  "block.avp.hose_anchor": "Seegson Hose Anchor",
+  "item.avp.belt_spool": "Belt Spool",
+  "item.avp.express_belt_spool": "Express Belt Spool",
+  "item.avp.cable_spool": "Power Cable Spool",
+  "item.avp.hose_spool": "Hose Spool"
 }

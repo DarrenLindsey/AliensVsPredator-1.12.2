@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "C",
+    "I",
+    "I"
+  ],
+  "key": {
+    "C": {
+      "item": "avp:conveyor"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "id": "avp:belt_anchor",
+    "count": 2
+  }
+}

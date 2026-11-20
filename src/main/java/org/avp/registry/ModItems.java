@@ -142,6 +142,15 @@ public final class ModItems
             JOE_UPGRADES.put(kind, ITEMS.register(kind.itemName(), () -> new org.avp.entity.joe.JoeUpgradeItem(kind, new Item.Properties().stacksTo(16))));
         }
     }
+    /** Spools for spline belts, cables and hoses. */
+    public static final DeferredItem<Item> BELT_SPOOL = ITEMS.register("belt_spool", () -> new org.avp.block.conveyor.spline.SplineSpoolItem(
+            org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.BELT, 0.12, new Item.Properties()));
+    public static final DeferredItem<Item> EXPRESS_BELT_SPOOL = ITEMS.register("express_belt_spool", () -> new org.avp.block.conveyor.spline.SplineSpoolItem(
+            org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.BELT, 0.3, new Item.Properties()));
+    public static final DeferredItem<Item> CABLE_SPOOL = ITEMS.register("cable_spool", () -> new org.avp.block.conveyor.spline.SplineSpoolItem(
+            org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.CABLE, 0, new Item.Properties()));
+    public static final DeferredItem<Item> HOSE_SPOOL = ITEMS.register("hose_spool", () -> new org.avp.block.conveyor.spline.SplineSpoolItem(
+            org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.HOSE, 0, new Item.Properties()));
     /** A crated Power Loader (org.avp.mining). */
     public static final DeferredItem<Item> POWER_LOADER = ITEMS.register("power_loader",
             () -> new org.avp.mining.PowerLoaderItem(new Item.Properties().stacksTo(1)));
@@ -162,6 +171,10 @@ public final class ModItems
         Tab.MAIN.add(WORKING_JOE);
         Tab.MAIN.add(JOE_TABLET);
         Tab.MAIN.add(POWER_LOADER);
+        Tab.MAIN.add(BELT_SPOOL);
+        Tab.MAIN.add(EXPRESS_BELT_SPOOL);
+        Tab.MAIN.add(CABLE_SPOOL);
+        Tab.MAIN.add(HOSE_SPOOL);
         JOE_UPGRADES.values().forEach(Tab.MAIN::add);
         Tab.MAIN.add(COATER_DRONE_SPAWN_EGG);
         Tab.MAIN.add(FACEHUGGER_SPAWN_EGG);

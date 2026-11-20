@@ -297,6 +297,17 @@ public final class ModBlocks
             () -> new org.avp.block.conveyor.ConveyorBlock(org.avp.block.conveyor.ConveyorBlock.Kind.EXTRACTOR,
                     BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(1.5F, 6.0F).noOcclusion()));
 
+    // ---- Spline lines (org.avp.block.conveyor.spline) ----
+    public static final DeferredBlock<org.avp.block.conveyor.spline.SplineAnchorBlock> BELT_ANCHOR = register("belt_anchor", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.spline.SplineAnchorBlock(org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.BELT,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(2.0F, 6.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.spline.SplineAnchorBlock> CABLE_PYLON = register("cable_pylon", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.spline.SplineAnchorBlock(org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.CABLE,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(3.0F, 8.0F).noOcclusion()));
+    public static final DeferredBlock<org.avp.block.conveyor.spline.SplineAnchorBlock> HOSE_ANCHOR = register("hose_anchor", Tab.BLOCKS,
+            () -> new org.avp.block.conveyor.spline.SplineAnchorBlock(org.avp.block.conveyor.spline.SplineAnchorBlock.Kind.HOSE,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(2.0F, 6.0F).noOcclusion()));
+
     // ---- Seegson PneuPost (org.avp.pneumatic) ----
     public static final DeferredBlock<org.avp.pneumatic.TubeBlock> PNEUMATIC_TUBE = register("pneumatic_tube", Tab.BLOCKS,
             () -> new org.avp.pneumatic.TubeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).sound(SoundType.GLASS).strength(0.6F).noOcclusion()));

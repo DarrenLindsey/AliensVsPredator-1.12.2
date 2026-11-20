@@ -72,6 +72,9 @@ public final class ClientSetup
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event)
     {
         event.registerBlockEntityRenderer(ModBlockEntities.MODEL_BLOCK.get(), ModelBlockRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.BELT_ANCHOR.get(), org.avp.client.render.SplineRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.CABLE_PYLON.get(), org.avp.client.render.SplineRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.HOSE_ANCHOR.get(), org.avp.client.render.SplineRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.STORAGE.get(), ModelBlockRenderer::new);
         event.registerEntityRenderer(ModEntities.SEAT.get(), NoopRenderer::new); // invisible
         event.registerEntityRenderer(ModEntities.FACEHUGGER.get(), org.avp.client.render.FacehuggerRenderer::new);

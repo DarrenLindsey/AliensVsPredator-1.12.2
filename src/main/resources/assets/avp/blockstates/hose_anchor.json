@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "avp:block/hose_anchor"
+    },
+    "facing=east": {
+      "model": "avp:block/hose_anchor",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "avp:block/hose_anchor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "avp:block/hose_anchor",
+      "y": 270
+    }
+  }
+}

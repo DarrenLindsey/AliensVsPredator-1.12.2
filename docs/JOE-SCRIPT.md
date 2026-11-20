@@ -218,3 +218,17 @@ straight                      # default
 Values: `item` (id), `name`, `count`, `n` (items seen), `redstone`, `time`, your variables.
 Functions: `is(id)`, `tag(t)`, `contains(a, b)`, `random(n)`, `chance(pct)`, `min max abs floor`.
 Routes: `left right straight back store`.
+
+## Spline lines: belts, power cables and hoses
+Place two anchors, then use a spool on the first and then on the second; the line strings itself between them
+(up to 48 blocks; one spool per 8 blocks; sneak-use a spool on an anchor to take its line down).
+- **Belt Anchor + Belt Spool / Express Belt Spool**: a curved belt that bends, climbs and drops. Items ride it (rendered
+  on the belt) and queue up when the far end is full. Feed an anchor with hoppers, block belts, pipes or Joes; a belt can
+  end at another anchor or at any belt block (including the smart belts). An anchor with no belt of its own hands items to
+  the block it faces (a belt or a container), or drops them there.
+- **Weyland-Yutani Cable Pylon + Power Cable Spool**: hanging power cables. A pylon is part of the power network, and a
+  span joins the networks at both ends, so you can run power across valleys. Voltage tiers, overloads and breakers apply as
+  usual, and Xenomorphs will tear pylons down.
+- **Seegson Hose Anchor + Hose Spool**: hanging hoses (250 mB/t). The anchor a hose leaves from pumps from the block behind
+  it (a tank, a machine, or a water source - endless); the anchor it ends at fills the block behind it. The hose takes the
+  colour of what's in it.

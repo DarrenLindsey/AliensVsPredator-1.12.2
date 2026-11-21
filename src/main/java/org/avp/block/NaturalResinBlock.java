@@ -13,6 +13,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -25,12 +26,14 @@ import net.minecraft.world.level.material.FluidState;
 
 /**
  * Hive resin the Drones spread over the walls, floor and ceiling of a hive (1.12.2 naturalResin).
- * The block it covers shows through and comes back when the resin is scraped off; resin burns.
+ * Fresh resin shows the block it covers. It can be scraped off before it hardens into Hive Stone.
  * Scraping it off brings the hive down on you.
  */
 public class NaturalResinBlock extends BaseEntityBlock
 {
     public static final MapCodec<NaturalResinBlock> CODEC = simpleCodec(NaturalResinBlock::new);
+    private static final int MIN_CURE_AGE = 2 * 60 * 20;
+    private static final int CURE_CHANCE = 8; // One in eight random ticks after the minimum age.
 
     public NaturalResinBlock(Properties properties)
     {
@@ -81,7 +84,10 @@ public class NaturalResinBlock extends BaseEntityBlock
         {
             return false;
         }
-        level.setBlock(pos, ModBlocks.NATURAL_RESIN.get().defaultBlockState(), Block.UPDATE_ALL);
+        if (!level.setBlock(pos, ModBlocks.NATURAL_RESIN.get().defaultBlockState(), Block.UPDATE_ALL))
+        {
+            return false;
+        }
         if (level.getBlockEntity(pos) instanceof ResinBlockEntity resin)
         {
             resin.setCovered(under);
@@ -113,10 +119,19 @@ public class NaturalResinBlock extends BaseEntityBlock
     }
 
     @Override
-    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random)
+    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random)
     {
+        if (!AvpConfig.server(AvpConfig.SERVER.hives))
+        {
+            return;
+        }
+        if (random.nextInt(CURE_CHANCE) == 0 && cure(level, pos))
+        {
+            return;
+        }
+
         double rate = AvpConfig.server(AvpConfig.SERVER.resinCreepRate);
-        if (rate <= 0 || random.nextDouble() >= rate * 0.25 || !AvpConfig.server(AvpConfig.SERVER.hives))
+        if (rate <= 0 || random.nextDouble() >= rate * 0.25)
         {
             return;
         }
@@ -131,6 +146,23 @@ public class NaturalResinBlock extends BaseEntityBlock
                 data.changed();
             }
         });
+    }
+
+    private static boolean cure(ServerLevel level, BlockPos pos)
+    {
+        if (!(level.getBlockEntity(pos) instanceof ResinBlockEntity resin)
+                || !resin.hasBeenCoveredFor(level.getGameTime(), MIN_CURE_AGE))
+        {
+            return false;
+        }
+        BlockState under = resin.covered();
+        Block hiveStone = ModBlocks.HIVESTONE.get();
+        // Coating intentionally placed over existing Hive Stone remains a separate layer.
+        if (under == null || under.is(hiveStone) || under.is(ModTags.XENO_UNBREAKABLE) || !under.is(ModTags.RESIN_COVERABLE))
+        {
+            return false;
+        }
+        return level.setBlock(pos, hiveStone.defaultBlockState(), Block.UPDATE_ALL);
     }
 
     private static double sq(double d)

@@ -25,6 +25,7 @@ public class ResinBlockEntity extends BlockEntity
 {
     @Nullable
     private BlockState covered;
+    private long coveredAt = -1;
 
     public ResinBlockEntity(BlockPos pos, BlockState state)
     {
@@ -40,11 +41,18 @@ public class ResinBlockEntity extends BlockEntity
     public void setCovered(@Nullable BlockState covered)
     {
         this.covered = covered;
+        coveredAt = covered != null && level != null ? level.getGameTime() : -1;
         setChanged();
         if (level != null)
         {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
+    }
+
+    public boolean hasBeenCoveredFor(long now, int ticks)
+    {
+        // Coatings from earlier versions have no timestamp. They can cure on a random tick.
+        return coveredAt < 0 || now - coveredAt >= ticks;
     }
 
     @Override
@@ -60,6 +68,10 @@ public class ResinBlockEntity extends BlockEntity
         if (covered != null)
         {
             tag.put("Covered", NbtUtils.writeBlockState(covered));
+            if (coveredAt >= 0)
+            {
+                tag.putLong("CoveredAt", coveredAt);
+            }
         }
     }
 
@@ -69,6 +81,7 @@ public class ResinBlockEntity extends BlockEntity
         super.loadAdditional(tag, registries);
         BlockState old = covered;
         covered = tag.contains("Covered") ? NbtUtils.readBlockState(registries.lookupOrThrow(Registries.BLOCK), tag.getCompound("Covered")) : null;
+        coveredAt = tag.contains("CoveredAt") ? tag.getLong("CoveredAt") : -1;
         if (level != null && level.isClientSide && old != covered)
         {
             requestModelDataUpdate();

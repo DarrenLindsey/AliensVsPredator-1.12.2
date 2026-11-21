@@ -1,8 +1,6 @@
 package org.avp.entity.xenomorph;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -12,6 +10,7 @@ import org.avp.registry.ModAttachments;
 import org.avp.registry.ModTags;
 import org.avp.world.hive.Hive;
 import org.avp.world.hive.HiveData;
+import org.avp.world.hive.HiveFounding;
 import org.avp.world.hive.HiveShaft;
 
 import net.minecraft.core.BlockPos;
@@ -21,7 +20,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -201,16 +199,10 @@ public final class HiveGoals
     /** A founding Drone excavates a straight shaft, then opens the chamber at its base. */
     public static class BurrowGoal extends Goal
     {
-        private static final int BLOCKS_PER_BATCH = 6;
-        private static final double SHAFT_DIG_MULTIPLIER = 2.0;
-
         private final DroneEntity drone;
         @Nullable
         private Hive hive;
-        private int digTicks;
-        private int stuck;
-        private List<BlockPos> layer = List.of();
-        private final List<BlockPos> work = new ArrayList<>(BLOCKS_PER_BATCH);
+        private HiveFounding construction;
 
         public BurrowGoal(DroneEntity drone)
         {
@@ -239,7 +231,7 @@ public final class HiveGoals
                 boolean mineToDo = drone.getUUID().equals(mine.digger()) || digger == null || !digger.isAlive();
                 if (mineToDo)
                 {
-                    if (!mine.hasVerticalShaft() && HiveShaft.canExcavate(level, HiveShaft.layer(mine.entrance().below())))
+                    if (!mine.hasVerticalShaft() && HiveShaft.canExcavate(level, mine.entrance().below()))
                     {
                         mine.beginShaft();
                         data.changed();
@@ -260,7 +252,7 @@ public final class HiveGoals
             }
             // claim it: the hive goes at the first deepslate under here
             BlockPos start = drone.blockPosition();
-            if (!HiveShaft.canExcavate(level, HiveShaft.layer(start.below())))
+            if (!HiveShaft.canExcavate(level, start.below()))
             {
                 return false;
             }
@@ -291,7 +283,8 @@ public final class HiveGoals
         @Override
         public boolean canContinueToUse()
         {
-            return hive != null && hive.state() == Hive.State.FOUNDING && drone.getTarget() == null && stuck < 400;
+            return hive != null && hive.state() == Hive.State.FOUNDING && hive.digPos() != null
+                    && drone.getUUID().equals(hive.digger()) && drone.getTarget() == null;
         }
 
         @Override
@@ -299,10 +292,8 @@ public final class HiveGoals
         {
             drone.setState("BURROWING");
             drone.setFounding(true); // the urge: no hunting, no hunger, until the hive is made
-            digTicks = 0;
-            stuck = 0;
-            layer = List.of();
-            work.clear();
+            drone.getNavigation().stop();
+            construction = new HiveFounding(hive);
         }
 
         @Override
@@ -314,171 +305,14 @@ public final class HiveGoals
         @Override
         public void tick()
         {
-            ServerLevel level = (ServerLevel) drone.level();
-            BlockPos at = hive == null || hive.state() != Hive.State.FOUNDING ? null : hive.digPos();
-            if (at == null)
-            {
-                return; // finished (or forgotten): the goal stops on the next check
-            }
-            if (!hive.hasVerticalShaft() || at.getY() <= hive.core().getY())
-            {
-                finish(level, at);
-                return;
-            }
-            BlockPos next = at.below();
-            // Stay over the centre support. In an open cave the Drone may drop ahead of the cut.
-            drone.getMoveControl().setWantedPosition(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.8);
-            if (!HiveShaft.isInside(drone, at) || drone.getY() > at.getY() + 1.5)
-            {
-                stuck++;
-                if (drone.tickCount % 20 == 0)
-                {
-                    drone.navigateTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.9);
-                }
-                return;
-            }
-            if (layer.isEmpty())
-            {
-                layer = HiveShaft.layer(next);
-                if (!HiveShaft.canExcavate(level, layer))
-                {
-                    finish(level, at);
-                    return;
-                }
-            }
-            if (work.isEmpty())
-            {
-                for (BlockPos pos : layer)
-                {
-                    if (!level.getBlockState(pos).isAir())
-                    {
-                        work.add(pos);
-                        if (work.size() == BLOCKS_PER_BATCH)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!work.isEmpty())
-            {
-                digBatch(level, at);
-                return;
-            }
-            if (at.equals(hive.entrance()))
-            {
-                HiveShaft.lineMouth(level, at);
-            }
-            hive.setDig(next, Direction.NORTH);
-            HiveData.get(level).changed();
-            layer = List.of();
-            stuck = 0;
-        }
-
-        private void digBatch(ServerLevel level, BlockPos at)
-        {
-            float hardness = 0.5F;
-            for (BlockPos pos : work)
-            {
-                hardness = Math.max(hardness, level.getBlockState(pos).getDestroySpeed(level, pos));
-            }
-            double speed = AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed)
-                    * AvpConfig.server(AvpConfig.SERVER.foundingDigSpeed) * SHAFT_DIG_MULTIPLIER;
-            if (++digTicks % 3 == 0)
-            {
-                level.destroyBlockProgress(drone.getId(), work.getFirst(), (int) Math.min(9, digTicks * speed / (hardness * 4)));
-                drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-            }
-            if (digTicks * speed < hardness * 40)
-            {
-                return;
-            }
-            clearCracks(level);
-            if (!HiveShaft.canExcavate(level, work))
-            {
-                finish(level, at);
-                return;
-            }
-            for (BlockPos pos : work)
-            {
-                if (!level.getBlockState(pos).isAir() && !level.destroyBlock(pos, false, drone))
-                {
-                    finish(level, at);
-                    return;
-                }
-            }
-            work.clear();
-            digTicks = 0;
-        }
-
-        private void clearCracks(ServerLevel level)
-        {
-            if (!work.isEmpty())
-            {
-                level.destroyBlockProgress(drone.getId(), work.getFirst(), -1);
-            }
-        }
-
-        private void finish(ServerLevel level, BlockPos at)
-        {
-            if (hive.hasVerticalShaft() && at.equals(hive.entrance()))
-            {
-                HiveData.get(level).remove(hive); // The first cut was blocked. Don't hollow out the surface.
-                drone.setHiveId(null);
-                hive = null;
-                return;
-            }
-            carveChamber(level, at);
-        }
-
-        /**
-         * At the deepslate: hollow out the hive's first chamber and open it. A dome 15 wide and 8 high,
-         * so a Queen (2 x 5 blocks) has room to move.
-         */
-        private void carveChamber(ServerLevel level, BlockPos centre)
-        {
-            int r = 7, height = 8;
-            for (BlockPos p : BlockPos.betweenClosed(centre.offset(-r, 0, -r), centre.offset(r, height - 1, r)))
-            {
-                double dx = (p.getX() - centre.getX()) / (double) r, dz = (p.getZ() - centre.getZ()) / (double) r;
-                double dy = (p.getY() - centre.getY()) / (double) height; // 0 at the floor, ~1 at the top of the dome
-                BlockState s = level.getBlockState(p);
-                if (dx * dx + dz * dz + dy * dy <= 1.0 && !s.isAir() && org.avp.world.hive.HivePlanner.diggable(level, p))
-                {
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
-                }
-            }
-            level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, centre.getX() + 0.5, centre.getY() + 2, centre.getZ() + 0.5,
-                    40, 3, 1.5, 3, 0.02);
-            hive.setCore(centre.above());
-            hive.setDig(null, Direction.NORTH);
-            hive.setDigger(null);
-            if (hive.rooms(org.avp.world.hive.Room.Type.QUEEN).isEmpty())
-            {
-                hive.rooms().add(0, new org.avp.world.hive.Room(org.avp.world.hive.Room.Type.QUEEN, centre, centre, r, height, true));
-            }
-            hive.setState(Hive.State.ACTIVE);
-            hive.placeCoreBlock(level);
-            HiveData.get(level).changed();
-            level.playSound(null, centre, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1.0F, 0.6F);
-            drone.setState("HIVE FOUNDED");
+            construction.tick((ServerLevel) drone.level(), drone);
         }
 
         @Override
         public void stop()
         {
             drone.setFounding(false);
-            if (!(drone.level() instanceof ServerLevel level))
-            {
-                return;
-            }
-            clearCracks(level);
-            if (hive != null && hive.state() == Hive.State.FOUNDING && stuck >= 400)
-            {
-                // couldn't get down (lava, water, bedrock...): found the hive where it got to
-                BlockPos at = hive.digPos() == null ? drone.blockPosition() : hive.digPos();
-                finish(level, at);
-            }
+            construction = null;
         }
     }
 

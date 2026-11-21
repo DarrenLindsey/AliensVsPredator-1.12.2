@@ -480,7 +480,7 @@ public final class AvpConfig
                     .comment("Most blocks one hive may dig out for its rooms and galleries (the founding tunnel and chamber don't count).")
                     .defineInRange("hiveMaxDugBlocks", 6_000, 0, 1_000_000);
             foundingDigSpeed = b
-                    .comment("How much faster a Drone digs the founding tunnel than normal digging - an urge it can't resist (it doesn't hunt or get hungry while digging).")
+                    .comment("Speed multiplier for initial shaft, rim and chamber construction. Founding jobs share a capped budget per server tick.")
                     .defineInRange("foundingDigSpeed", 3.0, 0.1, 50.0);
             resinBuildSpeed = b
                     .comment("How fast Drones spread resin (1.0 = normal, 0 = never).")

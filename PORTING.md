@@ -146,7 +146,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       Builder Drones: lay hivestone (new block) over holes in room floors, under
       galleries that cross open space, over water/lava leaking in, roof rooms open to the sky, pave floors.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.
-      Shaft 5 blocks square with a Hive Stone rim; founding chamber a dome 15 wide x 8 high; a Queen only grows in the chamber
+      Shaft 5 blocks square with a Hive Stone rim; founding chamber a dome 15 wide x 8 high. Founding is built in a few seconds with a shared server tick budget. A Queen only grows in the chamber
       and never spawns naturally (nor do boss forms).
 - [x] Skulls and biomasks can be worn (head slot); a biomask gives night vision and stops facehuggers.
 - [ ] Later: resin deterrent, Octohuggers hanging from ceilings,

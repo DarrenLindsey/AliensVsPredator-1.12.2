@@ -39,11 +39,6 @@ public final class HiveShaft
         return positions;
     }
 
-    public static boolean canExcavate(ServerLevel level, List<BlockPos> layer)
-    {
-        return layer.stream().allMatch(pos -> canExcavate(level, pos));
-    }
-
     public static boolean canExcavate(ServerLevel level, BlockPos pos)
     {
         if (!level.isInWorldBounds(pos) || !level.isLoaded(pos))
@@ -67,28 +62,37 @@ public final class HiveShaft
         return true;
     }
 
-    /** Replace exposed terrain just outside the opening. Leave obstacles and man-made blocks alone. */
-    public static void lineMouth(ServerLevel level, BlockPos entrance)
+    public static List<BlockPos> rim(BlockPos entrance)
     {
         int edge = RADIUS + 1;
         BlockPos ground = entrance.below();
-        BlockState stone = ModBlocks.HIVESTONE.get().defaultBlockState();
+        List<BlockPos> rim = new ArrayList<>(8 * edge);
         for (BlockPos pos : BlockPos.betweenClosed(ground.offset(-edge, 0, -edge), ground.offset(edge, 0, edge)))
         {
-            if (Math.max(Math.abs(pos.getX() - ground.getX()), Math.abs(pos.getZ() - ground.getZ())) != edge || !level.isLoaded(pos))
+            if (Math.max(Math.abs(pos.getX() - ground.getX()), Math.abs(pos.getZ() - ground.getZ())) == edge)
             {
-                continue;
+                rim.add(pos.immutable());
             }
-            for (int offset = 1; offset >= -1; offset--)
+        }
+        return rim;
+    }
+
+    /** Replace exposed terrain around one column of the mouth. */
+    public static void lineRimBlock(ServerLevel level, BlockPos ground)
+    {
+        if (!level.isLoaded(ground))
+        {
+            return;
+        }
+        for (int offset = 1; offset >= -1; offset--)
+        {
+            BlockPos surface = ground.above(offset);
+            BlockState state = level.getBlockState(surface);
+            if ((state.is(BlockTags.DIRT) || state.is(ModTags.RESIN_COVERABLE))
+                    && canExcavate(level, surface) && level.getBlockState(surface.above()).isAir())
             {
-                BlockPos surface = pos.above(offset);
-                BlockState state = level.getBlockState(surface);
-                if ((state.is(BlockTags.DIRT) || state.is(ModTags.RESIN_COVERABLE))
-                        && canExcavate(level, surface) && level.getBlockState(surface.above()).isAir())
-                {
-                    level.setBlock(surface, stone, Block.UPDATE_ALL);
-                    break;
-                }
+                level.setBlock(surface, ModBlocks.HIVESTONE.get().defaultBlockState(), Block.UPDATE_ALL);
+                return;
             }
         }
     }

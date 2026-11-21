@@ -96,7 +96,7 @@ public final class HiveFounding
                     recordLayer(level);
                 }
             }
-            case CHAMBER -> carveBlock(level);
+            case CHAMBER -> { return carveBlock(level); }
             case FINISH -> finish(level, drone);
         }
         return true;
@@ -121,6 +121,10 @@ public final class HiveFounding
         if (!HiveShaft.canExcavate(level, pos)
                 || phase == Phase.CUT_LAYER && !level.getBlockState(pos).isAir() && !level.destroyBlock(pos, false, drone))
         {
+            if (hive.blueprint() != null)
+            {
+                return false;
+            }
             return beginChamber(level, drone, at);
         }
         if (++cursor < layer.size())
@@ -166,7 +170,8 @@ public final class HiveFounding
             return false;
         }
         chamber = at;
-        sites = BlockPos.betweenClosed(at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, HEIGHT - 1, RADIUS)).iterator();
+        sites = hive.blueprint() != null ? hive.blueprint().excavation(at).iterator()
+                : BlockPos.betweenClosed(at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, HEIGHT - 1, RADIUS)).iterator();
         phase = Phase.CHAMBER;
         return true;
     }
@@ -177,18 +182,35 @@ public final class HiveFounding
                 && level.isLoaded(pos.offset(-radius, 0, radius)) && level.isLoaded(pos.offset(radius, 0, radius));
     }
 
-    private void carveBlock(ServerLevel level)
+    @javax.annotation.Nullable
+    private BlockPos pending;
+
+    private boolean carveBlock(ServerLevel level)
     {
-        if (!sites.hasNext())
+        if (pending == null && !sites.hasNext())
         {
             phase = Phase.FINISH;
-            return;
+            return true;
         }
-        BlockPos pos = sites.next();
+        BlockPos pos = pending != null ? pending : sites.next();
+        if (hive.blueprint() != null)
+        {
+            pending = pos;
+            if (!HiveShaft.canExcavate(level, pos) || !level.getBlockState(pos).isAir() && !HivePlanner.diggable(level, pos))
+            {
+                return false;
+            }
+            if (!level.getBlockState(pos).isAir())
+            {
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+            }
+            pending = null;
+            return true;
+        }
         // A shallow chamber must not cut away its own surface rim.
         if (hive.hasVerticalShaft() && pos.getY() >= hive.entrance().getY() - 1)
         {
-            return;
+            return true;
         }
         double x = (pos.getX() - chamber.getX()) / (double) RADIUS;
         double y = (pos.getY() - chamber.getY()) / (double) HEIGHT;
@@ -198,11 +220,20 @@ public final class HiveFounding
         {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
         }
+        return true;
     }
 
     private void finish(ServerLevel level, DroneEntity drone)
     {
-        hive.setCore(chamber.above());
+        if (hive.blueprint() != null)
+        {
+            hive.setCore(hive.blueprint().core(chamber));
+            hive.rooms().addAll(hive.blueprint().rooms(chamber));
+        }
+        else
+        {
+            hive.setCore(chamber.above());
+        }
         hive.setDig(null, Direction.NORTH);
         hive.setDigger(null);
         if (hive.rooms(Room.Type.QUEEN).isEmpty())

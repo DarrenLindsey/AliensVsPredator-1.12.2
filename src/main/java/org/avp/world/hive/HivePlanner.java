@@ -50,6 +50,19 @@ public final class HivePlanner
             return cached;
         }
         List<BlockPos> list = new ArrayList<>();
+        if (!room.footprint().isEmpty())
+        {
+            for (BlockPos floor : room.footprint())
+            {
+                for (int y = 0; y < room.height(); y++)
+                {
+                    list.add(floor.above(y));
+                }
+            }
+            DIG_LISTS.put(room, list);
+            DIG_LIST_SIZE.put(room, room.radius() * 100 + room.height());
+            return list;
+        }
         BlockPos a = room.from(), b = room.centre();
         int dx = b.getX() - a.getX(), dy = b.getY() - a.getY(), dz = b.getZ() - a.getZ();
         int steps = Math.max(Math.max(Math.abs(dx), Math.abs(dz)), Math.abs(dy));
@@ -289,7 +302,7 @@ public final class HivePlanner
      */
     public static void plan(ServerLevel level, Hive hive)
     {
-        if (hive.state() != Hive.State.ACTIVE || hive.project() != null || hive.dug() >= maxDug())
+        if (hive.blueprint() != null || hive.state() != Hive.State.ACTIVE || hive.project() != null || hive.dug() >= maxDug())
         {
             return;
         }
@@ -461,6 +474,10 @@ public final class HivePlanner
             for (int dy = -1; dy <= 2; dy++)
             {
                 BlockPos q = p.above(dy);
+                if (!room.footprint().isEmpty() && !room.contains(q))
+                {
+                    continue;
+                }
                 if (level.getBlockState(q).isAir() && level.getBlockState(q.above()).isAir() && level.getBlockState(q.below()).isSolid())
                 {
                     boolean wall = false;

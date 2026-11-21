@@ -56,7 +56,7 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            if (!enabled() || xeno.getTarget() != null || xeno.tickCount % 40 >= 2 || !(xeno.level() instanceof ServerLevel level))
+            if (!enabled() || xeno.getTarget() != null || xeno.isOnForagingTrip() || xeno.tickCount % 40 >= 2 || !(xeno.level() instanceof ServerLevel level))
             {
                 return false;
             }
@@ -85,7 +85,7 @@ public final class HiveGoals
         @Override
         public boolean canContinueToUse()
         {
-            return xeno.getTarget() == null && (usingShaft || !xeno.getNavigation().isDone());
+            return xeno.getTarget() == null && !xeno.isOnForagingTrip() && (usingShaft || !xeno.getNavigation().isDone());
         }
 
         @Override
@@ -130,6 +130,7 @@ public final class HiveGoals
         private Direction exit = Direction.NORTH;
         private int expires;
         private int nextAttempt;
+        private boolean forage;
 
         public ExitShaftGoal(XenomorphEntity xeno)
         {
@@ -140,7 +141,8 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            if (xeno.tickCount < nextAttempt || xeno.tickCount % 10 >= 2 || xeno.getTarget() == null || xeno.isFounding())
+            if (xeno.tickCount < nextAttempt || Math.floorMod(xeno.tickCount + xeno.getId(), 10) >= 2 || xeno.isFounding()
+                    || xeno.isVehicle() || xeno.isBonded() || !(xeno.level() instanceof ServerLevel level))
             {
                 return false;
             }
@@ -150,20 +152,31 @@ public final class HiveGoals
                 return false;
             }
             BlockPos entrance = hive.entrance();
-            return xeno.getTarget().getY() >= entrance.getY() - 1 && xeno.getY() < entrance.getY()
+            var target = xeno.getTarget();
+            forage = target == null && xeno instanceof DroneEntity && !xeno.isOnForagingTrip()
+                    && (xeno.isHungry() || xeno.getClass() == DroneEntity.class && !xeno.getUUID().equals(hive.heir())
+                            && (hive.needsHosts || hive.needsFood))
+                    && hive.canSendForager(level.getGameTime());
+            if (!(forage || target != null && target.getY() >= entrance.getY() - 1) || !(xeno.getY() < entrance.getY()
                     && xeno.getY() >= hive.core().getY() - 2
-                    && (HiveShaft.isInside(xeno, entrance) || hive.core().distSqr(xeno.blockPosition()) < 16 * 16);
+                    && xeno.blockPosition().distSqr(entrance.atY(hive.core().getY())) < 48 * 48))
+            {
+                return false;
+            }
+            Direction preferred = target == null ? Direction.Plane.HORIZONTAL.getRandomDirection(xeno.getRandom())
+                    : Direction.getNearest(target.getX() - entrance.getX() - .5, 0, target.getZ() - entrance.getZ() - .5);
+            exit = HiveShaft.exitSide(level, xeno, entrance, preferred);
+            return exit != null;
         }
 
         @Override
         public void start()
         {
             BlockPos entrance = hive.entrance();
-            exit = Direction.getNearest(xeno.getTarget().getX() - entrance.getX() - .5, 0,
-                    xeno.getTarget().getZ() - entrance.getZ() - .5);
-            if (exit.getAxis().isVertical())
+            if (forage)
             {
-                exit = xeno.getDirection();
+                hive.sentForager(xeno.level().getGameTime());
+                xeno.setState("LEAVING TO FORAGE");
             }
             expires = xeno.tickCount + 100 + 8 * (entrance.getY() - hive.core().getY());
             xeno.getNavigation().stop();
@@ -172,8 +185,8 @@ public final class HiveGoals
         @Override
         public boolean canContinueToUse()
         {
-            return xeno.getTarget() != null && xeno.tickCount < expires && hive != null
-                    && (xeno.getY() < hive.entrance().getY() || HiveShaft.isInside(xeno, hive.entrance())
+            return (forage || xeno.getTarget() != null) && xeno.tickCount < expires && hive != null
+                    && (xeno.getY() < hive.entrance().getY() || !HiveShaft.isPastLip(xeno, hive.entrance(), exit)
                     || !xeno.onGround());
         }
 
@@ -193,7 +206,11 @@ public final class HiveGoals
         public void stop()
         {
             nextAttempt = xeno.tickCount + 60;
-            xeno.getNavigation().stop();
+            if (forage && hive != null && xeno.getY() >= hive.entrance().getY() - 0.1 && HiveShaft.isPastLip(xeno, hive.entrance(), exit))
+            {
+                xeno.beginForagingTrip();
+            }
+            xeno.stopJobNavigation();
         }
     }
 

@@ -53,6 +53,7 @@ public class Room
     /** How far through its dig list the Drones are. */
     private int cursor;
     private int pillars;
+    private java.util.Set<BlockPos> footprint = java.util.Set.of();
     /** How many times in a row nothing open could be found to dig (not saved). */
     public int stalls;
 
@@ -69,6 +70,19 @@ public class Room
     public Type type()
     {
         return type;
+    }
+
+    static Room blueprint(Type type, BlockPos centre, int height, java.util.Set<BlockPos> footprint)
+    {
+        int radius = (int) Math.ceil(Math.sqrt(footprint.stream().mapToDouble(centre::distSqr).max().orElse(0)));
+        Room room = new Room(type, centre, centre, radius, height, true);
+        room.footprint = java.util.Set.copyOf(footprint);
+        return room;
+    }
+
+    java.util.Set<BlockPos> footprint()
+    {
+        return footprint;
     }
 
     public BlockPos centre()
@@ -135,6 +149,10 @@ public class Room
     {
         double dx = pos.getX() - centre.getX(), dz = pos.getZ() - centre.getZ();
         int dy = pos.getY() - centre.getY();
+        if (!footprint.isEmpty())
+        {
+            return dy >= -1 && dy <= height && footprint.contains(pos.atY(centre.getY()));
+        }
         double r = Math.max(1.5, radius + 0.5);
         return dx * dx + dz * dz <= r * r && dy >= -1 && dy <= Math.max(2, height);
     }
@@ -150,6 +168,10 @@ public class Room
         tag.putBoolean("Done", done);
         tag.putInt("Cursor", cursor);
         tag.putInt("Pillars", pillars);
+        if (!footprint.isEmpty())
+        {
+            tag.putLongArray("Footprint", footprint.stream().mapToLong(BlockPos::asLong).toArray());
+        }
         return tag;
     }
 
@@ -159,6 +181,11 @@ public class Room
                 NbtUtils.readBlockPos(tag, "From").orElse(BlockPos.ZERO), tag.getInt("Radius"), tag.getInt("Height"), tag.getBoolean("Done"));
         room.cursor = tag.getInt("Cursor");
         room.pillars = tag.getInt("Pillars");
+        if (tag.contains("Footprint"))
+        {
+            room.footprint = java.util.Arrays.stream(tag.getLongArray("Footprint")).mapToObj(BlockPos::of)
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        }
         return room;
     }
 }

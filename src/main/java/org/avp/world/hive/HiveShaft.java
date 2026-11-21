@@ -104,27 +104,55 @@ public final class HiveShaft
                 && Math.abs(xeno.getZ() - entrance.getZ() - 0.5) <= allowance;
     }
 
+    public static boolean isPastLip(XenomorphEntity xeno, BlockPos entrance, Direction side)
+    {
+        double distance = (xeno.getX() - entrance.getX() - .5) * side.getStepX()
+                + (xeno.getZ() - entrance.getZ() - .5) * side.getStepZ();
+        return distance >= RADIUS + .5 + xeno.getBbWidth() / 2;
+    }
+
+    @javax.annotation.Nullable
+    public static Direction exitSide(ServerLevel level, XenomorphEntity xeno, BlockPos mouth, Direction preferred)
+    {
+        Direction first = preferred.getAxis().isHorizontal() ? preferred : Direction.NORTH;
+        for (Direction side : List.of(first, first.getClockWise(), first.getCounterClockWise(), first.getOpposite()))
+        {
+            BlockPos landing = mouth.relative(side, Mth.ceil(RADIUS + 1 + xeno.getBbWidth() / 2));
+            Vec3 at = Vec3.atBottomCenterOf(landing);
+            if (level.isLoaded(landing) && level.getBlockState(landing.below()).isSolid()
+                    && level.noCollision(xeno, xeno.getBoundingBox().move(at.subtract(xeno.position()))))
+            {
+                return side;
+            }
+        }
+        return null;
+    }
+
     /** Guides a Xeno from its chamber to the shaft and up to the surface. */
     public static void ascend(XenomorphEntity xeno, Hive hive, Direction exit)
     {
         BlockPos entrance = hive.entrance();
-        boolean atMouth = xeno.getY() >= entrance.getY();
+        boolean atMouth = xeno.getY() >= entrance.getY() + .08;
         double x = entrance.getX() + 0.5;
         double z = entrance.getZ() + 0.5;
         if (!atMouth && !isInside(xeno, entrance))
         {
             if (xeno.getNavigation().isDone() && xeno.tickCount % 10 == 0)
             {
-                xeno.navigateTo(x, hive.core().getY() - 1, z, 1.0);
+                xeno.navigateTo(x, hive.core().getY() - (hive.blueprint() == null ? 1 : 0), z, 1.0);
             }
             return;
         }
         xeno.getNavigation().stop();
-        double wall = atMouth ? RADIUS + 1.75 : RADIUS + 0.45 - xeno.getBbWidth() / 2;
+        if (isPastLip(xeno, entrance, exit) && xeno.getY() >= entrance.getY() - 0.1)
+        {
+            return; // Landing is ordinary gravity once the entire body has crossed the rim.
+        }
+        double wall = atMouth ? RADIUS + 1.4 + xeno.getBbWidth() / 2 : RADIUS + 0.42 - xeno.getBbWidth() / 2;
         double dx = x + exit.getStepX() * wall - xeno.getX();
         double dz = z + exit.getStepZ() * wall - xeno.getZ();
         // Keep against a shaft wall on the way up. Step outward only above the rim.
-        double rise = xeno.getY() < entrance.getY() + 0.65 ? .32 : .02;
+        double rise = atMouth ? (xeno.getY() < entrance.getY() + .7 ? .17 : .02) : .32;
         xeno.setDeltaMovement(Mth.clamp(dx * .45, -.34, .34), rise, Mth.clamp(dz * .45, -.34, .34));
     }
 
@@ -156,7 +184,14 @@ public final class HiveShaft
                 return true;
             }
             xeno.getNavigation().stop();
-            xeno.getMoveControl().setWantedPosition(entrance.getX() + 0.5, entrance.getY(), entrance.getZ() + 0.5, 1.0);
+            if (xeno.onGround())
+            {
+                xeno.setDeltaMovement(Mth.clamp(dx * .25, -.42, .42), .17, Mth.clamp(dz * .25, -.42, .42));
+            }
+            else
+            {
+                xeno.getMoveControl().setWantedPosition(entrance.getX() + 0.5, entrance.getY(), entrance.getZ() + 0.5, 1.0);
+            }
             return true;
         }
 

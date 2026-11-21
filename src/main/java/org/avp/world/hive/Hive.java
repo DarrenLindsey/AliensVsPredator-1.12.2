@@ -174,6 +174,31 @@ public class Hive
         return work;
     }
 
+    @Nullable
+    private HiveBlueprint blueprint;
+    private long nextForage;
+
+    @Nullable
+    public HiveBlueprint blueprint()
+    {
+        return blueprint;
+    }
+
+    public void setBlueprint(HiveBlueprint blueprint)
+    {
+        this.blueprint = blueprint;
+    }
+
+    public boolean canSendForager(long now)
+    {
+        return now >= nextForage;
+    }
+
+    public void sentForager(long now)
+    {
+        nextForage = now + 140;
+    }
+
     public void setState(State state)
     {
         this.state = state;
@@ -205,7 +230,7 @@ public class Hive
         HiveData.get(level).changed();
     }
 
-    private static boolean isCoreFloor(ServerLevel level, BlockPos pos, BlockState state)
+    static boolean isCoreFloor(ServerLevel level, BlockPos pos, BlockState state)
     {
         // A natural resin coating is safe to replace only when the block it remembers was natural terrain.
         if (state.is(ModBlocks.NATURAL_RESIN.get()) && level.getBlockEntity(pos) instanceof ResinBlockEntity resin)
@@ -388,6 +413,10 @@ public class Hive
         net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
         rooms.forEach(r -> list.add(r.save()));
         tag.put("Rooms", list);
+        if (blueprint != null)
+        {
+            tag.put("Blueprint", blueprint.save());
+        }
         return tag;
     }
 
@@ -404,6 +433,10 @@ public class Hive
         hive.heir = tag.hasUUID("Heir") ? tag.getUUID("Heir") : null;
         hive.digger = tag.hasUUID("Digger") ? tag.getUUID("Digger") : null;
         hive.dug = tag.getInt("Dug");
+        if (tag.contains("Blueprint"))
+        {
+            hive.blueprint = HiveBlueprint.load(tag.getCompound("Blueprint"));
+        }
         for (net.minecraft.nbt.Tag t : tag.getList("Rooms", net.minecraft.nbt.Tag.TAG_COMPOUND))
         {
             hive.rooms.add(Room.load((CompoundTag) t));

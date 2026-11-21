@@ -543,6 +543,18 @@ public abstract class XenomorphEntity extends Monster
         getNavigation().stop();
     }
 
+    private int forageUntil;
+
+    boolean isOnForagingTrip()
+    {
+        return tickCount < forageUntil;
+    }
+
+    void beginForagingTrip()
+    {
+        forageUntil = tickCount + 300;
+    }
+
     /** Stuck: on its way somewhere for a job but hasn't got closer in the last 3 seconds. */
     private int stuckFor;
     private double lastDistance = Double.MAX_VALUE;

@@ -49,6 +49,7 @@ public final class AvpCommands
                 .then(Commands.literal("hive")
                         .then(Commands.literal("nearest").executes(c -> nearest(c.getSource())))
                         .then(Commands.literal("list").executes(c -> list(c.getSource())))
+                        .then(HiveBlueprintCommands.commands())
                         .then(Commands.literal("found").executes(c -> found(c.getSource())))
                         .then(Commands.literal("forget").executes(c -> forget(c.getSource())))));
     }

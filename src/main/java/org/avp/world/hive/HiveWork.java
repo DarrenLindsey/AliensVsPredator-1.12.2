@@ -83,7 +83,9 @@ public final class HiveWork
             directive = Directive.CORE;
             if (queen != null && level.getEntity(queen) instanceof AdultXenomorphEntity adult && adult.isAlive() && adult.isQueen())
             {
-                directive = adult.getTarget() != null || adult.hurtTime > 0 ? Directive.DEFEND : Directive.BROOD;
+                // Combat hits can be shorter than the refresh interval. Keep repairs urgent for a few seconds.
+                boolean recentlyAttacked = adult.getLastHurtByMob() != null && adult.tickCount - adult.getLastHurtByMobTimestamp() < 100;
+                directive = adult.getTarget() != null || recentlyAttacked ? Directive.DEFEND : Directive.BROOD;
             }
         }
         return directive;

@@ -128,12 +128,10 @@ public final class HivePlanner
     }
 
     /**
-     * The next block of the current room for a worker to dig ("slot" spreads several Drones over
-     * the next few blocks). Skips what's already clear; finishes the room when its list runs out;
-     * takes over natural caves the tunnel breaks into.
+     * Find an exposed and unclaimed block near the excavation front. Keep the cursor behind pending work.
      */
     @Nullable
-    public static BlockPos nextBlock(ServerLevel level, Hive hive, int slot)
+    public static BlockPos nextBlock(ServerLevel level, Hive hive, java.util.UUID worker)
     {
         Room room = hive.project();
         if (room == null || hive.dug() >= maxDug())
@@ -141,42 +139,56 @@ public final class HivePlanner
             return null;
         }
         List<BlockPos> list = digList(room);
-        int found = 0;
-        for (int i = room.cursor(); i < list.size(); i++)
+        int start = room.cursor();
+        int end = Math.min(start + 64, list.size());
+        boolean pending = false;
+        boolean reachable = false;
+        boolean unloaded = false;
+        long now = level.getGameTime();
+        for (int i = start; i < end; i++)
         {
             BlockPos p = list.get(i);
+            if (!level.isLoaded(p))
+            {
+                unloaded = true;
+                break;
+            }
             if (diggable(level, p))
             {
-                // only blocks already open to the hive (the face a Drone can stand at), so nobody walks off to a buried one
-                if (openSide(level, p) != null && found++ == slot)
+                pending = true;
+                if (openSide(level, p) != null)
                 {
-                    room.stalls = 0;
-                    return p;
-                }
-                if (found == 0 && i - room.cursor() > 64)
-                {
-                    // nothing open nearby in the list yet: wait for the others to break through - but if the
-                    // way is blocked for good (a gap left beside water, say), skip ahead past the buried block
-                    if (++room.stalls > 120)
+                    reachable = true;
+                    if (hive.work().available(worker, HiveWork.Kind.DIG, p, now))
                     {
                         room.stalls = 0;
-                        room.setCursor(room.cursor() + 1);
+                        return p;
                     }
-                    break;
                 }
             }
-            else if (found == 0)
+            else if (!pending)
             {
-                if (level.getBlockState(p).isAir())
+                if (level.getBlockState(p).isAir() && hive.roomAt(p).isEmpty() && hive.work().beginCaveProbe(now))
                 {
                     claimCave(level, hive, p);
                 }
                 room.setCursor(i + 1); // nothing to do here (already open, or not safe): move on
             }
         }
-        if (found == 0 && room.cursor() >= list.size())
+        if (room.cursor() >= list.size())
         {
             room.setDone(true);
+            HiveData.get(level).changed();
+        }
+        else if (reachable || room.cursor() > start)
+        {
+            room.stalls = 0;
+        }
+        else if (pending && !unloaded && hive.work().available(worker, HiveWork.Kind.DIG, list.get(start), now)
+                && ++room.stalls > 120)
+        {
+            room.stalls = 0;
+            room.setCursor(start + 1);
             HiveData.get(level).changed();
         }
         return null;
@@ -189,7 +201,7 @@ public final class HivePlanner
         for (Direction d : new Direction[] { Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN })
         {
             BlockPos p = pos.relative(d);
-            if (level.getBlockState(p).isAir())
+            if (level.isLoaded(p) && level.getBlockState(p).isAir())
             {
                 return p;
             }
@@ -227,7 +239,7 @@ public final class HivePlanner
         int air = 0;
         for (BlockPos p : BlockPos.betweenClosed(at.offset(-2, -2, -2), at.offset(2, 2, 2)))
         {
-            if (level.getBlockState(p).isAir())
+            if (level.isLoaded(p) && level.getBlockState(p).isAir())
             {
                 air++;
             }
@@ -252,7 +264,7 @@ public final class HivePlanner
                 {
                     BlockPos n = p.relative(d);
                     if (Math.abs(n.getX() - at.getX()) <= 16 && Math.abs(n.getZ() - at.getZ()) <= 16 && Math.abs(n.getY() - at.getY()) <= 12
-                            && !seen.contains(n) && level.getBlockState(n).isAir())
+                            && !seen.contains(n) && level.isLoaded(n) && level.getBlockState(n).isAir())
                     {
                         seen.add(n);
                         queue.add(n);

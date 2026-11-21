@@ -35,6 +35,7 @@ public class Hive
     /** Top of the tunnel down to the hive (where it was founded). */
     private BlockPos entrance;
     private State state;
+    private final HiveWork work = new HiveWork();
     private int resin;
     private boolean coreBlockPlaced;
     private long nextCorePlacement;
@@ -166,6 +167,11 @@ public class Hive
     public State state()
     {
         return state;
+    }
+
+    public HiveWork work()
+    {
+        return work;
     }
 
     public void setState(State state)

@@ -65,11 +65,7 @@ public class DroneEntity extends XenomorphEntity
         addHunterGoals(1.0);
         goalSelector.addGoal(1, new HiveGoals.CarryHostGoal(this));
         goalSelector.addGoal(5, new HiveGoals.BurrowGoal(this));
-        goalSelector.addGoal(5, new HiveGoals.BuildResinGoal(this));
-        goalSelector.addGoal(5, new HiveGoals.DigHiveGoal(this));
-        goalSelector.addGoal(4, new HiveGoals.BuildHiveGoal(this));
-        goalSelector.addGoal(4, new HiveGoals.CoatWallsGoal(this));
-        goalSelector.addGoal(3, new HiveGoals.CarryEggGoal(this));
+        goalSelector.addGoal(4, new HiveGoals.AssignedWorkGoal(this));
         goalSelector.addGoal(1, new HiveGoals.SealLeakGoal(this));
     }
 

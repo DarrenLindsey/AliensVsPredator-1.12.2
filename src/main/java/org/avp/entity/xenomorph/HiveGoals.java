@@ -12,6 +12,7 @@ import org.avp.world.hive.Hive;
 import org.avp.world.hive.HiveData;
 import org.avp.world.hive.HiveFounding;
 import org.avp.world.hive.HiveShaft;
+import org.avp.world.hive.HiveWork;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -316,10 +317,155 @@ public final class HiveGoals
         }
     }
 
-    /** Drones coat their hive in resin, from the core outwards. Well-fed Drones build faster. */
-    public static class BuildResinGoal extends Goal
+    /** A worker executes a claimed task and frees it when done, interrupted or unable to finish. */
+    private abstract static class AssignedGoal extends Goal
+    {
+        protected final DroneEntity drone;
+        @Nullable
+        private Hive assignedHive;
+        @Nullable
+        private HiveWork.Job assignment;
+
+        AssignedGoal(DroneEntity drone)
+        {
+            this.drone = drone;
+        }
+
+        protected boolean reserve(Hive hive, HiveWork.Kind kind, @Nullable BlockPos target, @Nullable java.util.UUID subject)
+        {
+            if (target == null)
+            {
+                return false;
+            }
+            HiveWork.Job granted = hive.work().assign(drone.getUUID(), kind, target, subject, drone.level().getGameTime());
+            if (granted == null)
+            {
+                return false;
+            }
+            assignedHive = hive;
+            assignment = granted;
+            return true;
+        }
+
+        protected boolean keepsAssignment()
+        {
+            return assignment != null && drone.hive() == assignedHive
+                    && assignedHive.work().renew(assignment, drone.level().getGameTime());
+        }
+
+        @Override
+        public void stop()
+        {
+            if (assignment != null)
+            {
+                assignedHive.work().release(assignment);
+                assignment = null;
+                assignedHive = null;
+            }
+        }
+    }
+
+    /** The hive chooses the order in which a drone tries its role's existing work routines. */
+    public static class AssignedWorkGoal extends Goal
     {
         private final DroneEntity drone;
+        private final AssignedGoal dig;
+        private final AssignedGoal build;
+        private final AssignedGoal workerCoat;
+        private final AssignedGoal specialistCoat;
+        private final AssignedGoal eggs;
+        @Nullable
+        private AssignedGoal active;
+
+        public AssignedWorkGoal(DroneEntity drone)
+        {
+            this.drone = drone;
+            dig = new DigHiveGoal(drone);
+            build = new BuildHiveGoal(drone);
+            workerCoat = new BuildResinGoal(drone);
+            specialistCoat = new CoatWallsGoal(drone);
+            eggs = new CarryEggGoal(drone);
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (!enabled() || drone.getTarget() != null || drone.isVehicle()
+                    || Math.floorMod(drone.tickCount + drone.getId(), 20) >= 2 || !(drone.level() instanceof ServerLevel level))
+            {
+                return false;
+            }
+            Hive hive = drone.hive();
+            if (hive == null || hive.state() != Hive.State.ACTIVE)
+            {
+                return false;
+            }
+            for (HiveWork.Kind kind : hive.work().directive(level, hive).order())
+            {
+                AssignedGoal candidate = switch (kind)
+                {
+                    case DIG -> dig;
+                    case BUILD -> build;
+                    case COAT -> drone.isCoater() ? specialistCoat : workerCoat;
+                    case EGG -> eggs;
+                    case SEAL -> throw new IllegalStateException("Leaks use their emergency goal");
+                };
+                if (candidate.canUse())
+                {
+                    active = candidate;
+                    return true;
+                }
+                if (candidate == specialistCoat && workerCoat.canUse())
+                {
+                    active = workerCoat;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return active != null && active.canContinueToUse() && active.keepsAssignment();
+        }
+
+        @Override
+        public void start()
+        {
+            active.start();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick()
+        {
+            return true;
+        }
+
+        @Override
+        public void tick()
+        {
+            if (active != null && (active.requiresUpdateEveryTick() || drone.tickCount % 2 == 0))
+            {
+                active.tick();
+            }
+        }
+
+        @Override
+        public void stop()
+        {
+            if (active != null)
+            {
+                active.stop();
+                active = null;
+            }
+        }
+    }
+
+    /** Drones coat their hive in resin, from the core outwards. Well-fed Drones build faster. */
+    private static class BuildResinGoal extends AssignedGoal
+    {
         @Nullable
         private BlockPos spot;
         @Nullable
@@ -328,15 +474,14 @@ public final class HiveGoals
 
         public BuildResinGoal(DroneEntity drone)
         {
-            this.drone = drone;
-            setFlags(EnumSet.of(Flag.MOVE));
+            super(drone);
         }
 
         @Override
         public boolean canUse()
         {
             double speed = AvpConfig.server(AvpConfig.SERVER.resinBuildSpeed);
-            if (!enabled() || speed <= 0 || drone.getTarget() != null || drone.isVehicle() || drone.tickCount % 20 >= 2
+            if (speed <= 0
                     || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
@@ -358,7 +503,8 @@ public final class HiveGoals
             {
                 BlockPos p = room.centre().offset(drone.getRandom().nextInt(radius * 2 + 1) - radius, drone.getRandom().nextInt(4),
                         drone.getRandom().nextInt(radius * 2 + 1) - radius);
-                if (level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
+                if (level.isLoaded(p) && level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid()
+                        && reserve(hive, HiveWork.Kind.COAT, p, null))
                 {
                     spot = p;
                     return true;
@@ -390,6 +536,12 @@ public final class HiveGoals
                 return;
             }
             ServerLevel level = (ServerLevel) drone.level();
+            Hive hive = drone.hive();
+            if (hive == null || !level.isLoaded(spot))
+            {
+                spot = null;
+                return;
+            }
             double speed = AvpConfig.server(AvpConfig.SERVER.resinBuildSpeed) * (drone.hunger() > 70 ? 2.0 : 1.0);
             int coats = Math.max(1, (int) Math.round(3 * speed));
             int done = 0;
@@ -397,7 +549,8 @@ public final class HiveGoals
             {
                 BlockPos p = drone.blockPosition().offset(drone.getRandom().nextInt(7) - 3, drone.getRandom().nextInt(6) - 2,
                         drone.getRandom().nextInt(7) - 3);
-                if (exposed(level, p) && NaturalResinBlock.cover(level, p))
+                if (level.isLoaded(p) && hive.work().available(drone.getUUID(), HiveWork.Kind.COAT, p, level.getGameTime())
+                        && exposed(level, p) && NaturalResinBlock.cover(level, p))
                 {
                     done++;
                 }
@@ -411,12 +564,8 @@ public final class HiveGoals
             {
                 drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 level.playSound(null, drone.blockPosition(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.HOSTILE, 0.6F, 0.6F);
-                Hive hive = drone.hive();
-                if (hive != null)
-                {
-                    hive.addResin(done);
-                    HiveData.get(level).changed();
-                }
+                hive.addResin(done);
+                HiveData.get(level).changed();
             }
             spot = null;
         }
@@ -583,9 +732,8 @@ public final class HiveGoals
      * The colony at work: Drones dig the hive's next room (and the gallery to it), several at a
      * time, the way ants do. Fed Drones dig faster.
      */
-    public static class DigHiveGoal extends Goal
+    private static class DigHiveGoal extends AssignedGoal
     {
-        private final DroneEntity drone;
         @Nullable
         private BlockPos block;
         private float progress;
@@ -593,14 +741,13 @@ public final class HiveGoals
 
         public DigHiveGoal(DroneEntity drone)
         {
-            this.drone = drone;
-            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+            super(drone);
         }
 
         @Override
         public boolean canUse()
         {
-            if (!enabled() || drone.getTarget() != null || drone.isVehicle() || drone.hunger() < 15 || drone.tickCount % 20 >= 2
+            if (drone.hunger() < 15
                     || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
@@ -610,8 +757,8 @@ public final class HiveGoals
             {
                 return false;
             }
-            block = org.avp.world.hive.HivePlanner.nextBlock(level, hive, Math.floorMod(drone.getId(), 3));
-            return block != null;
+            block = org.avp.world.hive.HivePlanner.nextBlock(level, hive, drone.getUUID());
+            return reserve(hive, HiveWork.Kind.DIG, block, null);
         }
 
         @Override
@@ -653,6 +800,11 @@ public final class HiveGoals
             ticks++;
             ServerLevel level = (ServerLevel) drone.level();
             Hive hive = drone.hive();
+            if (!level.isLoaded(block))
+            {
+                block = null;
+                return;
+            }
             if (hive == null || !org.avp.world.hive.HivePlanner.diggable(level, block))
             {
                 if (hive != null)
@@ -694,6 +846,7 @@ public final class HiveGoals
         @Override
         public void stop()
         {
+            super.stop();
             if (block != null && drone.level() instanceof ServerLevel level)
             {
                 level.destroyBlockProgress(drone.getId(), block, -1);
@@ -713,9 +866,8 @@ public final class HiveGoals
      * floors under galleries that cross open space, seals over water and lava leaking in, a roof
      * over any room open to the sky - and pave the room floors in it.
      */
-    public static class BuildHiveGoal extends Goal
+    private static class BuildHiveGoal extends AssignedGoal
     {
-        private final DroneEntity drone;
         @Nullable
         private BlockPos job;
         /** The job is clearing a block out of the hive's planned space (not placing hivestone). */
@@ -724,14 +876,13 @@ public final class HiveGoals
 
         public BuildHiveGoal(DroneEntity drone)
         {
-            this.drone = drone;
-            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+            super(drone);
         }
 
         @Override
         public boolean canUse()
         {
-            if (!enabled() || drone.getTarget() != null || drone.isVehicle() || drone.tickCount % 20 >= 2 || !drone.isBuilder()
+            if (!drone.isBuilder()
                     || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
@@ -742,7 +893,7 @@ public final class HiveGoals
                 return false;
             }
             job = findJob(level, hive);
-            return job != null;
+            return reserve(hive, HiveWork.Kind.BUILD, job, null);
         }
 
         /** A few random looks around the hive for something to build. Urgent jobs (holes, leaks, sky) first; paving last. */
@@ -766,6 +917,10 @@ public final class HiveGoals
                     continue;
                 }
                 BlockPos p = space.get(random.nextInt(space.size()));
+                if (!available(level, hive, p))
+                {
+                    continue;
+                }
                 BlockState s = level.getBlockState(p);
                 if (!s.isAir() && !s.is(org.avp.registry.ModBlocks.HIVERESIN_STANDARD.get()) // resin columns are meant to be there
                         && org.avp.world.hive.HivePlanner.diggable(level, p) && org.avp.world.hive.HivePlanner.openSide(level, p) != null)
@@ -788,7 +943,8 @@ public final class HiveGoals
                 {
                     case 0 -> { // a hole in a room's floor
                         BlockPos floor = c.offset(random.nextInt(r * 2 + 1) - r, -1, random.nextInt(r * 2 + 1) - r);
-                        if (room.type().isChamber() && room.contains(floor.above()) && level.getBlockState(floor.above()).isAir() && fillable(level, floor))
+                        if (room.type().isChamber() && room.contains(floor.above()) && available(level, hive, floor)
+                                && level.getBlockState(floor.above()).isAir() && fillable(level, floor))
                         {
                             return floor;
                         }
@@ -799,7 +955,8 @@ public final class HiveGoals
                         {
                             BlockPos p = list.get(random.nextInt(Math.min(list.size(), Math.max(1, room.cursor()))));
                             BlockPos floor = p.below();
-                            if (level.getBlockState(p).isAir() && !org.avp.world.hive.HivePlanner.digSet(room).contains(floor) && fillable(level, floor))
+                            if (available(level, hive, floor) && level.getBlockState(p).isAir()
+                                    && !org.avp.world.hive.HivePlanner.digSet(room).contains(floor) && fillable(level, floor))
                             {
                                 return floor;
                             }
@@ -807,20 +964,24 @@ public final class HiveGoals
                     }
                     case 2 -> { // water or lava getting in
                         BlockPos p = c.offset(random.nextInt(r * 2 + 3) - r - 1, random.nextInt(room.height() + 3) - 1, random.nextInt(r * 2 + 3) - r - 1);
-                        if (!level.getFluidState(p).isEmpty() && !level.getBlockState(p).hasBlockEntity())
+                        if (available(level, hive, p) && !level.getFluidState(p).isEmpty() && !level.getBlockState(p).hasBlockEntity())
                         {
                             return p.immutable();
                         }
                     }
                     default -> { // open to the sky: roof it over; otherwise pave the floor
                         BlockPos roof = c.offset(random.nextInt(r * 2 + 1) - r, Math.max(2, room.height()), random.nextInt(r * 2 + 1) - r);
-                        if (room.type().isChamber() && level.getBlockState(roof).isAir() && level.canSeeSky(roof))
+                        if (room.type().isChamber() && available(level, hive, roof) && level.getBlockState(roof).isAir() && level.canSeeSky(roof))
                         {
                             return roof;
                         }
                         BlockPos floor = c.offset(random.nextInt(r * 2 + 1) - r, -1, random.nextInt(r * 2 + 1) - r);
+                        if (paving != null || !room.type().isChamber() || !room.contains(floor.above()) || !available(level, hive, floor))
+                        {
+                            continue;
+                        }
                         BlockState s = level.getBlockState(floor);
-                        if (paving == null && room.type().isChamber() && room.contains(floor.above()) && level.getBlockState(floor.above()).isAir()
+                        if (level.getBlockState(floor.above()).isAir()
                                 && s.isSolid() && !s.is(org.avp.registry.ModBlocks.HIVESTONE.get()) && !s.is(org.avp.registry.ModBlocks.NATURAL_RESIN.get())
                                 && !s.hasBlockEntity() && !s.is(ModTags.XENO_UNBREAKABLE) && s.getDestroySpeed(level, floor) >= 0)
                         {
@@ -830,6 +991,11 @@ public final class HiveGoals
                 }
             }
             return paving;
+        }
+
+        private boolean available(ServerLevel level, Hive hive, BlockPos pos)
+        {
+            return level.isLoaded(pos) && hive.work().available(drone.getUUID(), HiveWork.Kind.BUILD, pos, level.getGameTime());
         }
 
         /** Open (air, a fluid, plants...) and safe to fill. */
@@ -866,6 +1032,11 @@ public final class HiveGoals
                 return;
             }
             ServerLevel level = (ServerLevel) drone.level();
+            if (!level.isLoaded(job))
+            {
+                job = null;
+                return;
+            }
             drone.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(job));
             drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
             if (clearing)
@@ -883,6 +1054,12 @@ public final class HiveGoals
                 job = null;
                 return;
             }
+            BlockState existing = level.getBlockState(job);
+            if (existing.hasBlockEntity() || existing.is(ModTags.XENO_UNBREAKABLE) || existing.getDestroySpeed(level, job) < 0)
+            {
+                job = null;
+                return;
+            }
             level.setBlock(job, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
             level.playSound(null, job, SoundEvents.MUD_PLACE, SoundSource.HOSTILE, 0.8F, 0.6F);
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.ITEM_SLIME, job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 4, 0.3, 0.1, 0.3, 0.02);
@@ -894,24 +1071,21 @@ public final class HiveGoals
      * Coater Drones: they climb the hive's walls and ceilings - big captured caves above all - and
      * spray resin over everything within reach, working their way across the surface.
      */
-    public static class CoatWallsGoal extends Goal
+    private static class CoatWallsGoal extends AssignedGoal
     {
-        private final DroneEntity drone;
         @Nullable
         private BlockPos target;
         private int ticks, sprays;
 
         public CoatWallsGoal(DroneEntity drone)
         {
-            this.drone = drone;
-            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+            super(drone);
         }
 
         @Override
         public boolean canUse()
         {
-            if (!enabled() || AvpConfig.server(AvpConfig.SERVER.resinBuildSpeed) <= 0 || drone.getTarget() != null || drone.isVehicle()
-                    || drone.tickCount % 20 >= 2 || !drone.isCoater() || !(drone.level() instanceof ServerLevel level))
+            if (AvpConfig.server(AvpConfig.SERVER.resinBuildSpeed) <= 0 || !drone.isCoater() || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
             }
@@ -928,27 +1102,33 @@ public final class HiveGoals
             // caves are the big job: look there more often
             org.avp.world.hive.Room room = rooms.stream().filter(r -> r.type() == org.avp.world.hive.Room.Type.CAVE).findAny()
                     .filter(r -> drone.getRandom().nextInt(3) > 0).orElse(rooms.get(drone.getRandom().nextInt(rooms.size())));
-            target = findSurface(level, room.centre(), room.radius() + 4, room.height() + 6);
+            target = findSurface(level, hive, room.centre(), room.radius() + 4, room.height() + 6);
             sprays = 0;
-            return target != null;
+            return reserve(hive, HiveWork.Kind.COAT, target, null);
         }
 
         /** An uncoated wall or ceiling block near here, with open hive space in front of it. */
         @Nullable
-        private BlockPos findSurface(ServerLevel level, BlockPos around, int radius, int height)
+        private BlockPos findSurface(ServerLevel level, Hive hive, BlockPos around, int radius, int height)
         {
             net.minecraft.util.RandomSource random = drone.getRandom();
             for (int tries = 0; tries < 40; tries++)
             {
                 BlockPos p = around.offset(random.nextInt(radius * 2 + 1) - radius, random.nextInt(height + 2) - 1, random.nextInt(radius * 2 + 1) - radius);
+                if (!level.isLoaded(p))
+                {
+                    continue;
+                }
                 BlockState s = level.getBlockState(p);
                 if (!s.isAir() && NaturalResinBlock.canCover(level, p, s))
                 {
                     for (Direction d : Direction.values())
                     {
-                        if (d != Direction.UP && level.getBlockState(p.relative(d)).isAir()) // walls and ceilings (floors are the builders')
+                        BlockPos stand = p.relative(d);
+                        if (d != Direction.UP && level.isLoaded(stand) && level.getBlockState(stand).isAir()
+                                && hive.work().available(drone.getUUID(), HiveWork.Kind.COAT, stand, level.getGameTime()))
                         {
-                            return p.relative(d).immutable();
+                            return stand;
                         }
                     }
                 }
@@ -987,6 +1167,12 @@ public final class HiveGoals
                 return;
             }
             ServerLevel level = (ServerLevel) drone.level();
+            Hive hive = drone.hive();
+            if (hive == null || !level.isLoaded(target))
+            {
+                target = null;
+                return;
+            }
             // spray everything exposed within reach
             int coated = 0;
             int limit = Math.max(2, (int) Math.round(8 * AvpConfig.server(AvpConfig.SERVER.resinBuildSpeed)));
@@ -997,7 +1183,9 @@ public final class HiveGoals
                 {
                     break;
                 }
-                if (drone.getRandom().nextInt(3) == 0 && exposedNotFloor(level, p) && NaturalResinBlock.cover(level, p))
+                if (drone.getRandom().nextInt(3) == 0 && level.isLoaded(p)
+                        && hive.work().available(drone.getUUID(), HiveWork.Kind.COAT, p, level.getGameTime())
+                        && exposedNotFloor(level, p) && NaturalResinBlock.cover(level, p))
                 {
                     coated++;
                 }
@@ -1006,19 +1194,19 @@ public final class HiveGoals
             {
                 drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 level.playSound(null, at, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.HOSTILE, 0.7F, 0.5F);
-                Hive hive = drone.hive();
-                if (hive != null)
-                {
-                    hive.addResin(coated);
-                    HiveData.get(level).changed();
-                }
+                hive.addResin(coated);
+                HiveData.get(level).changed();
             }
             // and on across the wall
-            target = ++sprays < 8 ? findSurface(level, at, 5, 5) : null;
-            if (target != null)
+            target = ++sprays < 8 ? findSurface(level, hive, at, 5, 5) : null;
+            if (reserve(hive, HiveWork.Kind.COAT, target, null))
             {
                 ticks = 0;
                 drone.navigateTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 0.9);
+            }
+            else
+            {
+                target = null;
             }
         }
 
@@ -1026,7 +1214,8 @@ public final class HiveGoals
         {
             for (Direction d : Direction.values())
             {
-                if (d != Direction.UP && level.getBlockState(pos.relative(d)).isAir())
+                BlockPos outside = pos.relative(d);
+                if (d != Direction.UP && level.isLoaded(outside) && level.getBlockState(outside).isAir())
                 {
                     return true;
                 }
@@ -1039,9 +1228,8 @@ public final class HiveGoals
      * Worker Drones take the eggs from the rear of the Queen's egg sac (she lays no more than 3 there)
      * and carry them to the cocooned hosts - or set them out around her chamber.
      */
-    public static class CarryEggGoal extends Goal
+    private static class CarryEggGoal extends AssignedGoal
     {
-        private final DroneEntity drone;
         @Nullable
         private OvamorphEntity egg;
         @Nullable
@@ -1050,15 +1238,13 @@ public final class HiveGoals
 
         public CarryEggGoal(DroneEntity drone)
         {
-            this.drone = drone;
-            setFlags(EnumSet.of(Flag.MOVE));
+            super(drone);
         }
 
         @Override
         public boolean canUse()
         {
-            if (!enabled() || drone.getClass() != DroneEntity.class || drone.getTarget() != null || drone.isVehicle()
-                    || drone.tickCount % 20 >= 2 || !(drone.level() instanceof ServerLevel level))
+            if (drone.getClass() != DroneEntity.class || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
             }
@@ -1070,13 +1256,14 @@ public final class HiveGoals
             }
             Vec3 rear = queen.eggSacRear();
             egg = level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(rear, rear).inflate(2.5),
-                    e -> e.isFull() && !e.isPassenger() && e.openProgress() <= -20).stream().findFirst().orElse(null);
+                    e -> e.isFull() && !e.isPassenger() && e.openProgress() <= -20
+                            && hive.work().subjectAvailable(drone.getUUID(), e.getUUID(), level.getGameTime())).stream().findFirst().orElse(null);
             if (egg == null)
             {
                 return false;
             }
             destination = destination(level, hive, rear);
-            return destination != null;
+            return reserve(hive, HiveWork.Kind.EGG, destination, egg.getUUID());
         }
 
         /** Next to a cocooned host with no egg yet; else somewhere in the Queen's chamber, away from the sac. */
@@ -1092,7 +1279,8 @@ public final class HiveGoals
                 for (Direction d : Direction.Plane.HORIZONTAL)
                 {
                     BlockPos p = host.blockPosition().relative(d);
-                    if (level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
+                    if (level.isLoaded(p) && hive.work().available(drone.getUUID(), HiveWork.Kind.EGG, p, level.getGameTime())
+                            && level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
                     {
                         return p;
                     }
@@ -1103,7 +1291,8 @@ public final class HiveGoals
             for (int tries = 0; room != null && tries < 6; tries++)
             {
                 BlockPos p = org.avp.world.hive.HivePlanner.floorSpot(level, room, false);
-                if (p != null && p.distToCenterSqr(rear) > 25 && level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(p).inflate(1.0)).isEmpty())
+                if (p != null && hive.work().available(drone.getUUID(), HiveWork.Kind.EGG, p, level.getGameTime())
+                        && p.distToCenterSqr(rear) > 25 && level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(p).inflate(1.0)).isEmpty())
                 {
                     return p;
                 }
@@ -1114,7 +1303,8 @@ public final class HiveGoals
         @Override
         public boolean canContinueToUse()
         {
-            return egg != null && egg.isAlive() && destination != null && ticks < 600 && drone.getTarget() == null;
+            return egg != null && egg.isAlive() && (!egg.isPassenger() || egg.getVehicle() == drone)
+                    && destination != null && ticks < 600 && drone.getTarget() == null;
         }
 
         @Override
@@ -1136,15 +1326,19 @@ public final class HiveGoals
             if (!egg.isPassenger())
             {
                 // go and pick it up
-                if (drone.distanceToSqr(egg) < 2.5 * 2.5)
+                if (drone.distanceToSqr(egg) < 2.5 * 2.5 && egg.startRiding(drone, true))
                 {
-                    egg.startRiding(drone, true);
                     drone.navigateTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
                 }
                 else if (ticks % 20 == 0)
                 {
                     drone.navigateTo(egg, 0.9);
                 }
+                return;
+            }
+            if (egg.getVehicle() != drone)
+            {
+                egg = null;
                 return;
             }
             if (drone.blockPosition().distSqr(destination) > 4)
@@ -1166,7 +1360,8 @@ public final class HiveGoals
         @Override
         public void stop()
         {
-            if (egg != null && egg.isPassenger())
+            super.stop();
+            if (egg != null && egg.getVehicle() == drone)
             {
                 // interrupted: put it down where it is
                 drone.releasing = true;
@@ -1182,23 +1377,26 @@ public final class HiveGoals
      * Water or lava getting into the hive: the nearest free Drone drops what it's doing and walls it
      * off with hivestone, from a safe distance, until the flow is stopped.
      */
-    public static class SealLeakGoal extends Goal
+    public static class SealLeakGoal extends AssignedGoal
     {
-        private final DroneEntity drone;
         @Nullable
         private BlockPos leak;
+        @Nullable
+        private java.util.List<BlockPos> patch;
+        private int patchIndex;
         private int ticks;
 
         public SealLeakGoal(DroneEntity drone)
         {
-            this.drone = drone;
+            super(drone);
             setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
         }
 
         @Override
         public boolean canUse()
         {
-            if (!enabled() || drone.getTarget() != null || drone.isVehicle() || !(drone.level() instanceof ServerLevel level))
+            if (!enabled() || drone.getTarget() != null || drone.isVehicle()
+                    || Math.floorMod(drone.tickCount + drone.getId(), 10) >= 2 || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
             }
@@ -1207,22 +1405,25 @@ public final class HiveGoals
             {
                 return false;
             }
-            hive.leaks.removeIf(p -> !Hive.isLeak(level, p));
-            leak = hive.leaks.stream().filter(p -> p.distSqr(drone.blockPosition()) < 48 * 48)
+            hive.leaks.removeIf(p -> level.isLoaded(p) && !Hive.isLeak(level, p));
+            leak = hive.leaks.stream().filter(p -> level.isLoaded(p) && p.distSqr(drone.blockPosition()) < 48 * 48
+                            && hive.work().available(drone.getUUID(), HiveWork.Kind.SEAL, p, level.getGameTime()))
                     .min(java.util.Comparator.comparingDouble(p -> p.distSqr(drone.blockPosition()))).orElse(null);
-            return leak != null;
+            return reserve(hive, HiveWork.Kind.SEAL, leak, null);
         }
 
         @Override
         public boolean canContinueToUse()
         {
-            return leak != null && ticks < 400 && drone.getTarget() == null;
+            return leak != null && ticks < 400 && drone.getTarget() == null && keepsAssignment();
         }
 
         @Override
         public void start()
         {
             ticks = 0;
+            patch = null;
+            patchIndex = 0;
             drone.setState("SEALING LEAK");
             approach();
         }
@@ -1244,12 +1445,14 @@ public final class HiveGoals
             }
             ServerLevel level = (ServerLevel) drone.level();
             Hive hive = drone.hive();
-            if (hive == null || !Hive.isLeak(level, leak))
+            if (hive == null || !level.isLoaded(leak))
             {
-                if (hive != null)
-                {
-                    hive.leaks.remove(leak);
-                }
+                leak = null;
+                return;
+            }
+            if (patch == null && !Hive.isLeak(level, leak))
+            {
+                hive.leaks.remove(leak);
                 leak = null;
                 return;
             }
@@ -1262,16 +1465,39 @@ public final class HiveGoals
                 return;
             }
             drone.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(leak));
-            drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-            for (BlockPos p : sealPlan(level, hive, leak))
+            if (patch == null)
             {
-                level.setBlock(p, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
-                hive.leaks.remove(p);
+                drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                patch = sealPlan(level, hive, leak);
+                patchIndex = patch.size();
+            }
+            // Work back toward the opening, so an interrupted repair can still be picked up.
+            int end = Math.max(0, patchIndex - 8);
+            while (patchIndex > end)
+            {
+                BlockPos p = patch.get(--patchIndex);
+                if (level.isLoaded(p) && level.getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock
+                        && hive.work().available(drone.getUUID(), HiveWork.Kind.SEAL, p, level.getGameTime()))
+                {
+                    level.setBlock(p, org.avp.registry.ModBlocks.HIVESTONE.get().defaultBlockState(), 3);
+                    hive.leaks.remove(p);
+                }
+            }
+            if (patchIndex > 0)
+            {
+                return;
             }
             level.playSound(null, leak, SoundEvents.MUD_PLACE, SoundSource.HOSTILE, 1.0F, 0.6F);
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, leak.getX() + 0.5, leak.getY() + 0.5, leak.getZ() + 0.5, 6, 0.4, 0.4, 0.4, 0.02);
             hive.checkForLeaks(level, leak, 2); // still coming through somewhere next to it?
             leak = null;
+        }
+
+        @Override
+        public void stop()
+        {
+            super.stop();
+            patch = null;
         }
     }
 
@@ -1297,8 +1523,9 @@ public final class HiveGoals
             for (Direction d : new Direction[] { Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN })
             {
                 BlockPos n = p.relative(d);
-                if (!body.contains(n) && level.getBlockState(n).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock
-                        && level.getFluidState(n).getType().isSame(fluid) && n.distManhattan(leak) <= 40)
+                if (n.distManhattan(leak) <= 40 && !body.contains(n) && level.isLoaded(n)
+                        && level.getBlockState(n).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock
+                        && level.getFluidState(n).getType().isSame(fluid))
                 {
                     if (body.size() >= 160)
                     {

@@ -193,7 +193,7 @@ public abstract class XenomorphEntity extends Monster
             hiveId = hive.id();
         }
         hive.touch(now);
-        if (random.nextInt(4) == 0)
+        if (hive.state() == org.avp.world.hive.Hive.State.ACTIVE && random.nextInt(4) == 0 && hive.work().beginReview(now))
         {
             hive.placeCoreBlock(level);
             org.avp.world.hive.HivePlanner.plan(level, hive);

@@ -90,6 +90,11 @@ public final class AvpCommands
                 + (hive.hasQueen(now) ? "" : ", heir: " + (heir == null ? "none" : heir.getType().getDescription().getString()
                         + (heir instanceof XenomorphEntity x ? " (" + x.jelly() + " jelly)" : "")))), false);
         source.sendSuccess(() -> Component.literal("  Members: " + members.size() + " " + summary(members)), false);
+        if (hive.state() == Hive.State.ACTIVE)
+        {
+            source.sendSuccess(() -> Component.literal("  Work: " + hive.work().directive(level, hive).label()
+                    + " (" + hive.work().claimedCount(now) + " assigned)"), false);
+        }
         source.sendSuccess(() -> Component.literal("  Dug out: " + hive.dug() + " / " + org.avp.world.hive.HivePlanner.maxDug()
                 + " blocks, reach " + hive.maxReach(now, HiveData.maxRadius())), false);
         for (org.avp.world.hive.Room room : hive.rooms())

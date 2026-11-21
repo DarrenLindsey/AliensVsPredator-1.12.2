@@ -10,6 +10,7 @@ import org.avp.registry.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -82,7 +83,8 @@ public final class HiveShaft
             {
                 BlockPos surface = pos.above(offset);
                 BlockState state = level.getBlockState(surface);
-                if (state.is(ModTags.RESIN_COVERABLE) && canExcavate(level, surface) && level.getBlockState(surface.above()).isAir())
+                if ((state.is(BlockTags.DIRT) || state.is(ModTags.RESIN_COVERABLE))
+                        && canExcavate(level, surface) && level.getBlockState(surface.above()).isAir())
                 {
                     level.setBlock(surface, stone, Block.UPDATE_ALL);
                     break;

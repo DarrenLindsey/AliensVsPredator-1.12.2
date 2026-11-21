@@ -300,6 +300,7 @@ public final class HiveGoals
                 hive.rooms().add(0, new org.avp.world.hive.Room(org.avp.world.hive.Room.Type.QUEEN, centre, centre, r, height, true));
             }
             hive.setState(Hive.State.ACTIVE);
+            hive.placeCoreBlock(level);
             HiveData.get(level).changed();
             level.playSound(null, centre, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1.0F, 0.6F);
             drone.setState("HIVE FOUNDED");

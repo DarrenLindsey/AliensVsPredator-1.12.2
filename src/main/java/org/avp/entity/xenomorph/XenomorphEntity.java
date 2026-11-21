@@ -195,6 +195,7 @@ public abstract class XenomorphEntity extends Monster
         hive.touch(now);
         if (random.nextInt(4) == 0)
         {
+            hive.placeCoreBlock(level);
             org.avp.world.hive.HivePlanner.plan(level, hive);
             // foraging: is the hive short of hosts (for the eggs) or food (for the larder)?
             java.util.List<net.minecraft.world.entity.LivingEntity> held = level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,

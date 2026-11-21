@@ -4,10 +4,17 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import org.avp.block.entity.ResinBlockEntity;
+import org.avp.registry.ModBlocks;
+import org.avp.registry.ModTags;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * One Xenomorph hive (1.12.2 XenomorphHive): where its core is, how it got there and how big it
@@ -29,6 +36,8 @@ public class Hive
     private BlockPos entrance;
     private State state;
     private int resin;
+    private boolean coreBlockPlaced;
+    private long nextCorePlacement;
     @Nullable
     private UUID queen;
     /** Game time a Queen was last seen alive at this hive. */
@@ -161,6 +170,43 @@ public class Hive
     public void setState(State state)
     {
         this.state = state;
+    }
+
+    /** Installs the visible core in the floor once, including for hives loaded from older saves. */
+    public void placeCoreBlock(ServerLevel level)
+    {
+        long now = level.getGameTime();
+        if (coreBlockPlaced || state != State.ACTIVE || now < nextCorePlacement)
+        {
+            return;
+        }
+        nextCorePlacement = now + 200;
+
+        BlockPos floor = rooms.stream().filter(room -> room.type() == Room.Type.QUEEN && room.done())
+                .findFirst().map(room -> room.centre().below()).orElseGet(core::below);
+        if (!level.isInWorldBounds(floor) || !level.isLoaded(floor) || !level.getBlockState(floor.above()).isAir())
+        {
+            return;
+        }
+        BlockState marker = ModBlocks.HIVE_CORE.get().defaultBlockState();
+        BlockState current = level.getBlockState(floor);
+        if (!current.is(marker.getBlock()) && (!isCoreFloor(level, floor, current) || !level.setBlock(floor, marker, Block.UPDATE_ALL)))
+        {
+            return;
+        }
+        coreBlockPlaced = true;
+        HiveData.get(level).changed();
+    }
+
+    private static boolean isCoreFloor(ServerLevel level, BlockPos pos, BlockState state)
+    {
+        // A natural resin coating is safe to replace only when the block it remembers was natural terrain.
+        if (state.is(ModBlocks.NATURAL_RESIN.get()) && level.getBlockEntity(pos) instanceof ResinBlockEntity resin)
+        {
+            state = resin.covered();
+        }
+        return state != null && !state.hasBlockEntity() && state.getFluidState().isEmpty() && !state.is(ModTags.XENO_UNBREAKABLE)
+                && (state.is(ModTags.RESIN_COVERABLE) || state.is(ModBlocks.HIVERESIN_STANDARD.get()));
     }
 
     public int resin()
@@ -300,6 +346,7 @@ public class Hive
         tag.put("Entrance", NbtUtils.writeBlockPos(entrance));
         tag.putString("State", state.name());
         tag.putInt("Resin", resin);
+        tag.putBoolean("CoreBlockPlaced", coreBlockPlaced);
         if (queen != null)
         {
             tag.putUUID("Queen", queen);
@@ -330,6 +377,7 @@ public class Hive
         Hive hive = new Hive(tag.getUUID("Id"), NbtUtils.readBlockPos(tag, "Core").orElse(BlockPos.ZERO),
                 NbtUtils.readBlockPos(tag, "Entrance").orElse(BlockPos.ZERO), State.valueOf(tag.getString("State")), tag.getLong("LastActive"));
         hive.resin = tag.getInt("Resin");
+        hive.coreBlockPlaced = tag.getBoolean("CoreBlockPlaced");
         hive.queen = tag.hasUUID("Queen") ? tag.getUUID("Queen") : null;
         hive.digPos = NbtUtils.readBlockPos(tag, "Dig").orElse(null);
         hive.digDir = Direction.from2DDataValue(tag.getInt("DigDir"));

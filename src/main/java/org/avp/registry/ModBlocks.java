@@ -247,6 +247,7 @@ public final class ModBlocks
     private static final List<DeferredBlock<? extends Block>> SHAPE_BLOCKS = new ArrayList<>();
     /** Hardened resin mixed with digested rock: what builder Drones lay hive floors, bridges and seals with. */
     public static final DeferredBlock<Block> HIVESTONE = simple("hivestone", Kind.STONE, 3.0F, 9.0F);
+    public static final DeferredBlock<Block> HIVE_CORE = simple("hive_core", Kind.STONE, 5.0F, 10.0F);
 
     // ---- Power (batch D3) ----
     public static final DeferredBlock<org.avp.block.BreakerBlock> BREAKER = register("breaker", Tab.BLOCKS, () -> new org.avp.block.BreakerBlock(

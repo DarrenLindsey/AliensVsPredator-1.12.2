@@ -26,7 +26,7 @@ import net.minecraft.world.level.material.FluidState;
 
 /**
  * Hive resin the Drones spread over the walls, floor and ceiling of a hive (1.12.2 naturalResin).
- * Fresh resin shows the block it covers. It can be scraped off before it hardens into Hive Stone.
+ * Fresh resin shows the block it covers. It can be scraped off before it hardens into solid Hive Resin.
  * Scraping it off brings the hive down on you.
  */
 public class NaturalResinBlock extends BaseEntityBlock
@@ -62,7 +62,8 @@ public class NaturalResinBlock extends BaseEntityBlock
     /** Can a hive coat this block? (natural stone, dirt, deepslate... - or any plain solid block with the config option) */
     public static boolean canCover(Level level, BlockPos pos, BlockState state)
     {
-        if (state.isAir() || state.is(ModBlocks.NATURAL_RESIN.get()) || state.hasBlockEntity() || !state.getFluidState().isEmpty()
+        if (state.isAir() || state.is(ModBlocks.NATURAL_RESIN.get()) || state.is(ModBlocks.HIVERESIN_STANDARD.get())
+                || state.hasBlockEntity() || !state.getFluidState().isEmpty()
                 || state.is(ModTags.XENO_UNBREAKABLE) || !state.isCollisionShapeFullBlock(level, pos) || !state.canOcclude())
         {
             return false;
@@ -156,13 +157,14 @@ public class NaturalResinBlock extends BaseEntityBlock
             return false;
         }
         BlockState under = resin.covered();
-        Block hiveStone = ModBlocks.HIVESTONE.get();
+        Block solidResin = ModBlocks.HIVERESIN_STANDARD.get();
         // Coating intentionally placed over existing Hive Stone remains a separate layer.
-        if (under == null || under.is(hiveStone) || under.is(ModTags.XENO_UNBREAKABLE) || !under.is(ModTags.RESIN_COVERABLE))
+        if (under == null || under.is(solidResin) || under.is(ModBlocks.HIVESTONE.get())
+                || under.is(ModTags.XENO_UNBREAKABLE) || !under.is(ModTags.RESIN_COVERABLE))
         {
             return false;
         }
-        return level.setBlock(pos, hiveStone.defaultBlockState(), Block.UPDATE_ALL);
+        return level.setBlock(pos, solidResin.defaultBlockState(), Block.UPDATE_ALL);
     }
 
     private static double sq(double d)

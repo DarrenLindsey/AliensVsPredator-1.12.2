@@ -292,10 +292,10 @@ public final class HiveGoals
                 BlockState state = level.getBlockState(pos);
                 if (state.is(Blocks.DEEPSLATE))
                 {
-                    return y - 3;
+                    return HiveShaft.targetFloorY(level, y - 3, 8);
                 }
             }
-            return Math.max(level.getMinBuildHeight() + 8, from.getY() - 24);
+            return Math.max(level.getMinBuildHeight() + 8, HiveShaft.targetFloorY(level, from.getY() - 24, 8));
         }
 
         @Override

@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -23,6 +24,16 @@ public final class HiveShaft
 
     private HiveShaft()
     {
+    }
+
+    public static int targetFloorY(ServerLevel level, int proposed, int ceilingHeight)
+    {
+        return level.dimension().equals(Level.OVERWORLD) ? Math.min(proposed, -ceilingHeight - 4) : proposed;
+    }
+
+    public static boolean inHiveLayer(ServerLevel level, int floorY, int ceilingHeight)
+    {
+        return !level.dimension().equals(Level.OVERWORLD) || floorY + ceilingHeight <= 0;
     }
 
     public static List<BlockPos> layer(BlockPos centre)

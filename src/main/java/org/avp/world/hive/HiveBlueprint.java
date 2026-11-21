@@ -235,6 +235,7 @@ public final class HiveBlueprint
 
     public void checkSite(ServerLevel level, BlockPos mouth, int depth)
     {
+        checkDepth(level, mouth, depth);
         BlockPos floor = mouth.below(depth);
         List<BlockPos> cut = excavation(floor);
         if (cut.size() + depth * 25 > HivePlanner.maxDug())
@@ -256,6 +257,24 @@ public final class HiveBlueprint
         if (!Hive.isCoreFloor(level, coreFloor, level.getBlockState(coreFloor)))
         {
             throw new IllegalArgumentException("The Core needs solid terrain below its marked floor.");
+        }
+    }
+
+    public static int defaultDepth(ServerLevel level, BlockPos mouth)
+    {
+        return mouth.getY() - HiveShaft.targetFloorY(level, mouth.getY() - 12, MIGRATION_HEIGHT);
+    }
+
+    public static void checkDepth(ServerLevel level, BlockPos mouth, int depth)
+    {
+        int floorY = mouth.getY() - depth;
+        if (!HiveShaft.inHiveLayer(level, floorY, MIGRATION_HEIGHT))
+        {
+            throw new IllegalArgumentException("New Overworld hives must fit below Y 0. Omit the depth to use the deepslate layer automatically.");
+        }
+        if (floorY <= level.getMinBuildHeight())
+        {
+            throw new IllegalArgumentException("This depth leaves no ground below the hive floor.");
         }
     }
 

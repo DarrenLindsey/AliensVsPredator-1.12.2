@@ -158,12 +158,12 @@ public final class HiveFounding
 
     private boolean beginChamber(ServerLevel level, DroneEntity drone, BlockPos at)
     {
-        if (hive.hasVerticalShaft() && at.equals(hive.entrance()))
+        if (hive.hasVerticalShaft() && (at.equals(hive.entrance()) || !HiveShaft.inHiveLayer(level, at.getY(), HEIGHT)))
         {
             hive.setDig(null, Direction.NORTH);
             HiveData.get(level).remove(hive);
             drone.setHiveId(null);
-            return false; // The first cut was blocked. Leave the surface alone.
+            return false; // A blocked shaft cannot found an Overworld hive above the deepslate layer.
         }
         if (!chunkAreaLoaded(level, at, RADIUS + 1))
         {

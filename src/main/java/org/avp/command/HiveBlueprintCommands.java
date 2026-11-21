@@ -39,28 +39,33 @@ public final class HiveBlueprintCommands
     static LiteralArgumentBuilder<CommandSourceStack> commands()
     {
         return Commands.literal("blueprint")
-                .then(Commands.literal("preview").then(Commands.argument("name", StringArgumentType.word())
-                        .suggests((context, builder) -> builder.suggest("sample").buildFuture())
-                        .then(Commands.argument("depth", IntegerArgumentType.integer(9, 64))
-                                .executes(c -> run(c.getSource(), StringArgumentType.getString(c, "name"), IntegerArgumentType.getInteger(c, "depth"), true)))))
-                .then(Commands.literal("found").then(Commands.argument("name", StringArgumentType.word())
-                        .suggests((context, builder) -> builder.suggest("sample").buildFuture())
-                        .then(Commands.argument("depth", IntegerArgumentType.integer(9, 64))
-                                .executes(c -> run(c.getSource(), StringArgumentType.getString(c, "name"), IntegerArgumentType.getInteger(c, "depth"), false)))))
+                .then(blueprintAction("preview", true))
+                .then(blueprintAction("found", false))
                 .then(Commands.literal("clear").executes(c -> {
                     PREVIEWS.remove(c.getSource().getPlayerOrException());
                     return 1;
                 }));
     }
 
-    private static int run(CommandSourceStack source, String name, int depth, boolean preview) throws CommandSyntaxException
+    private static LiteralArgumentBuilder<CommandSourceStack> blueprintAction(String action, boolean preview)
+    {
+        return Commands.literal(action).then(Commands.argument("name", StringArgumentType.word())
+                .suggests((context, builder) -> builder.suggest("sample").buildFuture())
+                .executes(c -> run(c.getSource(), StringArgumentType.getString(c, "name"), 0, preview))
+                .then(Commands.argument("depth", IntegerArgumentType.integer(9, 384))
+                        .executes(c -> run(c.getSource(), StringArgumentType.getString(c, "name"), IntegerArgumentType.getInteger(c, "depth"), preview))));
+    }
+
+    private static int run(CommandSourceStack source, String name, int requestedDepth, boolean preview) throws CommandSyntaxException
     {
         ServerPlayer player = source.getPlayerOrException();
         ServerLevel level = source.getLevel();
         BlockPos mouth = BlockPos.containing(source.getPosition());
+        int depth = requestedDepth == 0 ? HiveBlueprint.defaultDepth(level, mouth) : requestedDepth;
         try
         {
             HiveBlueprint plan = HiveBlueprint.named(level, name);
+            HiveBlueprint.checkDepth(level, mouth, depth);
             if (preview)
             {
                 var tiles = plan.tiles();

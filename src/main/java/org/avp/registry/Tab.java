@@ -7,24 +7,16 @@ import java.util.function.Supplier;
 import net.minecraft.world.level.ItemLike;
 
 /**
- * The mod's creative tabs (same groups as the 1.12.2 version).
- * Blocks and items add themselves to a tab when they are registered;
- * {@link ModCreativeTabs} then shows each tab's list.
+ * Browsing groups for the AVP Creative tab. Blocks and items join a group when registered.
  */
 public enum Tab
 {
-    MAIN("main"),
-    BLOCKS("blocks"),
-    CRAFTING("crafting"),
-    GUN_PARTS("gun_parts");
+    MAIN,
+    BLOCKS,
+    CRAFTING,
+    GUN_PARTS;
 
-    public final String id;
     private final List<Supplier<? extends ItemLike>> contents = new ArrayList<>();
-
-    Tab(String id)
-    {
-        this.id = id;
-    }
 
     public void add(Supplier<? extends ItemLike> entry)
     {

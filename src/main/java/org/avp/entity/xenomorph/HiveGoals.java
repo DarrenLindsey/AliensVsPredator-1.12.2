@@ -706,6 +706,7 @@ public final class HiveGoals
             host.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
             host.setData(ModAttachments.COCOONED, 0);
             host.setData(ModAttachments.COCOON_POS, spot);
+            CocoonEvents.syncWrap(host);
             if (host instanceof Mob mob)
             {
                 mob.setNoAi(true);

@@ -126,6 +126,20 @@ public final class ModNetwork
                 (payload, context) -> org.avp.client.screen.LogicBeltScreen.info(payload.data()));
         registrar.playToClient(VisionModePayload.TYPE, VisionModePayload.CODEC,
                 (payload, context) -> org.avp.client.ClientHooks.visionMode(payload.mode()));
+        registrar.playToClient(CocoonStatePayload.TYPE, CocoonStatePayload.CODEC, (payload, context) ->
+        {
+            if (context.player().level().getEntity(payload.entityId()) instanceof net.minecraft.world.entity.LivingEntity host)
+            {
+                if (payload.wrapped())
+                {
+                    host.setData(org.avp.registry.ModAttachments.COCOONED, 0);
+                }
+                else
+                {
+                    host.removeData(org.avp.registry.ModAttachments.COCOONED);
+                }
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")

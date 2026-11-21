@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -247,36 +248,38 @@ public class DroneEntity extends XenomorphEntity
      * hosts to be cocooned for the eggs, and (with the larder on) other prey as food. Players too,
      * with "Cocoon Players". A starving Drone just kills and eats.
      */
-    private boolean trySubdue(Entity target)
+    boolean canCapture(LivingEntity prey)
     {
         org.avp.world.hive.Hive hive = hive();
-        if (!(target instanceof net.minecraft.world.entity.LivingEntity prey) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
+        if (!isPrey(prey) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
                 || hunger() < 20 || isVehicle() || prey.isVehicle() || prey.isPassenger()
-                || prey.hasData(org.avp.registry.ModAttachments.COCOONED) || prey.getBbWidth() > 1.5F || prey.getBbHeight() > 2.3F
-                || prey.getHealth() - getAttributeValue(Attributes.ATTACK_DAMAGE) > prey.getMaxHealth() * 0.4F)
+                || prey.getBbWidth() > 1.5F || prey.getBbHeight() > 2.3F)
         {
             return false;
         }
         boolean host = org.avp.entity.parasite.FacehuggerEntity.isValidHost(prey);
         if (prey instanceof net.minecraft.world.entity.player.Player player)
         {
-            if (!AvpConfig.server(AvpConfig.SERVER.xenosCocoonPlayers) || player.isCreative() || player.isSpectator())
-            {
-                return false;
-            }
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.captured"), true);
+            return AvpConfig.server(AvpConfig.SERVER.xenosCocoonPlayers);
         }
-        else if (!(prey instanceof net.minecraft.world.entity.Mob) || !(host ? AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts)
-                : AvpConfig.server(AvpConfig.SERVER.hiveLarder)) || prey.getType().is(org.avp.registry.ModTags.XENOMORPHS)
-                || prey.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD))
+        return prey instanceof net.minecraft.world.entity.Mob && !prey.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD)
+                && (host ? AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts) : AvpConfig.server(AvpConfig.SERVER.hiveLarder));
+    }
+
+    private boolean trySubdue(LivingEntity prey)
+    {
+        if (prey.getHealth() - getAttributeValue(Attributes.ATTACK_DAMAGE) > prey.getMaxHealth() * 0.4F || !prey.startRiding(this, true))
         {
             return false;
+        }
+        if (prey instanceof net.minecraft.world.entity.player.Player player)
+        {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.captured"), true);
         }
         prey.setHealth(Math.max(1.0F, prey.getMaxHealth() * 0.2F));
         // too weak to fight back while carried
         prey.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 600, 4, false, false));
         prey.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DIG_SLOWDOWN, 600, 4, false, false));
-        prey.startRiding(this, true);
         playSound(ModSounds.ALIEN_ATTACK.get(), 0.8F, 0.7F);
         setTarget(null);
         return true;
@@ -285,9 +288,23 @@ public class DroneEntity extends XenomorphEntity
     @Override
     public boolean doHurtTarget(Entity target)
     {
-        if (!level().isClientSide && trySubdue(target))
+        if (!level().isClientSide && target instanceof LivingEntity prey)
         {
-            return true;
+            if (PreyCapture.blocksAttack(this, prey))
+            {
+                return false;
+            }
+            if (canCapture(prey))
+            {
+                if (getTarget() == prey)
+                {
+                    PreyCapture.reserve(this, prey);
+                }
+                if (trySubdue(prey))
+                {
+                    return true;
+                }
+            }
         }
         boolean hit = super.doHurtTarget(target);
         if (hit)

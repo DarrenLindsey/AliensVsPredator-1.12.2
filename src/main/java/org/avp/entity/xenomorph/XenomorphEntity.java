@@ -396,8 +396,21 @@ public abstract class XenomorphEntity extends Monster
     public void setTarget(@Nullable net.minecraft.world.entity.LivingEntity target)
     {
         net.minecraft.world.entity.LivingEntity before = getTarget();
+        if (target != null && PreyCapture.blocksAttack(this, target))
+        {
+            return;
+        }
         super.setTarget(target);
-        if (target == null || target == before || fromPack || level().isClientSide)
+        if (target == null || getTarget() != target || target == before || level().isClientSide)
+        {
+            return;
+        }
+        if (this instanceof DroneEntity drone && drone.canCapture(target))
+        {
+            PreyCapture.reserve(drone, target);
+            return;
+        }
+        if (fromPack)
         {
             return;
         }
@@ -771,7 +784,7 @@ public abstract class XenomorphEntity extends Monster
         {
             return false; // nothing matters but the hive (it still fights back)
         }
-        if (!isPrey(target))
+        if (!isPrey(target) || PreyCapture.blocksAttack(this, target))
         {
             return false;
         }
@@ -912,7 +925,9 @@ public abstract class XenomorphEntity extends Monster
         {
             hurt(damageSources().starve(), 1.0F);
         }
-        if (tickCount % 20 == 0 && getTarget() != null && getTarget() != getLastHurtByMob() && !wantsToHunt(getTarget()))
+        var target = getTarget();
+        if (target != null && (PreyCapture.blocksAttack(this, target)
+                || tickCount % 20 == 0 && target != getLastHurtByMob() && !wantsToHunt(target)))
         {
             setTarget(null);
         }

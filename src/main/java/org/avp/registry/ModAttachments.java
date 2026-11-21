@@ -2,6 +2,7 @@ package org.avp.registry;
 
 import org.avp.AliensVsPredator;
 import org.avp.entity.parasite.Embryo;
+import org.avp.entity.xenomorph.PreyCapture;
 
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -23,6 +24,10 @@ public final class ModAttachments
     /** A host cocooned in a hive: ticks it's been there (it turns into an egg in time - "eggmorphing"). */
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> COCOONED = ATTACHMENTS.register("cocooned",
             () -> AttachmentType.builder(() -> 0).serialize(com.mojang.serialization.Codec.INT).build());
+
+    /** Transient reservation while a drone hunts a live capture. */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<PreyCapture>> PREY_CAPTURE = ATTACHMENTS.register("prey_capture",
+            () -> AttachmentType.builder(() -> new PreyCapture(new java.util.UUID(0, 0), 0)).build());
 
     /** Where a cocooned player is held (they can't move off it until they struggle free). */
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<net.minecraft.core.BlockPos>> COCOON_POS = ATTACHMENTS.register("cocoon_pos",

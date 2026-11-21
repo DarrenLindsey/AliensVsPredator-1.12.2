@@ -2,6 +2,7 @@ package org.avp.entity.xenomorph;
 
 import org.avp.AliensVsPredator;
 import org.avp.config.AvpConfig;
+import org.avp.network.CocoonStatePayload;
 import org.avp.registry.ModAttachments;
 import org.avp.registry.ModEntities;
 import org.avp.world.hive.HiveData;
@@ -9,6 +10,7 @@ import org.avp.world.hive.HiveData;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -19,10 +21,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Hosts cocooned in a hive: held fast in resin, waiting for an egg to open next to them. Left long
@@ -36,6 +41,39 @@ public final class CocoonEvents
 {
     /** Last sneak state of each cocooned player (a press = sneak going down). */
     private static final java.util.Map<Player, Boolean> SNEAKING = new java.util.WeakHashMap<>();
+
+    @SubscribeEvent
+    public static void protectCapture(LivingIncomingDamageEvent event)
+    {
+        if (event.getSource().getEntity() instanceof XenomorphEntity xeno && PreyCapture.blocksAttack(xeno, event.getEntity()))
+        {
+            event.setCanceled(true);
+        }
+    }
+
+    static void syncWrap(LivingEntity host)
+    {
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf(host, new CocoonStatePayload(host.getId(), host.hasData(ModAttachments.COCOONED)));
+    }
+
+    @SubscribeEvent
+    public static void startTracking(PlayerEvent.StartTracking event)
+    {
+        if (event.getEntity() instanceof ServerPlayer player && event.getTarget() instanceof LivingEntity host
+                && host.hasData(ModAttachments.COCOONED))
+        {
+            PacketDistributor.sendToPlayer(player, new CocoonStatePayload(host.getId(), true));
+        }
+    }
+
+    @SubscribeEvent
+    public static void playerJoined(PlayerEvent.PlayerLoggedInEvent event)
+    {
+        if (event.getEntity() instanceof ServerPlayer player && player.hasData(ModAttachments.COCOONED))
+        {
+            syncWrap(player);
+        }
+    }
 
     @SubscribeEvent
     public static void tick(EntityTickEvent.Post event)
@@ -133,6 +171,7 @@ public final class CocoonEvents
     {
         host.removeData(ModAttachments.COCOONED);
         host.removeData(ModAttachments.COCOON_POS);
+        syncWrap(host);
         host.removeData(ModAttachments.STRUGGLE);
         if (host instanceof Mob mob)
         {

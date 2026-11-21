@@ -201,13 +201,16 @@ public final class HiveGoals
     /** A founding Drone excavates a straight shaft, then opens the chamber at its base. */
     public static class BurrowGoal extends Goal
     {
+        private static final int BLOCKS_PER_BATCH = 6;
+        private static final double SHAFT_DIG_MULTIPLIER = 2.0;
+
         private final DroneEntity drone;
         @Nullable
         private Hive hive;
         private int digTicks;
         private int stuck;
         private List<BlockPos> layer = List.of();
-        private final List<BlockPos> work = new ArrayList<>(4);
+        private final List<BlockPos> work = new ArrayList<>(BLOCKS_PER_BATCH);
 
         public BurrowGoal(DroneEntity drone)
         {
@@ -350,7 +353,7 @@ public final class HiveGoals
                     if (!level.getBlockState(pos).isAir())
                     {
                         work.add(pos);
-                        if (work.size() == 4)
+                        if (work.size() == BLOCKS_PER_BATCH)
                         {
                             break;
                         }
@@ -379,7 +382,8 @@ public final class HiveGoals
             {
                 hardness = Math.max(hardness, level.getBlockState(pos).getDestroySpeed(level, pos));
             }
-            double speed = AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed) * AvpConfig.server(AvpConfig.SERVER.foundingDigSpeed);
+            double speed = AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed)
+                    * AvpConfig.server(AvpConfig.SERVER.foundingDigSpeed) * SHAFT_DIG_MULTIPLIER;
             if (++digTicks % 3 == 0)
             {
                 level.destroyBlockProgress(drone.getId(), work.getFirst(), (int) Math.min(9, digTicks * speed / (hardness * 4)));

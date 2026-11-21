@@ -176,6 +176,7 @@ public class Hive
 
     @Nullable
     private HiveBlueprint blueprint;
+    private boolean chooseBlueprint;
     private long nextForage;
 
     @Nullable
@@ -187,6 +188,16 @@ public class Hive
     public void setBlueprint(HiveBlueprint blueprint)
     {
         this.blueprint = blueprint;
+    }
+
+    boolean shouldChooseBlueprint()
+    {
+        return chooseBlueprint;
+    }
+
+    public void setChooseBlueprint(boolean choose)
+    {
+        chooseBlueprint = choose;
     }
 
     public boolean canSendForager(long now)
@@ -417,6 +428,10 @@ public class Hive
         {
             tag.put("Blueprint", blueprint.save());
         }
+        if (chooseBlueprint)
+        {
+            tag.putBoolean("ChooseBlueprint", true);
+        }
         return tag;
     }
 
@@ -433,6 +448,7 @@ public class Hive
         hive.heir = tag.hasUUID("Heir") ? tag.getUUID("Heir") : null;
         hive.digger = tag.hasUUID("Digger") ? tag.getUUID("Digger") : null;
         hive.dug = tag.getInt("Dug");
+        hive.chooseBlueprint = tag.getBoolean("ChooseBlueprint");
         if (tag.contains("Blueprint"))
         {
             hive.blueprint = HiveBlueprint.load(tag.getCompound("Blueprint"));

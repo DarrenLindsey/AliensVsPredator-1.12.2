@@ -24,6 +24,7 @@ public final class HiveFounding
     private static final int SERVER_BUDGET = 64;
     private static final int RADIUS = 7;
     private static final int HEIGHT = 8;
+    private static final int MAX_BLUEPRINT_ATTEMPTS = 4;
     private static final Map<MinecraftServer, TickBudget> BUDGETS = new WeakHashMap<>();
 
     private static final class TickBudget
@@ -32,7 +33,7 @@ public final class HiveFounding
         private int remaining;
     }
 
-    private enum Phase { CHECK_LAYER, CUT_LAYER, RIM, CHAMBER, FINISH }
+    private enum Phase { CHECK_LAYER, CUT_LAYER, RIM, CHECK_BLUEPRINT, CHAMBER, FINISH }
 
     private final Hive hive;
     private Phase phase = Phase.CHECK_LAYER;
@@ -40,6 +41,10 @@ public final class HiveFounding
     private int cursor;
     private BlockPos chamber;
     private Iterator<BlockPos> sites;
+    private List<HiveBlueprint> candidates = List.of();
+    private int candidateIndex;
+    private int attempts;
+    private HiveBlueprint candidate;
 
     public HiveFounding(Hive hive)
     {
@@ -101,6 +106,7 @@ public final class HiveFounding
                     recordLayer(level);
                 }
             }
+            case CHECK_BLUEPRINT -> checkBlueprintBlock(level);
             case CHAMBER -> { return carveBlock(level); }
             case FINISH -> finish(level, drone);
         }
@@ -175,10 +181,64 @@ public final class HiveFounding
             return false;
         }
         chamber = at;
-        sites = hive.blueprint() != null ? hive.blueprint().excavation(at).iterator()
-                : BlockPos.betweenClosed(at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, HEIGHT - 1, RADIUS)).iterator();
-        phase = Phase.CHAMBER;
+        if (hive.shouldChooseBlueprint() && hive.blueprint() == null)
+        {
+            candidates = HiveBlueprintLibrary.plans(level.getServer());
+            if (!candidates.isEmpty())
+            {
+                candidateIndex = Math.floorMod(hive.id().hashCode(), candidates.size());
+                phase = Phase.CHECK_BLUEPRINT;
+                return true;
+            }
+            finishChoosing(level);
+        }
+        else
+        {
+            beginCarving();
+        }
         return true;
+    }
+
+    private void checkBlueprintBlock(ServerLevel level)
+    {
+        if (candidate == null)
+        {
+            if (attempts >= Math.min(MAX_BLUEPRINT_ATTEMPTS, candidates.size()))
+            {
+                finishChoosing(level);
+                return;
+            }
+            HiveBlueprint plan = candidates.get((candidateIndex + attempts++) % candidates.size());
+            if (plan.withinBudget(hive.entrance().getY() - chamber.getY()) && plan.hasCoreFloor(level, chamber))
+            {
+                candidate = plan;
+                sites = plan.blocksAt(chamber);
+            }
+        }
+        else if (!sites.hasNext())
+        {
+            hive.setBlueprint(candidate);
+            finishChoosing(level);
+        }
+        else if (!HiveBlueprint.canCarve(level, sites.next()))
+        {
+            candidate = null;
+        }
+    }
+
+    private void finishChoosing(ServerLevel level)
+    {
+        hive.setChooseBlueprint(false);
+        HiveData.get(level).changed();
+        beginCarving();
+    }
+
+    private void beginCarving()
+    {
+        sites = hive.blueprint() != null ? hive.blueprint().blocksAt(chamber)
+                : BlockPos.betweenClosed(chamber.offset(-RADIUS, 0, -RADIUS),
+                        chamber.offset(RADIUS, HEIGHT - 1, RADIUS)).iterator();
+        phase = Phase.CHAMBER;
     }
 
     private static boolean chunkAreaLoaded(ServerLevel level, BlockPos pos, int radius)
@@ -201,7 +261,7 @@ public final class HiveFounding
         if (hive.blueprint() != null)
         {
             pending = pos;
-            if (!HiveShaft.canExcavate(level, pos) || !level.getBlockState(pos).isAir() && !HivePlanner.diggable(level, pos))
+            if (!HiveBlueprint.canCarve(level, pos))
             {
                 return false;
             }

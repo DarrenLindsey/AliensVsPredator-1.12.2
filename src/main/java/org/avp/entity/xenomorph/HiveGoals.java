@@ -275,6 +275,7 @@ public final class HiveGoals
                 return false;
             }
             hive = data.create(new BlockPos(start.getX(), deepslateLevel(level, start), start.getZ()), start, Hive.State.FOUNDING, level.getGameTime());
+            hive.setChooseBlueprint(true);
             hive.beginShaft();
             hive.setDigger(drone.getUUID());
             drone.setHiveId(hive.id());

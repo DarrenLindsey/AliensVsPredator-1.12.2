@@ -7,8 +7,11 @@ import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -28,6 +31,7 @@ public final class HiveBlueprint
     private final String cells;
     private final BlockPos shaft;
     private final BlockPos core;
+    private final List<Tile> tiles;
 
     private HiveBlueprint(int width, String cells)
     {
@@ -35,6 +39,8 @@ public final class HiveBlueprint
         this.cells = cells;
         shaft = at(cells.indexOf('S'));
         core = at(cells.indexOf('C'));
+        tiles = IntStream.range(0, cells.length()).filter(i -> cells.charAt(i) != '.')
+                .mapToObj(i -> new Tile(at(i).subtract(shaft), cells.charAt(i))).toList();
     }
 
     public static HiveBlueprint read(InputStream png) throws IOException
@@ -92,26 +98,31 @@ public final class HiveBlueprint
 
     public static HiveBlueprint named(ServerLevel level, String name) throws IOException
     {
-        if (!name.matches("[a-zA-Z0-9_-]{1,48}"))
+        if (!validName(name))
         {
             throw new IllegalArgumentException("Use a blueprint name with letters, numbers, underscores or hyphens.");
         }
-        if (name.equals("sample"))
+        Path path = HiveBlueprintLibrary.folder(level.getServer()).resolve(name + ".png");
+        if (Files.exists(path))
         {
-            try (InputStream bundled = HiveBlueprint.class.getResourceAsStream("/avp_blueprints/sample.png"))
-            {
-                if (bundled == null)
-                {
-                    throw new IOException("The bundled sample is missing.");
-                }
-                return read(bundled);
-            }
+            return readFile(path);
         }
-        Path path = level.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
-                .resolve("avp_blueprints").resolve(name + ".png");
+        try (InputStream png = HiveBlueprintLibrary.bundled(name))
+        {
+            return read(png);
+        }
+    }
+
+    static boolean validName(String name)
+    {
+        return name.matches("[a-zA-Z0-9_-]{1,48}");
+    }
+
+    static HiveBlueprint readFile(Path path) throws IOException
+    {
         if (!Files.isRegularFile(path) || Files.size(path) > 262144)
         {
-            throw new IllegalArgumentException("Put a PNG under 256 KB in this world's avp_blueprints folder as " + name + ".png.");
+            throw new IllegalArgumentException("Expected a PNG file no larger than 256 KB.");
         }
         try (InputStream png = Files.newInputStream(path))
         {
@@ -208,55 +219,70 @@ public final class HiveBlueprint
 
     public List<Tile> tiles()
     {
-        List<Tile> result = new ArrayList<>();
-        for (int i = 0; i < cells.length(); i++)
-        {
-            char kind = cells.charAt(i);
-            if (kind != '.')
-            {
-                result.add(new Tile(at(i).subtract(shaft), kind));
-            }
-        }
-        return result;
+        return tiles;
     }
 
-    public List<BlockPos> excavation(BlockPos shaftFloor)
+    private Stream<BlockPos> excavation(BlockPos floor)
     {
-        List<BlockPos> cut = new ArrayList<>();
-        for (Tile tile : tiles())
-        {
-            for (int y = 0; y < height(tile.kind()); y++)
-            {
-                cut.add(shaftFloor.offset(tile.offset()).above(y));
-            }
-        }
-        return cut;
+        return tiles.stream().flatMap(tile -> {
+            BlockPos column = floor.offset(tile.offset());
+            return IntStream.range(0, height(tile.kind())).mapToObj(column::above);
+        });
+    }
+
+    Iterator<BlockPos> blocksAt(BlockPos floor)
+    {
+        return excavation(floor).iterator();
+    }
+
+    boolean withinBudget(int depth)
+    {
+        int shaftBlocks = depth * 25;
+        return shaftBlocks + tiles.stream().mapToInt(tile -> height(tile.kind())).sum() <= HivePlanner.maxDug();
+    }
+
+    static boolean canCarve(ServerLevel level, BlockPos pos)
+    {
+        return HiveShaft.canExcavate(level, pos)
+                && (level.getBlockState(pos).isAir() || HivePlanner.diggable(level, pos));
+    }
+
+    boolean hasCoreFloor(ServerLevel level, BlockPos floor)
+    {
+        BlockPos pos = core(floor).below();
+        return level.isLoaded(pos) && Hive.isCoreFloor(level, pos, level.getBlockState(pos));
     }
 
     public void checkSite(ServerLevel level, BlockPos mouth, int depth)
     {
         checkDepth(level, mouth, depth);
         BlockPos floor = mouth.below(depth);
-        List<BlockPos> cut = excavation(floor);
-        if (cut.size() + depth * 25 > HivePlanner.maxDug())
+        if (!withinBudget(depth))
         {
             throw new IllegalArgumentException("The plan plus shaft exceeds the hive excavation limit.");
         }
+        for (Iterator<BlockPos> cut = blocksAt(floor); cut.hasNext();)
+        {
+            verifyCarvable(level, cut.next());
+        }
         for (int y = 1; y <= depth; y++)
         {
-            cut.addAll(HiveShaft.layer(mouth.below(y)));
-        }
-        for (BlockPos p : cut)
-        {
-            if (!HiveShaft.canExcavate(level, p) || !level.getBlockState(p).isAir() && !HivePlanner.diggable(level, p))
+            for (BlockPos pos : HiveShaft.layer(mouth.below(y)))
             {
-                throw new IllegalArgumentException("Unloaded, protected or flooded terrain at " + p.toShortString() + ".");
+                verifyCarvable(level, pos);
             }
         }
-        BlockPos coreFloor = core(floor).below();
-        if (!Hive.isCoreFloor(level, coreFloor, level.getBlockState(coreFloor)))
+        if (!hasCoreFloor(level, floor))
         {
             throw new IllegalArgumentException("The Core needs solid terrain below its marked floor.");
+        }
+    }
+
+    private static void verifyCarvable(ServerLevel level, BlockPos pos)
+    {
+        if (!canCarve(level, pos))
+        {
+            throw new IllegalArgumentException("Unloaded, protected or flooded terrain at " + pos.toShortString() + ".");
         }
     }
 

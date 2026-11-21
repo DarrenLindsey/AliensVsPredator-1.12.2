@@ -9,6 +9,7 @@ import org.avp.AliensVsPredator;
 import org.avp.entity.xenomorph.DroneEntity;
 import org.avp.world.hive.Hive;
 import org.avp.world.hive.HiveBlueprint;
+import org.avp.world.hive.HiveBlueprintLibrary;
 import org.avp.world.hive.HiveData;
 import org.joml.Vector3f;
 
@@ -19,6 +20,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
@@ -50,7 +52,8 @@ public final class HiveBlueprintCommands
     private static LiteralArgumentBuilder<CommandSourceStack> blueprintAction(String action, boolean preview)
     {
         return Commands.literal(action).then(Commands.argument("name", StringArgumentType.word())
-                .suggests((context, builder) -> builder.suggest("sample").buildFuture())
+                .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                        HiveBlueprintLibrary.names(context.getSource().getServer()), builder))
                 .executes(c -> run(c.getSource(), StringArgumentType.getString(c, "name"), 0, preview))
                 .then(Commands.argument("depth", IntegerArgumentType.integer(9, 384))
                         .executes(c -> run(c.getSource(), StringArgumentType.getString(c, "name"), IntegerArgumentType.getInteger(c, "depth"), preview))));

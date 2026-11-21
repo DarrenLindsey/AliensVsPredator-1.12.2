@@ -537,6 +537,12 @@ public abstract class XenomorphEntity extends Monster
         getNavigation().moveTo(x, y, z, speed);
     }
 
+    void stopJobNavigation()
+    {
+        destination = null;
+        getNavigation().stop();
+    }
+
     /** Stuck: on its way somewhere for a job but hasn't got closer in the last 3 seconds. */
     private int stuckFor;
     private double lastDistance = Double.MAX_VALUE;

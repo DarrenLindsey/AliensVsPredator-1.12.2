@@ -361,6 +361,7 @@ public final class HiveGoals
                 assignedHive.work().release(assignment);
                 assignment = null;
                 assignedHive = null;
+                drone.stopJobNavigation();
             }
         }
     }
@@ -615,6 +616,11 @@ public final class HiveGoals
     public static class CarryHostGoal extends Goal
     {
         private final DroneEntity drone;
+        @Nullable
+        private WallSite site;
+        private int searchTicks;
+
+        private record WallSite(BlockPos floor, Direction wall) {}
 
         public CarryHostGoal(DroneEntity drone)
         {
@@ -632,6 +638,8 @@ public final class HiveGoals
         @Override
         public void start()
         {
+            site = null;
+            searchTicks = 0;
             drone.setTarget(null);
             drone.setState("CARRYING HOST");
         }
@@ -650,7 +658,7 @@ public final class HiveGoals
             {
                 return;
             }
-            if (HiveShaft.descend(drone, hive))
+            if (site == null && HiveShaft.descend(drone, hive))
             {
                 return;
             }
@@ -666,7 +674,7 @@ public final class HiveGoals
                     .or(() -> hive.rooms(org.avp.world.hive.Room.Type.HATCHERY).stream().filter(org.avp.world.hive.Room::done).findFirst())
                     .orElse(null);
             BlockPos core = room != null ? room.centre() : hive.core();
-            if (drone.blockPosition().distSqr(core) > (room != null ? Math.max(9, room.radius() * room.radius()) : 16))
+            if (site == null && drone.blockPosition().distSqr(core) > (room != null ? Math.max(9, room.radius() * room.radius()) : 36))
             {
                 if (drone.tickCount % 20 < 2)
                 {
@@ -674,36 +682,108 @@ public final class HiveGoals
                 }
                 return;
             }
-            cocoon((ServerLevel) drone.level(), host, core, room);
+            ServerLevel level = (ServerLevel) drone.level();
+            if (site == null)
+            {
+                if (searchTicks-- > 0)
+                {
+                    return;
+                }
+                searchTicks = 10;
+                site = findWall(level, host, core, room == null ? 8 : Math.min(17, room.radius() + 1));
+                if (site == null)
+                {
+                    drone.stopJobNavigation();
+                    return;
+                }
+                approachWall();
+            }
+            Vec3 spot = Vec3.atBottomCenterOf(site.floor());
+            if (drone.distanceToSqr(spot) > 2.5 * 2.5)
+            {
+                if (drone.tickCount % 20 == 0)
+                {
+                    approachWall();
+                }
+                return;
+            }
+            if (!validWall(level, site, Math.max(1, net.minecraft.util.Mth.ceil(host.getBbHeight()))) || occupied(level, site.floor()))
+            {
+                site = null;
+                return;
+            }
+            cocoon(level, host, site);
         }
 
-        /** Puts the host against a wall near the core and seals it in. */
-        private void cocoon(ServerLevel level, net.minecraft.world.entity.LivingEntity host, BlockPos core, @Nullable org.avp.world.hive.Room room)
+        private void approachWall()
         {
-            BlockPos spot = room == null ? null : org.avp.world.hive.HivePlanner.floorSpot(level, room, true);
-            for (int tries = 0; tries < 30 && spot == null; tries++) // no room yet: near the core
+            Vec3 approach = Vec3.atBottomCenterOf(site.floor().relative(site.wall().getOpposite()));
+            drone.navigateTo(approach.x, approach.y, approach.z, 0.9);
+        }
+
+        @Nullable
+        private static WallSite findWall(ServerLevel level, net.minecraft.world.entity.LivingEntity host, BlockPos centre, int radius)
+        {
+            int height = Math.max(1, net.minecraft.util.Mth.ceil(host.getBbHeight()));
+            for (BlockPos p : BlockPos.withinManhattan(centre, radius, 2, radius))
             {
-                BlockPos p = core.offset(drone.getRandom().nextInt(9) - 4, drone.getRandom().nextInt(3) - 1, drone.getRandom().nextInt(9) - 4);
-                if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && level.getBlockState(p.below()).isSolid())
+                if (!level.isLoaded(p) || !level.getBlockState(p).isAir() || !level.getBlockState(p.below()).isSolid())
                 {
-                    for (Direction d : Direction.Plane.HORIZONTAL)
+                    continue;
+                }
+                for (Direction direction : Direction.Plane.HORIZONTAL)
+                {
+                    WallSite candidate = new WallSite(p, direction);
+                    if (validWall(level, candidate, height) && !occupied(level, p))
                     {
-                        if (level.getBlockState(p.relative(d)).isSolid())
-                        {
-                            spot = p;
-                            break;
-                        }
+                        return new WallSite(p.immutable(), direction);
                     }
                 }
             }
-            if (spot == null)
+            return null;
+        }
+
+        private static boolean validWall(ServerLevel level, WallSite site, int height)
+        {
+            BlockPos floor = site.floor();
+            BlockPos backing = floor.relative(site.wall());
+            if (!level.isLoaded(floor) || !level.isLoaded(backing) || !level.getBlockState(floor.below()).isSolid())
             {
-                spot = drone.blockPosition();
+                return false;
             }
+            for (int y = 0; y < height; y++)
+            {
+                if (!level.getBlockState(floor.above(y)).isAir() || !level.getBlockState(backing.above(y)).isSolid())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static boolean occupied(ServerLevel level, BlockPos spot)
+        {
+            return !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, new net.minecraft.world.phys.AABB(spot).inflate(0.25, 1.0, 0.25),
+                    entity -> entity.hasData(ModAttachments.COCOONED)).isEmpty();
+        }
+
+        /** Puts the host against the chosen wall and seals it in. */
+        private void cocoon(ServerLevel level, net.minecraft.world.entity.LivingEntity host, WallSite site)
+        {
+            BlockPos spot = site.floor();
+            Direction wall = site.wall();
             drone.releasing = true;
             host.stopRiding();
             drone.releasing = false;
-            host.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
+            double inset = Math.max(0.0, 0.47 - host.getBbWidth() / 2);
+            host.teleportTo(spot.getX() + 0.5 + wall.getStepX() * inset, spot.getY(), spot.getZ() + 0.5 + wall.getStepZ() * inset);
+            if (!(host instanceof net.minecraft.world.entity.player.Player))
+            {
+                float yaw = wall.getOpposite().toYRot();
+                host.setYRot(yaw);
+                host.setYBodyRot(yaw);
+                host.setYHeadRot(yaw);
+            }
             host.setData(ModAttachments.COCOONED, 0);
             host.setData(ModAttachments.COCOON_POS, spot);
             CocoonEvents.syncWrap(host);
@@ -718,14 +798,21 @@ public final class HiveGoals
                 player.setData(ModAttachments.STRUGGLE, 0);
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.cocooned"), false);
             }
-            // resin around it
-            for (Direction d : Direction.Plane.HORIZONTAL)
+            // Bind the cocoon to the backing blocks.
+            BlockPos backing = spot.relative(wall);
+            for (int y = 0; y < host.getBbHeight(); y++)
             {
-                NaturalResinBlock.cover(level, spot.relative(d));
-                NaturalResinBlock.cover(level, spot.above().relative(d));
+                NaturalResinBlock.cover(level, backing.above(y));
             }
             level.playSound(null, spot, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.HOSTILE, 1.0F, 0.5F);
             drone.setState("COCOONED HOST");
+        }
+
+        @Override
+        public void stop()
+        {
+            site = null;
+            drone.stopJobNavigation();
         }
     }
 
@@ -1017,7 +1104,33 @@ public final class HiveGoals
         {
             ticks = 0;
             drone.setState("BUILDING HIVESTONE");
-            drone.navigateTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
+            approach();
+        }
+
+        private void approach()
+        {
+            if (drone.distanceToSqr(Vec3.atCenterOf(job)) <= 4.5 * 4.5)
+            {
+                drone.stopJobNavigation();
+                return;
+            }
+            ServerLevel level = (ServerLevel) drone.level();
+            BlockPos best = null;
+            double closest = Double.MAX_VALUE;
+            // A builder works from the floor beside or below the work, including when sealing a roof.
+            for (BlockPos p : BlockPos.betweenClosed(job.offset(-1, -3, -1), job.offset(1, 1, 1)))
+            {
+                double distance = drone.distanceToSqr(Vec3.atBottomCenterOf(p));
+                if (distance < closest && level.isLoaded(p) && level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
+                {
+                    best = p.immutable();
+                    closest = distance;
+                }
+            }
+            if (best != null)
+            {
+                drone.navigateTo(best.getX() + 0.5, best.getY(), best.getZ() + 0.5, 0.9);
+            }
         }
 
         @Override
@@ -1028,11 +1141,12 @@ public final class HiveGoals
             {
                 if (job != null && ticks % 20 == 0)
                 {
-                    drone.navigateTo(job.getX() + 0.5, job.getY() + 1, job.getZ() + 0.5, 0.9);
+                    approach();
                 }
                 return;
             }
             ServerLevel level = (ServerLevel) drone.level();
+            drone.stopJobNavigation();
             if (!level.isLoaded(job))
             {
                 job = null;

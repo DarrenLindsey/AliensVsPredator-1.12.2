@@ -33,6 +33,8 @@ public class DroneEntity extends XenomorphEntity
 {
     public static final ResourceLocation WARRIOR = ResourceLocation.fromNamespaceAndPath(AliensVsPredator.MOD_ID, "warrior");
     private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(DroneEntity.class, EntityDataSerializers.BOOLEAN);
+    private float previousCrawlBlend;
+    private float crawlBlend;
 
     public DroneEntity(EntityType<? extends DroneEntity> type, Level level)
     {
@@ -117,6 +119,16 @@ public class DroneEntity extends XenomorphEntity
         {
             entityData.set(CLIMBING, wantsToClimb());
         }
+        else
+        {
+            previousCrawlBlend = crawlBlend;
+            crawlBlend = net.minecraft.util.Mth.approach(crawlBlend, isCrawling() ? 1.0F : 0.0F, 0.2F);
+        }
+    }
+
+    public float crawlBlend(float partialTick)
+    {
+        return net.minecraft.util.Mth.lerp(partialTick, previousCrawlBlend, crawlBlend);
     }
 
     @Override

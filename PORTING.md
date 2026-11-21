@@ -112,7 +112,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
   - Wildlife: Goo Mutant, Babyhead, Aethon (flying boss), Scelemur, Ursuidae, Deacon Shark,
     Hammerpede (venom), Mutant Yautja, Predator Hound (hunts Xenomorphs).
 - [x] Hives (org.avp.world.hive, entity/xenomorph/HiveGoals): one hive per "Hive Spacing" (256); a Drone
-      with no hive in range claims the spot and digs a winding 3-high staircase down to the deepslate,
+      with no hive in range claims the spot and digs a straight vertical shaft toward deepslate,
       hollows out a chamber and founds the hive; members join the hive whose area they're in and drift
       home when idle. Drones coat the hive in resin from the core outwards (natural_resin: the block
       underneath still shows, comes back when scraped off; burns; natural ground only unless configured).
@@ -146,7 +146,7 @@ If something fails, copy the **first** error from the console (or `run/logs/late
       Builder Drones: lay hivestone (new block) over holes in room floors, under
       galleries that cross open space, over water/lava leaking in, roof rooms open to the sky, pave floors.
       Debug: /avp hive nearest | list | found (the Drone you look at starts a hive now) | forget.
-      Tunnel 2 wide x 4 high; founding chamber a dome 15 wide x 8 high; a Queen only grows in the chamber
+      Shaft 5 blocks square with a Hive Stone rim; founding chamber a dome 15 wide x 8 high; a Queen only grows in the chamber
       and never spawns naturally (nor do boss forms).
 - [x] Skulls and biomasks can be worn (head slot); a biomask gives night vision and stops facehuggers.
 - [ ] Later: resin deterrent, Octohuggers hanging from ceilings,

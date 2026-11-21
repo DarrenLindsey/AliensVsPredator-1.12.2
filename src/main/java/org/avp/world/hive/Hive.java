@@ -48,6 +48,7 @@ public class Hive
     @Nullable
     private BlockPos digPos;
     private Direction digDir = Direction.NORTH;
+    private boolean verticalShaft;
     /** The rooms: the first is the Queen's chamber (the founding dome). */
     private final java.util.List<Room> rooms = new java.util.ArrayList<>();
     /** Blocks dug out so far (capped by "Hive Max Dug Blocks"). */
@@ -267,6 +268,17 @@ public class Hive
         this.digDir = dir;
     }
 
+    public boolean hasVerticalShaft()
+    {
+        return verticalShaft;
+    }
+
+    public void beginShaft()
+    {
+        verticalShaft = true;
+        digPos = entrance;
+    }
+
     /** How far its rooms may reach from the core: the full radius with a Queen, a small nest without one. */
     public int maxReach(long now, int maxRadius)
     {
@@ -346,6 +358,7 @@ public class Hive
         tag.put("Entrance", NbtUtils.writeBlockPos(entrance));
         tag.putString("State", state.name());
         tag.putInt("Resin", resin);
+        tag.putBoolean("VerticalShaft", verticalShaft);
         tag.putBoolean("CoreBlockPlaced", coreBlockPlaced);
         if (queen != null)
         {
@@ -377,6 +390,7 @@ public class Hive
         Hive hive = new Hive(tag.getUUID("Id"), NbtUtils.readBlockPos(tag, "Core").orElse(BlockPos.ZERO),
                 NbtUtils.readBlockPos(tag, "Entrance").orElse(BlockPos.ZERO), State.valueOf(tag.getString("State")), tag.getLong("LastActive"));
         hive.resin = tag.getInt("Resin");
+        hive.verticalShaft = tag.getBoolean("VerticalShaft");
         hive.coreBlockPlaced = tag.getBoolean("CoreBlockPlaced");
         hive.queen = tag.hasUUID("Queen") ? tag.getUUID("Queen") : null;
         hive.digPos = NbtUtils.readBlockPos(tag, "Dig").orElse(null);

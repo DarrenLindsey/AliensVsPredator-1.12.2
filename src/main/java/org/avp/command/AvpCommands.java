@@ -81,7 +81,8 @@ public final class AvpCommands
         if (hive.state() == Hive.State.FOUNDING && hive.digPos() != null)
         {
             source.sendSuccess(() -> Component.literal("  Digging at: ").append(teleport(hive.digPos()))
-                    .append(Component.literal(" heading " + hive.digDir().getName() + ", down to y=" + hive.core().getY())), false);
+                    .append(Component.literal(" heading " + (hive.hasVerticalShaft() ? "straight down" : hive.digDir().getName())
+                            + " to y=" + hive.core().getY())), false);
         }
         source.sendSuccess(() -> Component.literal("  Entrance: ").append(teleport(hive.entrance())), false);
         source.sendSuccess(() -> Component.literal("  Resin: " + hive.resin() + " blocks, building out to " + radius + " blocks"), false);

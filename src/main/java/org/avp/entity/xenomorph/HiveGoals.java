@@ -1,6 +1,8 @@
 package org.avp.entity.xenomorph;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -10,6 +12,7 @@ import org.avp.registry.ModAttachments;
 import org.avp.registry.ModTags;
 import org.avp.world.hive.Hive;
 import org.avp.world.hive.HiveData;
+import org.avp.world.hive.HiveShaft;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Hive behaviour (1.12.2 EntityDrone.tickHiveBuildingAI + XenomorphHive, rebuilt):
  * - members drift back to their hive when there's nothing to hunt;
- * - a Drone with no hive in range digs a staircase down to the deepslate and founds one there;
+ * - a Drone with no hive in range digs a vertical shaft and founds a hive below it;
  * - Drones coat the hive in resin, outwards from the core;
  * - Drones carry subdued hosts home and cocoon them on the hive walls.
  */
@@ -43,6 +46,7 @@ public final class HiveGoals
         private final XenomorphEntity xeno;
         @Nullable
         private BlockPos home;
+        private boolean usingShaft;
 
         public ReturnToHiveGoal(XenomorphEntity xeno)
         {
@@ -82,22 +86,119 @@ public final class HiveGoals
         @Override
         public boolean canContinueToUse()
         {
-            return xeno.getTarget() == null && !xeno.getNavigation().isDone();
+            return xeno.getTarget() == null && (usingShaft || !xeno.getNavigation().isDone());
         }
 
         @Override
         public void start()
         {
-            xeno.navigateTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 0.9);
             xeno.setState("GOING HOME");
+            routeHome();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick()
+        {
+            return true;
+        }
+
+        @Override
+        public void tick()
+        {
+            if (usingShaft)
+            {
+                routeHome();
+            }
+        }
+
+        private void routeHome()
+        {
+            Hive hive = xeno.hive();
+            usingShaft = hive != null && HiveShaft.descend(xeno, hive);
+            if (!usingShaft)
+            {
+                xeno.navigateTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 0.9);
+            }
         }
     }
 
-    /**
-     * No hive within range: a Drone founds one. It claims the spot, then digs a staircase (3 high,
-     * so its kin can follow and climb back out) down to the deepslate, and hollows out the first
-     * chamber there.
-     */
+    /** Use a vertical exit when the target is on the surface. Kept separate from the creature's normal navigation. */
+    public static class ExitShaftGoal extends Goal
+    {
+        private final XenomorphEntity xeno;
+        @Nullable
+        private Hive hive;
+        private Direction exit = Direction.NORTH;
+        private int expires;
+        private int nextAttempt;
+
+        public ExitShaftGoal(XenomorphEntity xeno)
+        {
+            this.xeno = xeno;
+            setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            if (xeno.tickCount < nextAttempt || xeno.tickCount % 10 >= 2 || xeno.getTarget() == null || xeno.isFounding())
+            {
+                return false;
+            }
+            hive = xeno.hive();
+            if (hive == null || !hive.hasVerticalShaft() || hive.state() != Hive.State.ACTIVE || xeno.getBbWidth() >= 5)
+            {
+                return false;
+            }
+            BlockPos entrance = hive.entrance();
+            return xeno.getTarget().getY() >= entrance.getY() - 1 && xeno.getY() < entrance.getY()
+                    && xeno.getY() >= hive.core().getY() - 2
+                    && (HiveShaft.isInside(xeno, entrance) || hive.core().distSqr(xeno.blockPosition()) < 16 * 16);
+        }
+
+        @Override
+        public void start()
+        {
+            BlockPos entrance = hive.entrance();
+            exit = Direction.getNearest(xeno.getTarget().getX() - entrance.getX() - .5, 0,
+                    xeno.getTarget().getZ() - entrance.getZ() - .5);
+            if (exit.getAxis().isVertical())
+            {
+                exit = xeno.getDirection();
+            }
+            expires = xeno.tickCount + 100 + 8 * (entrance.getY() - hive.core().getY());
+            xeno.getNavigation().stop();
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return xeno.getTarget() != null && xeno.tickCount < expires && hive != null
+                    && (xeno.getY() < hive.entrance().getY() || HiveShaft.isInside(xeno, hive.entrance())
+                    || !xeno.onGround());
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick()
+        {
+            return true;
+        }
+
+        @Override
+        public void tick()
+        {
+            HiveShaft.ascend(xeno, hive, exit);
+        }
+
+        @Override
+        public void stop()
+        {
+            nextAttempt = xeno.tickCount + 60;
+            xeno.getNavigation().stop();
+        }
+    }
+
+    /** A founding Drone excavates a straight shaft, then opens the chamber at its base. */
     public static class BurrowGoal extends Goal
     {
         private final DroneEntity drone;
@@ -105,6 +206,8 @@ public final class HiveGoals
         private Hive hive;
         private int digTicks;
         private int stuck;
+        private List<BlockPos> layer = List.of();
+        private final List<BlockPos> work = new ArrayList<>(4);
 
         public BurrowGoal(DroneEntity drone)
         {
@@ -133,6 +236,11 @@ public final class HiveGoals
                 boolean mineToDo = drone.getUUID().equals(mine.digger()) || digger == null || !digger.isAlive();
                 if (mineToDo)
                 {
+                    if (!mine.hasVerticalShaft() && HiveShaft.canExcavate(level, HiveShaft.layer(mine.entrance().below())))
+                    {
+                        mine.beginShaft();
+                        data.changed();
+                    }
                     mine.setDigger(drone.getUUID());
                     hive = mine;
                     return true;
@@ -149,8 +257,12 @@ public final class HiveGoals
             }
             // claim it: the hive goes at the first deepslate under here
             BlockPos start = drone.blockPosition();
+            if (!HiveShaft.canExcavate(level, HiveShaft.layer(start.below())))
+            {
+                return false;
+            }
             hive = data.create(new BlockPos(start.getX(), deepslateLevel(level, start), start.getZ()), start, Hive.State.FOUNDING, level.getGameTime());
-            hive.setDig(start, drone.getDirection());
+            hive.beginShaft();
             hive.setDigger(drone.getUUID());
             drone.setHiveId(hive.id());
             data.changed();
@@ -186,6 +298,8 @@ public final class HiveGoals
             drone.setFounding(true); // the urge: no hunting, no hunger, until the hive is made
             digTicks = 0;
             stuck = 0;
+            layer = List.of();
+            work.clear();
         }
 
         @Override
@@ -203,16 +317,15 @@ public final class HiveGoals
             {
                 return; // finished (or forgotten): the goal stops on the next check
             }
-            Direction dir = hive.digDir();
-            if (at.getY() <= hive.core().getY())
+            if (!hive.hasVerticalShaft() || at.getY() <= hive.core().getY())
             {
-                carveChamber(level, at);
+                finish(level, at);
                 return;
             }
-            BlockPos next = at.relative(dir).below();
-            // keep to the tunnel
+            BlockPos next = at.below();
+            // Stay over the centre support. In an open cave the Drone may drop ahead of the cut.
             drone.getMoveControl().setWantedPosition(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.8);
-            if (drone.position().distanceToSqr(Vec3.atBottomCenterOf(at)) > 2.5)
+            if (!HiveShaft.isInside(drone, at) || drone.getY() > at.getY() + 1.5)
             {
                 stuck++;
                 if (drone.tickCount % 20 == 0)
@@ -221,56 +334,97 @@ public final class HiveGoals
                 }
                 return;
             }
-            // the tunnel is 2 wide and 4 high, so a Praetorian can use it too
-            Direction side = dir.getClockWise();
-            java.util.List<BlockPos> clear = new java.util.ArrayList<>();
-            java.util.List<BlockPos> check = new java.util.ArrayList<>();
-            for (BlockPos lane : new BlockPos[] { next, next.relative(side) })
+            if (layer.isEmpty())
             {
-                for (int up = 3; up >= 0; up--)
+                layer = HiveShaft.layer(next);
+                if (!HiveShaft.canExcavate(level, layer))
                 {
-                    clear.add(lane.above(up));
-                }
-                check.add(lane.below());
-            }
-            check.addAll(clear);
-            // nothing in the way may be a fluid or unbreakable, and the floor must hold
-            for (BlockPos p : check)
-            {
-                BlockState s = level.getBlockState(p);
-                if (!s.getFluidState().isEmpty() || s.is(ModTags.XENO_UNBREAKABLE) || s.getDestroySpeed(level, p) < 0)
-                {
-                    hive.setDig(at, dir.getClockWise()); // turn and try another way
-                    stuck += 20;
+                    finish(level, at);
                     return;
                 }
             }
-            for (BlockPos p : clear)
+            if (work.isEmpty())
             {
-                BlockState s = level.getBlockState(p);
-                if (!s.isAir())
+                for (BlockPos pos : layer)
                 {
-                    float hardness = Math.max(0.5F, s.getDestroySpeed(level, p));
-                    float speed = (float) (AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed) * AvpConfig.server(AvpConfig.SERVER.foundingDigSpeed));
-                    if (++digTicks % 3 == 0)
+                    if (!level.getBlockState(pos).isAir())
                     {
-                        level.destroyBlockProgress(drone.getId(), p, (int) Math.min(9, digTicks * speed / (hardness * 4)));
-                        drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                        work.add(pos);
+                        if (work.size() == 4)
+                        {
+                            break;
+                        }
                     }
-                    if (digTicks * speed >= hardness * 40)
-                    {
-                        level.destroyBlock(p, false, drone);
-                        level.destroyBlockProgress(drone.getId(), p, -1);
-                        digTicks = 0;
-                    }
-                    return;
                 }
             }
-            // step down; every 6 steps the stair turns, so it winds down rather than wandering off
-            int depth = hive.entrance().getY() - next.getY();
-            hive.setDig(next, depth % 6 == 0 ? dir.getClockWise() : dir);
+            if (!work.isEmpty())
+            {
+                digBatch(level, at);
+                return;
+            }
+            if (at.equals(hive.entrance()))
+            {
+                HiveShaft.lineMouth(level, at);
+            }
+            hive.setDig(next, Direction.NORTH);
             HiveData.get(level).changed();
+            layer = List.of();
             stuck = 0;
+        }
+
+        private void digBatch(ServerLevel level, BlockPos at)
+        {
+            float hardness = 0.5F;
+            for (BlockPos pos : work)
+            {
+                hardness = Math.max(hardness, level.getBlockState(pos).getDestroySpeed(level, pos));
+            }
+            double speed = AvpConfig.server(AvpConfig.SERVER.xenoDigSpeed) * AvpConfig.server(AvpConfig.SERVER.foundingDigSpeed);
+            if (++digTicks % 3 == 0)
+            {
+                level.destroyBlockProgress(drone.getId(), work.getFirst(), (int) Math.min(9, digTicks * speed / (hardness * 4)));
+                drone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            }
+            if (digTicks * speed < hardness * 40)
+            {
+                return;
+            }
+            clearCracks(level);
+            if (!HiveShaft.canExcavate(level, work))
+            {
+                finish(level, at);
+                return;
+            }
+            for (BlockPos pos : work)
+            {
+                if (!level.getBlockState(pos).isAir() && !level.destroyBlock(pos, false, drone))
+                {
+                    finish(level, at);
+                    return;
+                }
+            }
+            work.clear();
+            digTicks = 0;
+        }
+
+        private void clearCracks(ServerLevel level)
+        {
+            if (!work.isEmpty())
+            {
+                level.destroyBlockProgress(drone.getId(), work.getFirst(), -1);
+            }
+        }
+
+        private void finish(ServerLevel level, BlockPos at)
+        {
+            if (hive.hasVerticalShaft() && at.equals(hive.entrance()))
+            {
+                HiveData.get(level).remove(hive); // The first cut was blocked. Don't hollow out the surface.
+                drone.setHiveId(null);
+                hive = null;
+                return;
+            }
+            carveChamber(level, at);
         }
 
         /**
@@ -310,11 +464,16 @@ public final class HiveGoals
         public void stop()
         {
             drone.setFounding(false);
-            if (hive != null && hive.state() == Hive.State.FOUNDING && stuck >= 400 && drone.level() instanceof ServerLevel level)
+            if (!(drone.level() instanceof ServerLevel level))
+            {
+                return;
+            }
+            clearCracks(level);
+            if (hive != null && hive.state() == Hive.State.FOUNDING && stuck >= 400)
             {
                 // couldn't get down (lava, water, bedrock...): found the hive where it got to
                 BlockPos at = hive.digPos() == null ? drone.blockPosition() : hive.digPos();
-                carveChamber(level, at);
+                finish(level, at);
             }
         }
     }
@@ -491,10 +650,24 @@ public final class HiveGoals
         }
 
         @Override
+        public boolean requiresUpdateEveryTick()
+        {
+            return true;
+        }
+
+        @Override
         public void tick()
         {
             Hive hive = drone.hive();
             if (hive == null || !(drone.getFirstPassenger() instanceof net.minecraft.world.entity.LivingEntity host))
+            {
+                return;
+            }
+            if (HiveShaft.descend(drone, hive))
+            {
+                return;
+            }
+            if ((drone.tickCount & 1) != 0)
             {
                 return;
             }

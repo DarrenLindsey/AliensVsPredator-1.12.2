@@ -983,6 +983,7 @@ public abstract class XenomorphEntity extends Monster
             goalSelector.addGoal(1, new XenoBrain.RetreatGoal(this));
             goalSelector.addGoal(1, new XenoBrain.AvoidTurretGoal(this));
         }
+        goalSelector.addGoal(2, new HiveGoals.ExitShaftGoal(this));
         goalSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.LeapAtTargetGoal(this, 0.5F));
         goalSelector.addGoal(3, smart ? new XenoBrain.StalkAndStrikeGoal(this, speed * 1.2)
                 : new net.minecraft.world.entity.ai.goal.MeleeAttackGoal(this, speed * 1.15, false));

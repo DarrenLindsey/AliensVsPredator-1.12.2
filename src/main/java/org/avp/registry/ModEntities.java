@@ -50,11 +50,11 @@ public final class ModEntities
 
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.xenomorph.BuilderDroneEntity>> BUILDER_DRONE = ENTITIES.register("builder_drone",
             () -> EntityType.Builder.<org.avp.entity.xenomorph.BuilderDroneEntity>of(org.avp.entity.xenomorph.BuilderDroneEntity::new, MobCategory.MONSTER)
-                    .sized(0.95F, 2.0F).eyeHeight(1.7F).clientTrackingRange(10).build("builder_drone"));
+                    .sized(0.82F, 1.65F).eyeHeight(1.39F).clientTrackingRange(10).build("builder_drone"));
 
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.xenomorph.CoaterDroneEntity>> COATER_DRONE = ENTITIES.register("coater_drone",
             () -> EntityType.Builder.<org.avp.entity.xenomorph.CoaterDroneEntity>of(org.avp.entity.xenomorph.CoaterDroneEntity::new, MobCategory.MONSTER)
-                    .sized(0.9F, 1.9F).eyeHeight(1.6F).clientTrackingRange(10).build("coater_drone"));
+                    .sized(0.71F, 1.50F).eyeHeight(1.27F).clientTrackingRange(10).build("coater_drone"));
 
     public static final DeferredHolder<EntityType<?>, EntityType<org.avp.entity.projectile.GrenadeEntity>> GRENADE = ENTITIES.register("grenade",
             () -> EntityType.Builder.<org.avp.entity.projectile.GrenadeEntity>of(org.avp.entity.projectile.GrenadeEntity::new, MobCategory.MISC)

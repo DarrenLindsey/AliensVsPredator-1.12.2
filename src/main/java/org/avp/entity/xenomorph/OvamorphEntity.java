@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.avp.config.AvpConfig;
 import org.avp.entity.parasite.FacehuggerEntity;
+import org.avp.registry.ModAttachments;
 import org.avp.registry.ModEntities;
 import org.avp.registry.ModSounds;
 
@@ -12,6 +13,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -40,6 +42,8 @@ public class OvamorphEntity extends XenomorphEntity
     private boolean triggered;
     private int hatchTimer;
     private int emptyTicks;
+    @Nullable
+    private java.util.UUID pairedHost;
 
     public OvamorphEntity(EntityType<? extends OvamorphEntity> type, Level level)
     {
@@ -86,12 +90,27 @@ public class OvamorphEntity extends XenomorphEntity
         return full;
     }
 
+    public void pairWith(LivingEntity host)
+    {
+        pairedHost = host.getUUID();
+    }
+
+    public boolean isPaired()
+    {
+        return pairedHost != null;
+    }
+
+    public boolean isPairedWith(LivingEntity host)
+    {
+        return host.getUUID().equals(pairedHost);
+    }
+
     @Override
     public void tick()
     {
         super.tick();
         setDeltaMovement(0, Math.min(0, getDeltaMovement().y), 0); // never slides around
-        if (level().isClientSide)
+        if (!(level() instanceof ServerLevel level))
         {
             return;
         }
@@ -108,8 +127,9 @@ public class OvamorphEntity extends XenomorphEntity
         {
             return; // being carried by a Drone: it waits until it's set down
         }
-        boolean hostNearby = !level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(8), FacehuggerEntity::isValidHost).isEmpty();
-        if (triggered || hostNearby)
+        LivingEntity captive = pairedHost != null && level.getEntity(pairedHost) instanceof LivingEntity host
+                && host.hasData(ModAttachments.COCOONED) && distanceToSqr(host) <= 8 * 8 && FacehuggerEntity.isValidHost(host) ? host : null;
+        if (triggered || captive != null || !level.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(8), FacehuggerEntity::isValidHost).isEmpty())
         {
             hatchTimer -= triggered ? 20 : 1;
             if (hatchTimer <= 60)
@@ -122,12 +142,12 @@ public class OvamorphEntity extends XenomorphEntity
             }
             if (hatchTimer <= 0 && openProgress() >= MAX_OPEN)
             {
-                hatch();
+                hatch(captive);
             }
         }
     }
 
-    private void hatch()
+    private void hatch(@Nullable LivingEntity captive)
     {
         full = false;
         FacehuggerEntity hugger = ModEntities.FACEHUGGER.get().create(level());
@@ -136,12 +156,16 @@ public class OvamorphEntity extends XenomorphEntity
             return;
         }
         hugger.moveTo(getX(), getY() + 0.9, getZ(), random.nextFloat() * 360F, 0);
-        // spring out towards the nearest host
-        Player near = level().getNearestPlayer(this, 8);
-        Vec3 push = near != null ? near.position().subtract(position()).normalize().scale(0.45) : Vec3.ZERO;
+        LivingEntity near = captive != null ? captive : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(8),
+                FacehuggerEntity::isValidHost).stream().min(java.util.Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
+        Vec3 push = near != null ? FacehuggerEntity.faceAnchor(near).subtract(hugger.position()).multiply(1, 0, 1).normalize().scale(0.45) : Vec3.ZERO;
         hugger.setDeltaMovement(push.x, 0.75, push.z);
         hugger.finalizeSpawn((net.minecraft.server.level.ServerLevel) level(), level().getCurrentDifficultyAt(blockPosition()), MobSpawnType.BREEDING, null);
         level().addFreshEntity(hugger);
+        if (captive != null)
+        {
+            hugger.preferCaptive(captive);
+        }
     }
 
     /**
@@ -242,6 +266,10 @@ public class OvamorphEntity extends XenomorphEntity
         tag.putInt("OpenProgress", openProgress());
         tag.putInt("HatchTimer", hatchTimer);
         tag.putInt("EmptyTicks", emptyTicks);
+        if (pairedHost != null)
+        {
+            tag.putUUID("PairedHost", pairedHost);
+        }
     }
 
     @Override
@@ -255,5 +283,6 @@ public class OvamorphEntity extends XenomorphEntity
             hatchTimer = tag.getInt("HatchTimer");
         }
         emptyTicks = tag.getInt("EmptyTicks");
+        pairedHost = tag.hasUUID("PairedHost") ? tag.getUUID("PairedHost") : null;
     }
 }

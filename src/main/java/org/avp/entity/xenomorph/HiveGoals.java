@@ -1349,6 +1349,8 @@ public final class HiveGoals
         private OvamorphEntity egg;
         @Nullable
         private BlockPos destination;
+        @Nullable
+        private net.minecraft.world.entity.LivingEntity captive;
         private int ticks;
 
         public CarryEggGoal(DroneEntity drone)
@@ -1371,14 +1373,15 @@ public final class HiveGoals
             }
             Vec3 rear = queen.eggSacRear();
             egg = level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(rear, rear).inflate(2.5),
-                    e -> e.isFull() && !e.isPassenger() && e.openProgress() <= -20
+                    e -> e.isFull() && !e.isPaired() && !e.isPassenger() && e.openProgress() <= -20
                             && hive.work().subjectAvailable(drone.getUUID(), e.getUUID(), level.getGameTime())).stream().findFirst().orElse(null);
             if (egg == null)
             {
                 return false;
             }
+            captive = null;
             destination = destination(level, hive, rear);
-            return reserve(hive, HiveWork.Kind.EGG, destination, egg.getUUID());
+            return reserve(hive, HiveWork.Kind.EGG, captive != null ? captive.blockPosition() : destination, egg.getUUID());
         }
 
         /** Next to a cocooned host with no egg yet; else somewhere in the Queen's chamber, away from the sac. */
@@ -1389,14 +1392,18 @@ public final class HiveGoals
                     .inflate(hive.buildRadius(level.getGameTime(), HiveData.maxRadius()) + 2);
             for (net.minecraft.world.entity.LivingEntity host : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
                     e -> e.hasData(ModAttachments.COCOONED) && org.avp.entity.parasite.FacehuggerEntity.isValidHost(e)
-                            && level.getEntitiesOfClass(OvamorphEntity.class, e.getBoundingBox().inflate(2.5)).isEmpty()))
+                            && hive.work().available(drone.getUUID(), HiveWork.Kind.EGG, e.blockPosition(), level.getGameTime())
+                            && level.getEntitiesOfClass(OvamorphEntity.class, e.getBoundingBox().inflate(2.5), egg -> egg.isPairedWith(e)).isEmpty()))
             {
-                for (Direction d : Direction.Plane.HORIZONTAL)
+                Direction front = Direction.fromYRot(host.yBodyRot);
+                for (Direction d : java.util.List.of(front, front.getClockWise(), front.getCounterClockWise(), front.getOpposite()))
                 {
                     BlockPos p = host.blockPosition().relative(d);
                     if (level.isLoaded(p) && hive.work().available(drone.getUUID(), HiveWork.Kind.EGG, p, level.getGameTime())
-                            && level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid())
+                            && level.getBlockState(p).isAir() && level.getBlockState(p.below()).isSolid()
+                            && level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(p)).isEmpty())
                     {
+                        captive = host;
                         return p;
                     }
                 }
@@ -1468,6 +1475,11 @@ public final class HiveGoals
             egg.stopRiding();
             drone.releasing = false;
             egg.moveTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, egg.getYRot(), 0);
+            if (captive != null && captive.hasData(ModAttachments.COCOONED)
+                    && org.avp.entity.parasite.FacehuggerEntity.isValidHost(captive) && captive.blockPosition().distSqr(destination) <= 2)
+            {
+                egg.pairWith(captive);
+            }
             drone.level().playSound(null, destination, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 0.6F, 0.6F);
             egg = null;
         }
@@ -1485,6 +1497,7 @@ public final class HiveGoals
             }
             egg = null;
             destination = null;
+            captive = null;
         }
     }
 

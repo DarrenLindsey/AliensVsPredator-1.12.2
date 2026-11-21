@@ -61,6 +61,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class FacehuggerEntity extends Monster
 {
+    private static final int GRIP_TICKS = 60;
     private static final EntityDataAccessor<Boolean> FERTILE = SynchedEntityData.defineId(FacehuggerEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(FacehuggerEntity.class, EntityDataSerializers.BOOLEAN);
     /** Network id of the creature whose face it's on (-1 = none). Synced, so the client knows too. */
@@ -68,6 +69,8 @@ public class FacehuggerEntity extends Monster
     /** The host's UUID, to find it again after the world is reloaded. */
     @Nullable
     private java.util.UUID hostUuid;
+    @Nullable
+    private java.util.UUID reservedHost;
 
     private int ticksOnHost;
     private int ticksSpent;
@@ -149,6 +152,8 @@ public class FacehuggerEntity extends Monster
         hostUuid = host.getUUID();
         setNoGravity(true);
         noPhysics = true;
+        ticksOnHost = 0;
+        setTarget(null);
         clampToFace(host);
     }
 
@@ -163,7 +168,13 @@ public class FacehuggerEntity extends Monster
     /** Could this creature carry an embryo right now? */
     public boolean canHost(LivingEntity host)
     {
-        return host != this && isValidHost(host);
+        return host != this && (reservedHost == null || reservedHost.equals(host.getUUID())) && isValidHost(host);
+    }
+
+    public void preferCaptive(LivingEntity host)
+    {
+        reservedHost = host.getUUID();
+        setTarget(host);
     }
 
     /** Shared with the Ovamorph (it opens for the same creatures a facehugger would go for). */
@@ -211,6 +222,19 @@ public class FacehuggerEntity extends Monster
                 detach();
             }
         }
+        if (host == null && reservedHost != null && level() instanceof net.minecraft.server.level.ServerLevel server)
+        {
+            if (!(server.getEntity(reservedHost) instanceof LivingEntity captive) || !captive.hasData(ModAttachments.COCOONED)
+                    || distanceToSqr(captive) > 24 * 24 || !isValidHost(captive))
+            {
+                reservedHost = null;
+                setTarget(null);
+            }
+            else if (getTarget() != captive)
+            {
+                setTarget(captive);
+            }
+        }
         setClimbing(horizontalCollision && isFertile() && !isAttached());
         if (attachCooldown > 0)
         {
@@ -234,13 +258,28 @@ public class FacehuggerEntity extends Monster
         }
         else if (attachCooldown <= 0)
         {
-            // touching a possible host? latch on
-            for (LivingEntity candidate : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(0.25), this::canHost))
+            LivingEntity target = getTarget();
+            if (target != null && canHost(target) && withinFaceReach(target))
             {
-                tryAttach(candidate);
-                break;
+                tryAttach(target);
+            }
+            else if (reservedHost == null)
+            {
+                for (LivingEntity candidate : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(1), this::canHost))
+                {
+                    if (candidate != target && withinFaceReach(candidate))
+                    {
+                        tryAttach(candidate);
+                        break;
+                    }
+                }
             }
         }
+    }
+
+    private boolean withinFaceReach(LivingEntity target)
+    {
+        return position().add(0, getBbHeight() * 0.5, 0).distanceToSqr(faceAnchor(target)) <= 0.65 * 0.65 && hasLineOfSight(target);
     }
 
     private void tryAttach(LivingEntity host)
@@ -263,7 +302,6 @@ public class FacehuggerEntity extends Monster
             }
         }
         attachTo(host);
-        implant(host);
     }
 
     /** The embryo this parasite plants: "standard" (the host decides), "queen" for a Royal Facehugger... */
@@ -277,13 +315,16 @@ public class FacehuggerEntity extends Monster
         host.setData(ModAttachments.EMBRYO, new Embryo(0, AvpConfig.server(AvpConfig.SERVER.embryoGestationTicks), EmbryoKinds.forHost(host, embryoKind())));
         playSound(ModSounds.FACEHUGGER_IMPLANT.get(), 0.6F, 1.0F);
         setFertile(false);
+        reservedHost = null;
         ticksOnHost = 0;
         setTarget(null);
     }
 
     private void tickOnHost(LivingEntity host)
     {
-        if (!host.isAlive() || host instanceof Player player && (player.isCreative() || player.isSpectator()))
+        if (!host.isAlive() || host instanceof Player player && (player.isCreative() || player.isSpectator()
+                || isFertile() && player.getItemBySlot(EquipmentSlot.HEAD).is(ModTags.FACEHUGGER_PROOF))
+                || isFertile() && host.hasData(ModAttachments.EMBRYO))
         {
             if (host instanceof Player player && player.isCreative())
             {
@@ -304,15 +345,20 @@ public class FacehuggerEntity extends Monster
             mob.getNavigation().stop();
             mob.setTarget(null);
         }
-        if (++ticksOnHost >= AvpConfig.server(AvpConfig.SERVER.facehuggerAttachTicks))
+        ticksOnHost++;
+        if (isFertile() && ticksOnHost >= GRIP_TICKS)
+        {
+            implant(host);
+        }
+        else if (!isFertile() && ticksOnHost >= AvpConfig.server(AvpConfig.SERVER.facehuggerAttachTicks))
         {
             detach();
             setDeltaMovement(host.getLookAngle().scale(0.2).add(0, 0.2, 0));
         }
     }
 
-    /** Holds on to the host's face: in front of their eyes, facing them, turning with their head. */
-    private void clampToFace(LivingEntity host)
+    /** Face position shared by the leap, contact check and attached pose. */
+    public static Vec3 faceAnchor(LivingEntity host)
     {
         float yaw = host.getYHeadRot();
         Vec3 anchor;
@@ -332,8 +378,14 @@ public class FacehuggerEntity extends Monster
             anchor = new Vec3(host.getX(), host.getEyeY() - 0.1, host.getZ())
                     .add(look.scale(host.getBbWidth() / 2 + 0.05));
         }
+        return anchor;
+    }
+
+    private void clampToFace(LivingEntity host)
+    {
+        Vec3 anchor = faceAnchor(host);
         setPos(anchor.x, anchor.y, anchor.z);
-        setYRot(yaw + 180F);
+        setYRot(host.getYHeadRot() + 180F);
         yRotO = getYRot();
         yBodyRot = getYRot();
         yBodyRotO = getYRot();
@@ -389,6 +441,12 @@ public class FacehuggerEntity extends Monster
             {
                 host.hurt(ModDamageTypes.of(level(), ModDamageTypes.ACID), (float) acid);
                 level().playSound(null, host.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.6F, 1.8F);
+            }
+            if (isAlive() && isFertile())
+            {
+                detach();
+                attachCooldown = 60;
+                setDeltaMovement(host.getLookAngle().scale(0.4).add(0, 0.25, 0));
             }
         }
         return hurt;
@@ -475,6 +533,10 @@ public class FacehuggerEntity extends Monster
         {
             tag.putUUID("Host", hostUuid);
         }
+        if (reservedHost != null)
+        {
+            tag.putUUID("ReservedHost", reservedHost);
+        }
     }
 
     @Override
@@ -487,6 +549,7 @@ public class FacehuggerEntity extends Monster
         }
         ticksOnHost = tag.getInt("TicksOnHost");
         ticksSpent = tag.getInt("TicksSpent");
+        reservedHost = tag.hasUUID("ReservedHost") ? tag.getUUID("ReservedHost") : null;
         if (tag.hasUUID("Host"))
         {
             hostUuid = tag.getUUID("Host");
@@ -524,7 +587,7 @@ public class FacehuggerEntity extends Monster
                 return false;
             }
             double distance = hugger.distanceToSqr(target);
-            return distance > 2.5 * 2.5 && distance < 8 * 8 && hugger.hasLineOfSight(target);
+            return hugger.attachCooldown == 0 && distance < 8 * 8 && hugger.hasLineOfSight(target);
         }
 
         @Override
@@ -537,10 +600,10 @@ public class FacehuggerEntity extends Monster
         public void start()
         {
             LivingEntity target = hugger.getTarget();
-            Vec3 to = new Vec3(target.getX() - hugger.getX(), target.getEyeY() - hugger.getY(), target.getZ() - hugger.getZ());
+            Vec3 to = faceAnchor(target).subtract(hugger.position());
             Vec3 flat = new Vec3(to.x, 0, to.z).normalize();
             double strength = Math.min(1.2, Math.sqrt(to.x * to.x + to.z * to.z) * 0.18);
-            hugger.setDeltaMovement(flat.x * strength, 0.35 + Math.max(0, to.y) * 0.12, flat.z * strength);
+            hugger.setDeltaMovement(flat.x * strength, 0.35 + Math.max(0, to.y) * 0.14, flat.z * strength);
             hugger.getLookControl().setLookAt(target);
             cooldown = 50 + hugger.getRandom().nextInt(30);
         }

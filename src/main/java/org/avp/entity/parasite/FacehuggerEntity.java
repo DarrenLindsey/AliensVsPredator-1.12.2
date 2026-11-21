@@ -37,6 +37,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
+import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -148,7 +149,7 @@ public class FacehuggerEntity extends Monster
         hostUuid = host.getUUID();
         setNoGravity(true);
         noPhysics = true;
-        setDeltaMovement(Vec3.ZERO);
+        clampToFace(host);
     }
 
     private void detach()
@@ -313,10 +314,26 @@ public class FacehuggerEntity extends Monster
     /** Holds on to the host's face: in front of their eyes, facing them, turning with their head. */
     private void clampToFace(LivingEntity host)
     {
-        Vec3 look = Vec3.directionFromRotation(0, host.getYHeadRot());
-        double reach = host.getBbWidth() / 2 + 0.05;
-        setPos(host.getX() + look.x * reach, host.getEyeY() - 0.1, host.getZ() + look.z * reach);
-        setYRot(host.getYHeadRot() + 180F);
+        float yaw = host.getYHeadRot();
+        Vec3 anchor;
+        if (host instanceof Cow)
+        {
+            // Vanilla's cow head pivots eight model pixels forward of the torso. Its face
+            // is another six pixels forward and follows head yaw and pitch from that pivot.
+            float pitch = host.getXRot();
+            Vec3 neck = Vec3.directionFromRotation(0, host.yBodyRot).scale(8.0 / 16.0).add(0, 20.0 / 16.0, 0);
+            Vec3 muzzle = Vec3.directionFromRotation(pitch, yaw).scale(6.6 / 16.0)
+                    .add(Vec3.directionFromRotation(pitch + 90F, yaw).scale(1.0 / 16.0));
+            anchor = host.position().add(neck.add(muzzle).scale(host.getScale()));
+        }
+        else
+        {
+            Vec3 look = Vec3.directionFromRotation(0, yaw);
+            anchor = new Vec3(host.getX(), host.getEyeY() - 0.1, host.getZ())
+                    .add(look.scale(host.getBbWidth() / 2 + 0.05));
+        }
+        setPos(anchor.x, anchor.y, anchor.z);
+        setYRot(yaw + 180F);
         yRotO = getYRot();
         yBodyRot = getYRot();
         yBodyRotO = getYRot();

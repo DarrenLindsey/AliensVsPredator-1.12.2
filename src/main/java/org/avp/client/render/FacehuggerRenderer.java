@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.Cow;
 
 /**
  * Draws the Facehugger (1.12.2 RenderFacehuggers): 0.9 scale; tilted back mid-leap;
@@ -51,8 +52,17 @@ public class FacehuggerRenderer extends MobRenderer<FacehuggerEntity, Facehugger
         super.setupRotations(hugger, poseStack, bob, yaw, partialTick, scale);
         if (hugger.isAttached())
         {
-            // stand up against the face: belly to the host, legs round the head, tail down
-            poseStack.mulPose(Axis.XP.rotationDegrees(-90F));
+            if (hugger.host() instanceof Cow cow)
+            {
+                // Put the belly against the muzzle and trail the tail down from the face.
+                poseStack.mulPose(Axis.XP.rotationDegrees(cow.getViewXRot(partialTick)));
+                poseStack.translate(0, 0, -0.15F * scale);
+                poseStack.mulPose(Axis.XP.rotationDegrees(90F));
+            }
+            else
+            {
+                poseStack.mulPose(Axis.XP.rotationDegrees(-90F));
+            }
         }
         else if (!hugger.isFertile())
         {

@@ -480,6 +480,10 @@ public final class XenoBrain
 
     private static void melt(net.minecraft.server.level.ServerLevel level, BlockPos pos, float amount, XenomorphEntity source)
     {
+        if (!source.mayBreakTerrain(pos))
+        {
+            return;
+        }
         java.util.Map<BlockPos, Float> progress = MELT.computeIfAbsent(level, l -> new java.util.HashMap<>());
         float total = progress.getOrDefault(pos, 0F) + amount;
         float needed = AvpConfig.server(AvpConfig.SERVER.acidMeltAmount);
@@ -552,7 +556,7 @@ public final class XenoBrain
                 for (double up = 0; up <= 1; up++)
                 {
                     BlockPos pos = BlockPos.containing(from.add(dir.scale(d)).add(0, up, 0));
-                    if (xeno.level().getBlockState(pos).is(org.avp.registry.ModTags.ACID_MELTABLE))
+                    if (xeno.level().getBlockState(pos).is(org.avp.registry.ModTags.ACID_MELTABLE) && xeno.mayBreakTerrain(pos))
                     {
                         return pos;
                     }
@@ -566,7 +570,7 @@ public final class XenoBrain
         private XenomorphEntity packmate()
         {
             List<XenomorphEntity> near = xeno.level().getEntitiesOfClass(XenomorphEntity.class, xeno.getBoundingBox().inflate(4),
-                    x -> x != xeno && x.isAlive() && x.getHealth() > 6 && !(x instanceof OvamorphEntity));
+                    x -> x != xeno && x.isAlive() && x.getHealth() > 6 && !(x instanceof OvamorphEntity) && x.mayBreakTerrain(door));
             if (near.isEmpty() || near.stream().anyMatch(x -> x.getId() < xeno.getId() && x.getTarget() == xeno.getTarget()))
             {
                 return null;
@@ -586,6 +590,7 @@ public final class XenoBrain
         public boolean canContinueToUse()
         {
             return door != null && donor != null && donor.isAlive() && donor.getHealth() > 4
+                    && xeno.mayBreakTerrain(door) && donor.mayBreakTerrain(door)
                     && xeno.level().getBlockState(door).is(org.avp.registry.ModTags.ACID_MELTABLE);
         }
 
@@ -685,6 +690,7 @@ public final class XenoBrain
         {
             BlockState state = xeno.level().getBlockState(pos);
             if (state.isAir() || state.is(org.avp.registry.ModTags.XENO_UNBREAKABLE) || state.is(org.avp.registry.ModTags.ACID_MELTABLE)
+                    || !xeno.mayBreakTerrain(pos)
                     || state.is(org.avp.registry.ModTags.XENO_BREAKABLE) || !state.getFluidState().isEmpty()
                     || state.getCollisionShape(xeno.level(), pos).isEmpty())
             {
@@ -780,7 +786,7 @@ public final class XenoBrain
                 xeno.level().destroyBlockProgress(xeno.getId(), block, stage);
                 lastStage = stage;
             }
-            if (progress >= 1F)
+            if (progress >= 1F && xeno.mayBreakTerrain(block))
             {
                 xeno.level().destroyBlockProgress(xeno.getId(), block, -1);
                 xeno.level().destroyBlock(block, true, xeno);
@@ -852,7 +858,7 @@ public final class XenoBrain
             BlockPos origin = xeno.blockPosition();
             for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-6, -2, -6), origin.offset(6, 3, 6)))
             {
-                if (isLight(xeno.level().getBlockState(pos)))
+                if (isLight(xeno.level().getBlockState(pos)) && xeno.mayBreakTerrain(pos))
                 {
                     light = pos.immutable();
                     return true;
@@ -870,13 +876,13 @@ public final class XenoBrain
         @Override
         public boolean canContinueToUse()
         {
-            return light != null && isLight(xeno.level().getBlockState(light)) && !xeno.getNavigation().isDone();
+            return light != null && isLight(xeno.level().getBlockState(light)) && xeno.mayBreakTerrain(light) && !xeno.getNavigation().isDone();
         }
 
         @Override
         public void tick()
         {
-            if (light != null && xeno.distanceToSqr(Vec3.atCenterOf(light)) < 4.5)
+            if (light != null && xeno.distanceToSqr(Vec3.atCenterOf(light)) < 4.5 && xeno.mayBreakTerrain(light))
             {
                 xeno.level().destroyBlock(light, true, xeno);
                 xeno.swing(net.minecraft.world.InteractionHand.MAIN_HAND);

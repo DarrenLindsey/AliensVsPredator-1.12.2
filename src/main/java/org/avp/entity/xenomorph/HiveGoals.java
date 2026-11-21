@@ -231,7 +231,7 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            if (!enabled() || !(drone.level() instanceof ServerLevel level))
+            if (!enabled() || !drone.canFound() || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
             }
@@ -423,13 +423,13 @@ public final class HiveGoals
             {
                 AssignedGoal candidate = switch (kind)
                 {
-                    case DIG -> dig;
-                    case BUILD -> build;
-                    case COAT -> drone.isCoater() ? specialistCoat : workerCoat;
-                    case EGG -> eggs;
+                    case DIG -> drone.isBuilder() ? dig : null;
+                    case BUILD -> drone.isBuilder() ? build : null;
+                    case COAT -> drone.isCoater() ? specialistCoat : null;
+                    case EGG -> drone.getClass() == DroneEntity.class ? eggs : null;
                     case SEAL -> throw new IllegalStateException("Leaks use their emergency goal");
                 };
-                if (candidate.canUse())
+                if (candidate != null && candidate.canUse())
                 {
                     active = candidate;
                     return true;
@@ -815,11 +815,14 @@ public final class HiveGoals
                 player.setData(ModAttachments.STRUGGLE, 0);
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.avp.cocooned"), false);
             }
-            // Bind the cocoon to the backing blocks.
-            BlockPos backing = spot.relative(wall);
-            for (int y = 0; y < host.getBbHeight(); y++)
+            if (drone.isCoater())
             {
-                NaturalResinBlock.cover(level, backing.above(y));
+                // A Coater can bind the captive to the backing blocks while hauling.
+                BlockPos backing = spot.relative(wall);
+                for (int y = 0; y < host.getBbHeight(); y++)
+                {
+                    NaturalResinBlock.cover(level, backing.above(y));
+                }
             }
             level.playSound(null, spot, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.HOSTILE, 1.0F, 0.5F);
             drone.setState("COCOONED HOST");
@@ -852,7 +855,7 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            if (drone.hunger() < 15
+            if (!drone.isBuilder() || drone.hunger() < 15
                     || !(drone.level() instanceof ServerLevel level))
             {
                 return false;
@@ -1540,7 +1543,7 @@ public final class HiveGoals
         @Override
         public boolean canUse()
         {
-            if (!enabled() || drone.getTarget() != null || drone.isVehicle()
+            if (!enabled() || !drone.isBuilder() || drone.getTarget() != null || drone.isVehicle()
                     || Math.floorMod(drone.tickCount + drone.getId(), 10) >= 2 || !(drone.level() instanceof ServerLevel level))
             {
                 return false;

@@ -72,6 +72,25 @@ public class HiveData extends SavedData
                 .findFirst();
     }
 
+    /** Nest territory includes the entire shaft and rim even when the Core is far below them. */
+    public boolean protectsTerrain(BlockPos pos, long now)
+    {
+        for (Hive hive : hives.values())
+        {
+            BlockPos entrance = hive.entrance();
+            if (hive.hasVerticalShaft() && pos.getY() >= hive.core().getY() - 2 && pos.getY() <= entrance.getY() + 1
+                    && Math.abs(pos.getX() - entrance.getX()) <= 3 && Math.abs(pos.getZ() - entrance.getZ()) <= 3)
+            {
+                return true;
+            }
+            if (hive.core().distSqr(pos) <= sq(hive.buildRadius(now, maxRadius()) + 4) || hive.roomAt(pos).isPresent())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Hive create(BlockPos core, BlockPos entrance, Hive.State state, long now)
     {
         Hive hive = new Hive(UUID.randomUUID(), core, entrance, state, now);

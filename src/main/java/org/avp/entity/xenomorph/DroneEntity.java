@@ -69,7 +69,10 @@ public class DroneEntity extends XenomorphEntity
         goalSelector.addGoal(1, new HiveGoals.CarryHostGoal(this));
         goalSelector.addGoal(5, new HiveGoals.BurrowGoal(this));
         goalSelector.addGoal(4, new HiveGoals.AssignedWorkGoal(this));
-        goalSelector.addGoal(1, new HiveGoals.SealLeakGoal(this));
+        if (this instanceof BuilderDroneEntity)
+        {
+            goalSelector.addGoal(1, new HiveGoals.SealLeakGoal(this));
+        }
     }
 
     @Override
@@ -157,7 +160,7 @@ public class DroneEntity extends XenomorphEntity
             return;
         }
         DroneEntity next = server.getEntitiesOfClass(DroneEntity.class, getBoundingBox().inflate(128),
-                d -> d != this && d.isAlive() && (d.hiveId() == null || d.hiveId().equals(hive.id())))
+                d -> d != this && d.canFound() && (d.hiveId() == null || d.hiveId().equals(hive.id())))
                 .stream().min(java.util.Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
         hive.setDigger(null);
         if (next != null)
@@ -183,6 +186,30 @@ public class DroneEntity extends XenomorphEntity
         boolean force = forceFound;
         forceFound = false;
         return force;
+    }
+
+    public boolean canFound()
+    {
+        return isAlive() && !isBonded() && !isVehicle() && (getClass() == DroneEntity.class || this instanceof BuilderDroneEntity);
+    }
+
+    /** Converts the founder before any terrain work and hands off the same in-progress hive. */
+    public void appointFoundingBuilder(net.minecraft.server.level.ServerLevel level, org.avp.world.hive.Hive hive)
+    {
+        if (getClass() != DroneEntity.class || !canFound() || !getUUID().equals(hive.digger()))
+        {
+            return;
+        }
+        DroneEntity builder = morphIntoCaste(level, org.avp.registry.ModEntities.BUILDER_DRONE.get());
+        if (builder != null)
+        {
+            hive.setDigger(builder.getUUID());
+            if (getUUID().equals(hive.heir()))
+            {
+                hive.setHeir(null);
+            }
+            org.avp.world.hive.HiveData.get(level).changed();
+        }
     }
 
     /** Its job in its hive: a plain Drone is a worker; Builder and Coater Drones are their own castes. */
@@ -215,23 +242,38 @@ public class DroneEntity extends XenomorphEntity
         {
             return;
         }
+        morphIntoCaste(level, next);
+    }
+
+    @javax.annotation.Nullable
+    private DroneEntity morphIntoCaste(net.minecraft.server.level.ServerLevel level, EntityType<? extends DroneEntity> next)
+    {
         DroneEntity morph = next.create(level);
         if (morph == null)
         {
-            return;
+            return null;
         }
         morph.moveTo(getX(), getY(), getZ(), getYRot(), getXRot());
         morph.setHiveId(hiveId());
         morph.feed(hunger() - morph.hunger());
         morph.setHealth(morph.getMaxHealth() * getHealth() / getMaxHealth());
-        if (hasCustomName() && !isCustomNameVisible())
+        if (hasCustomName())
         {
             morph.setCustomName(getCustomName());
+            morph.setCustomNameVisible(isCustomNameVisible());
         }
-        level.addFreshEntity(morph);
+        if (isPersistenceRequired())
+        {
+            morph.setPersistenceRequired();
+        }
+        if (!level.addFreshEntity(morph))
+        {
+            return null;
+        }
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.ITEM_SLIME, getX(), getY() + 1, getZ(), 30, 0.4, 0.6, 0.4, 0.05);
         level.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.SLIME_SQUISH, net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, 0.5F);
         discard();
+        return morph;
     }
 
     /** Builders lay hivestone floors, bridges and seals. */

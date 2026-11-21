@@ -366,7 +366,7 @@ public final class XenoWorker
             ServerLevel level = (ServerLevel) xeno.level();
             BlockState s = level.getBlockState(at);
             float hardness = s.getDestroySpeed(level, at);
-            if (s.isAir() || hardness < 0 || level.getBlockEntity(at) != null)
+            if (s.isAir() || hardness < 0 || level.getBlockEntity(at) != null || !xeno.mayBreakTerrain(at))
             {
                 return true;
             }

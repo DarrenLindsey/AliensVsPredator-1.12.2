@@ -48,6 +48,11 @@ public final class HiveFounding
 
     public void tick(ServerLevel level, DroneEntity drone)
     {
+        if (!drone.isBuilder())
+        {
+            drone.appointFoundingBuilder(level, hive);
+            return;
+        }
         BlockPos dig = hive.digPos();
         if (dig == null || !chunkAreaLoaded(level, dig, phase == Phase.CHAMBER || phase == Phase.FINISH ? RADIUS + 1 : 3))
         {

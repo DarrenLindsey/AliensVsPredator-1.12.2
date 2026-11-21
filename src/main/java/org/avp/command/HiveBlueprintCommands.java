@@ -88,11 +88,11 @@ public final class HiveBlueprintCommands
                     throw new IllegalArgumentException("Choose a site outside the spacing of existing hives.");
                 }
                 DroneEntity drone = level.getEntitiesOfClass(DroneEntity.class, new AABB(mouth).inflate(6),
-                        d -> d.hive() == null && !d.isBonded() && d.getTarget() == null && !d.isVehicle())
+                        d -> d.hive() == null && d.canFound() && d.getTarget() == null)
                         .stream().min(java.util.Comparator.comparingDouble(d -> d.blockPosition().distSqr(mouth))).orElse(null);
                 if (drone == null)
                 {
-                    throw new IllegalArgumentException("Place a free drone within six blocks of the shaft marker.");
+                    throw new IllegalArgumentException("Place a free Drone or Builder within six blocks of the shaft marker.");
                 }
                 Hive hive = data.create(mouth.below(depth), mouth, Hive.State.FOUNDING, level.getGameTime());
                 hive.setBlueprint(plan);

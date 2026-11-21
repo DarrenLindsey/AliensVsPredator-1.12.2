@@ -193,9 +193,12 @@ public abstract class XenomorphEntity extends Monster
             hiveId = hive.id();
         }
         hive.touch(now);
-        if (hive.state() == org.avp.world.hive.Hive.State.ACTIVE && random.nextInt(4) == 0 && hive.work().beginReview(now))
+        if (this instanceof BuilderDroneEntity)
         {
             hive.placeCoreBlock(level);
+        }
+        if (hive.state() == org.avp.world.hive.Hive.State.ACTIVE && random.nextInt(4) == 0 && hive.work().beginReview(now))
+        {
             org.avp.world.hive.HivePlanner.plan(level, hive);
             // foraging: is the hive short of hosts (for the eggs) or food (for the larder)?
             java.util.List<net.minecraft.world.entity.LivingEntity> held = level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
@@ -236,7 +239,7 @@ public abstract class XenomorphEntity extends Monster
     private void leaveRemains(ServerLevel level)
     {
         org.avp.world.hive.Hive hive = hive();
-        if (hive == null)
+        if (hive == null || !(this instanceof BuilderDroneEntity))
         {
             return;
         }
@@ -543,6 +546,12 @@ public abstract class XenomorphEntity extends Monster
         getNavigation().stop();
     }
 
+    public boolean mayBreakTerrain(BlockPos pos)
+    {
+        return this instanceof BuilderDroneEntity || !(level() instanceof ServerLevel level)
+                || !org.avp.world.hive.HiveData.get(level).protectsTerrain(pos, level.getGameTime());
+    }
+
     private int forageUntil;
 
     boolean isOnForagingTrip()
@@ -652,7 +661,7 @@ public abstract class XenomorphEntity extends Monster
             for (int up = 0; up <= 1; up++)
             {
                 net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(from.add(dir.scale(d)).add(0, up, 0));
-                if (level().getBlockState(pos).is(org.avp.registry.ModTags.XENO_BREAKABLE))
+                if (level().getBlockState(pos).is(org.avp.registry.ModTags.XENO_BREAKABLE) && mayBreakTerrain(pos))
                 {
                     if (distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) < 2.5 * 2.5)
                     {
@@ -1026,7 +1035,20 @@ public abstract class XenomorphEntity extends Monster
             {
                 ground.setCanOpenDoors(true); // lets it path to doors (it can't open them - it smashes them)
             }
-            goalSelector.addGoal(4, new net.minecraft.world.entity.ai.goal.BreakDoorGoal(this, 120, d -> true));
+            goalSelector.addGoal(4, new net.minecraft.world.entity.ai.goal.BreakDoorGoal(this, 120, d -> true)
+            {
+                @Override
+                public boolean canUse()
+                {
+                    return super.canUse() && mayBreakTerrain(doorPos);
+                }
+
+                @Override
+                public boolean canContinueToUse()
+                {
+                    return mayBreakTerrain(doorPos) && super.canContinueToUse();
+                }
+            });
         }
         if (smart)
         {

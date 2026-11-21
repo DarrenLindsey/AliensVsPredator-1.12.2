@@ -148,10 +148,10 @@ public final class AvpCommands
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getLookAngle().scale(64));
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1),
-                e -> e instanceof DroneEntity, 64 * 64);
+                e -> e instanceof DroneEntity drone && drone.canFound(), 64 * 64);
         if (hit == null || !(hit.getEntity() instanceof DroneEntity drone))
         {
-            source.sendFailure(Component.literal("Look at a Drone (within 64 blocks)."));
+            source.sendFailure(Component.literal("Look at a free Drone or Builder (within 64 blocks)."));
             return 0;
         }
         drone.forceFoundHive();

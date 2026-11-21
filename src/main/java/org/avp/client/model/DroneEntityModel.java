@@ -1,8 +1,6 @@
 package org.avp.client.model;
 
 import org.avp.client.model.geometry.DroneModel;
-import org.avp.entity.xenomorph.BuilderDroneEntity;
-import org.avp.entity.xenomorph.CoaterDroneEntity;
 import org.avp.entity.xenomorph.DroneEntity;
 
 import net.minecraft.client.model.geom.ModelPart;
@@ -11,18 +9,9 @@ import net.minecraft.util.Mth;
 /** Drone animation, straight from 1.12.2 ModelDrone.render: walking limbs, turning head, swinging tail. */
 public class DroneEntityModel extends AvpEntityModel<DroneEntity, DroneModel>
 {
-    private final ModelPart[] headParts;
-    private final ModelPart[] forearmParts;
-    private final ModelPart[] dorsalParts;
-
     public DroneEntityModel(ModelPart root)
     {
         super(new DroneModel(root));
-        DroneModel m = model;
-        headParts = new ModelPart[] { m.head1, m.head2, m.head3, m.head4, m.head5, m.head6 };
-        forearmParts = new ModelPart[] { m.leftarm2, m.rightarm2, m.leftarm3, m.rightarm3, m.leftarm4, m.rightarm4 };
-        dorsalParts = new ModelPart[] { m.back1, m.back2, m.backhorn1, m.backhorn2, m.backhorn3, m.backhorn4,
-                m.tailSpikes1, m.tailSpikes2, m.tailSpikes3, m.tailSpikes4, m.tailSpikes5 };
     }
 
     @Override
@@ -41,7 +30,7 @@ public class DroneEntityModel extends AvpEntityModel<DroneEntity, DroneModel>
         doTail(angle * (1F - curl * 0.7F), distMult, curl);
 
         float head = (float) Math.toRadians(netHeadYaw) * 0.75F;
-        for (ModelPart part : headParts)
+        for (ModelPart part : new ModelPart[] { m.head1, m.head2, m.head3, m.head4, m.head5, m.head6 })
         {
             part.yRot = head;
         }
@@ -62,35 +51,6 @@ public class DroneEntityModel extends AvpEntityModel<DroneEntity, DroneModel>
         for (ModelPart arm : new ModelPart[] { m.leftarm1, m.leftarm2, m.leftarm3, m.leftarm4 })
         {
             arm.xRot = walkOpposite + 0.3665191F;
-        }
-        if (drone instanceof BuilderDroneEntity)
-        {
-            shapeWeaver(1.13F, 1.32F, 0.68F);
-        }
-        else if (drone instanceof CoaterDroneEntity)
-        {
-            shapeWeaver(0.85F, 0.85F, 0.53F);
-        }
-    }
-
-    /** Compact worker cowls and dorsal tubes, with caste-specific excavation or coating limbs. */
-    private void shapeWeaver(float shellWidth, float forearmWidth, float dorsalHeight)
-    {
-        DroneModel m = model;
-        m.body1.xScale = shellWidth;
-        m.body2.xScale = shellWidth;
-        for (ModelPart part : headParts)
-        {
-            part.xScale = shellWidth;
-            part.yScale = 0.9F;
-        }
-        for (ModelPart part : forearmParts)
-        {
-            part.xScale = forearmWidth;
-        }
-        for (ModelPart part : dorsalParts)
-        {
-            part.yScale = dorsalHeight;
         }
     }
 

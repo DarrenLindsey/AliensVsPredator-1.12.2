@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.avp.AliensVsPredator;
 import org.avp.client.model.MimicBakedModel;
+import org.avp.client.model.WeaverModel;
 import org.avp.client.model.geometry.AllModelLayers;
 import org.avp.client.render.BlastDoorRenderer;
 import org.avp.client.render.BlockEntityItemRenderer;
@@ -11,6 +12,7 @@ import org.avp.client.render.ModelBlockItemRenderer;
 import org.avp.client.render.PoweredBlockRenderer;
 import org.avp.client.render.ModelBlockRenderInfo;
 import org.avp.client.render.ModelBlockRenderer;
+import org.avp.client.render.WeaverRenderer;
 import org.avp.registry.ModBlockEntities;
 import org.avp.registry.ModBlocks;
 import org.avp.registry.ModEntities;
@@ -45,11 +47,13 @@ public final class ClientSetup
         event.enqueueWork(ModelBlockRenderInfo::init);
     }
 
-    /** Geometry of every model converted from 1.12.2. */
+    /** Converted model geometry and layers specific to this port. */
     @SubscribeEvent
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event)
     {
         AllModelLayers.register(event);
+        event.registerLayerDefinition(WeaverModel.BUILDER, WeaverModel::builderLayer);
+        event.registerLayerDefinition(WeaverModel.COATER, WeaverModel::coaterLayer);
         event.registerLayerDefinition(BlastDoorRenderer.ALARM_LAYER, BlastDoorRenderer::createAlarmLight);
         event.registerLayerDefinition(org.avp.client.render.HumanRenderer.LAYER, org.avp.client.render.HumanRenderer::createLayer);
         event.registerLayerDefinition(org.avp.client.render.PowerLoaderRenderer.LAYER, org.avp.client.render.PowerLoaderRenderer::createLayer);
@@ -81,11 +85,11 @@ public final class ClientSetup
         event.registerEntityRenderer(ModEntities.CHESTBURSTER.get(), org.avp.client.render.ChestbursterRenderer::new);
         event.registerEntityRenderer(ModEntities.OVAMORPH.get(), org.avp.client.render.OvamorphRenderer::new);
         event.registerEntityRenderer(ModEntities.DRONE.get(), org.avp.client.render.DroneRenderer::new);
-        event.registerEntityRenderer(ModEntities.BUILDER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
+        event.registerEntityRenderer(ModEntities.BUILDER_DRONE.get(), context -> new WeaverRenderer(context, true));
         event.registerEntityRenderer(ModEntities.WORKING_JOE.get(), org.avp.client.render.WorkingJoeRenderer::new);
         event.registerEntityRenderer(ModEntities.CAPSULE.get(), org.avp.client.render.CapsuleRenderer::new);
         event.registerEntityRenderer(ModEntities.POWER_LOADER.get(), org.avp.client.render.PowerLoaderRenderer::new);
-        event.registerEntityRenderer(ModEntities.COATER_DRONE.get(), org.avp.client.render.DroneRenderer::new);
+        event.registerEntityRenderer(ModEntities.COATER_DRONE.get(), context -> new WeaverRenderer(context, false));
         event.registerEntityRenderer(ModEntities.CREATURE_PROJECTILE.get(), NoopRenderer::new); // particles only
         event.registerEntityRenderer(ModEntities.GRENADE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_WEAPON.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);

@@ -316,7 +316,7 @@ public class DroneEntity extends XenomorphEntity
     @Override
     public boolean wantsToHunt(LivingEntity target)
     {
-        return !isWeaver() && super.wantsToHunt(target);
+        return (!isWeaver() || isBonded()) && super.wantsToHunt(target);
     }
 
     @Override

@@ -10,15 +10,17 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.avp.AliensVsPredator;
+import org.avp.config.AvpConfig;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
-/** The world-local PNG library. Decode plans on startup, never on a founding tick. */
+/** One PNG source per game instance. Decode plans on startup, never on a founding tick. */
 @EventBusSubscriber(modid = AliensVsPredator.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class HiveBlueprintLibrary
 {
@@ -34,11 +36,12 @@ public final class HiveBlueprintLibrary
     public static void start(ServerAboutToStartEvent event)
     {
         MinecraftServer server = event.getServer();
-        Path folder = folder(server);
+        Path folder = folder();
         List<Entry> entries = new ArrayList<>();
         try
         {
             Files.createDirectories(folder);
+            migrateLegacyFiles(server, folder);
             for (String name : DEFAULTS)
             {
                 Path dest = folder.resolve(name + ".png");
@@ -92,9 +95,51 @@ public final class HiveBlueprintLibrary
         }
     }
 
-    static Path folder(MinecraftServer server)
+    private static void migrateLegacyFiles(MinecraftServer server, Path folder) throws IOException
     {
-        return server.getWorldPath(LevelResource.ROOT).resolve("avp_blueprints");
+        Path legacy = server.getWorldPath(LevelResource.ROOT).resolve("avp_blueprints");
+        if (!Files.isDirectory(legacy) || Files.isSameFile(legacy, folder))
+        {
+            return;
+        }
+        try (var files = Files.list(legacy))
+        {
+            for (Path path : files.filter(Files::isRegularFile).toList())
+            {
+                String filename = path.getFileName().toString();
+                if (!filename.endsWith(".png") || !HiveBlueprint.validName(filename.substring(0, filename.length() - 4)))
+                {
+                    continue;
+                }
+                try
+                {
+                    Files.copy(path, folder.resolve(filename));
+                }
+                catch (FileAlreadyExistsException ignored)
+                {
+                    // A shared file may already contain a different user's version of the plan.
+                }
+                catch (IOException failure)
+                {
+                    AliensVsPredator.LOGGER.warn("Could not migrate hive blueprint {}", path, failure);
+                }
+            }
+        }
+    }
+
+    public static Path folder()
+    {
+        String configured = AvpConfig.common(AvpConfig.COMMON.hiveBlueprintDirectory).strip();
+        Path gameDir = FMLPaths.GAMEDIR.get();
+        try
+        {
+            return gameDir.resolve(configured.isEmpty() ? "avp_blueprints" : configured).normalize();
+        }
+        catch (java.nio.file.InvalidPathException failure)
+        {
+            AliensVsPredator.LOGGER.warn("Invalid hive blueprint directory; using avp_blueprints in the game directory.");
+            return gameDir.resolve("avp_blueprints");
+        }
     }
 
     static java.io.InputStream bundled(String name) throws IOException
@@ -107,7 +152,7 @@ public final class HiveBlueprintLibrary
                 return stream;
             }
         }
-        throw new IOException("Put " + name + ".png in this world's avp_blueprints folder.");
+        throw new IOException("Put " + name + ".png in the shared blueprint folder: " + folder());
     }
 
     static List<HiveBlueprint> plans(MinecraftServer server)

@@ -96,13 +96,13 @@ public final class HiveBlueprint
         }
     }
 
-    public static HiveBlueprint named(ServerLevel level, String name) throws IOException
+    public static HiveBlueprint named(String name) throws IOException
     {
         if (!validName(name))
         {
             throw new IllegalArgumentException("Use a blueprint name with letters, numbers, underscores or hyphens.");
         }
-        Path path = HiveBlueprintLibrary.folder(level.getServer()).resolve(name + ".png");
+        Path path = HiveBlueprintLibrary.folder().resolve(name + ".png");
         if (Files.exists(path))
         {
             return readFile(path);

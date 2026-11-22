@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.avp.AliensVsPredator;
+import org.avp.config.AvpConfig;
 import org.avp.entity.xenomorph.DroneEntity;
 import org.avp.world.hive.Hive;
 import org.avp.world.hive.HiveBlueprint;
@@ -67,13 +68,13 @@ public final class HiveBlueprintCommands
         int depth = requestedDepth == 0 ? HiveBlueprint.defaultDepth(level, mouth) : requestedDepth;
         try
         {
-            HiveBlueprint plan = HiveBlueprint.named(level, name);
+            HiveBlueprint plan = HiveBlueprint.named(name);
             HiveBlueprint.checkDepth(level, mouth, depth);
             if (preview)
             {
                 var tiles = plan.tiles();
                 PREVIEWS.put(player, new Preview(level, mouth, tiles, level.getServer().getTickCount() + 400));
-                draw(player, PREVIEWS.get(player));
+                draw(player, mouth, tiles);
                 source.sendSuccess(() -> Component.literal("Projected over the surface for 20 seconds. Shaft at " + mouth.toShortString()
                         + "; floor Y " + mouth.below(depth).getY() + "; Core at " + plan.core(mouth.below(depth)).toShortString()
                         + ". Blue shaft, red Core, purple Queen, green hatchery, brown larder, white passage."), false);
@@ -130,28 +131,41 @@ public final class HiveBlueprintCommands
             {
                 return true;
             }
-            draw(player, preview);
+            draw(player, preview.floor(), preview.tiles());
             return false;
         });
+        if (AvpConfig.server(AvpConfig.SERVER.xenoDebugLabels))
+        {
+            for (ServerPlayer player : event.getServer().getPlayerList().getPlayers())
+            {
+                if (!PREVIEWS.containsKey(player))
+                {
+                    HiveLayoutDebug.drawNearby(player);
+                }
+            }
+        }
     }
 
-    private static void draw(ServerPlayer player, Preview preview)
+    static void draw(ServerPlayer player, BlockPos floor, List<HiveBlueprint.Tile> tiles)
     {
-        int stride = Math.max(1, (preview.tiles().size() + 239) / 240);
-        for (int i = 0; i < preview.tiles().size(); i++)
+        int stride = Math.max(1, (tiles.size() + 239) / 240);
+        for (int i = 0; i < tiles.size(); i++)
         {
-            HiveBlueprint.Tile tile = preview.tiles().get(i);
+            HiveBlueprint.Tile tile = tiles.get(i);
             boolean marker = tile.kind() == 'S' || tile.kind() == 'C';
             if (!marker && i % stride != 0)
             {
                 continue;
             }
-            BlockPos at = preview.floor().offset(tile.offset());
-            int color = tile.color();
-            Vector3f rgb = new Vector3f((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F);
-            preview.level().sendParticles(player, new DustParticleOptions(rgb, marker ? 2.5F : 1.3F), true,
-                    at.getX() + .5, at.getY() + .3, at.getZ() + .5, 1, 0, 0, 0, 0);
+            dust(player, floor.offset(tile.offset()), tile.color(), marker ? 2.5F : 1.3F);
         }
+    }
+
+    static void dust(ServerPlayer player, BlockPos at, int color, float size)
+    {
+        Vector3f rgb = new Vector3f((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F);
+        player.serverLevel().sendParticles(player, new DustParticleOptions(rgb, size), true,
+                at.getX() + .5, at.getY() + .3, at.getZ() + .5, 1, 0, 0, 0, 0);
     }
 
     private HiveBlueprintCommands() {}

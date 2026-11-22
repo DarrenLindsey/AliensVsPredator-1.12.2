@@ -49,9 +49,16 @@ public final class AvpConfig
         /** Natural spawning per creature, by the name used in data/avp/neoforge/biome_modifier/spawn_<name>.json. */
         public final java.util.Map<String, ModConfigSpec.BooleanValue> spawns = new java.util.LinkedHashMap<>();
         public final ModConfigSpec.BooleanValue naturalSpawns;
+        public final ModConfigSpec.ConfigValue<String> hiveBlueprintDirectory;
 
         Common(ModConfigSpec.Builder b)
         {
+            b.push("hives");
+            hiveBlueprintDirectory = b
+                    .comment("Shared PNG source for all saves. Relative paths start at the game directory. Reopen the world after changing this.")
+                    .define("hiveBlueprintDirectory", "avp_blueprints");
+            b.pop();
+
             b.push("worldgen");
             generateOres = b
                     .comment("Generate AvP ores in new chunks. Needs a restart. (Vein size, height and rarity are in the data pack files data/avp/worldgen/.)")
@@ -705,7 +712,7 @@ public final class AvpConfig
                     .comment("Xenomorphs drop to a crawl (under 1 block tall) to squeeze through vents and 1-block-high gaps.")
                     .define("xenosCrawl", true);
             xenoDebugLabels = b
-                    .comment("Show what each Xenomorph is doing above its head (STALKING, INVESTIGATING, ...). For testing.")
+                    .comment("Show Xenomorph activity labels and the color-coded layout of the nearby hive.")
                     .define("xenoDebugLabels", false);
             xenosDigThroughBlocks = b
                     .comment("When there's no other way to their prey, Xenomorphs tear through the blocks in the way.")
@@ -802,7 +809,7 @@ public final class AvpConfig
         return get(SERVER_SPEC, value);
     }
 
-    public static boolean common(ModConfigSpec.BooleanValue value)
+    public static <T> T common(ModConfigSpec.ConfigValue<T> value)
     {
         return get(COMMON_SPEC, value);
     }

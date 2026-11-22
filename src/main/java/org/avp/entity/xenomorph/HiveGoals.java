@@ -153,8 +153,8 @@ public final class HiveGoals
             }
             BlockPos entrance = hive.entrance();
             var target = xeno.getTarget();
-            forage = target == null && xeno instanceof DroneEntity && !xeno.isOnForagingTrip()
-                    && (xeno.isHungry() || xeno.getClass() == DroneEntity.class && !xeno.getUUID().equals(hive.heir())
+            forage = target == null && xeno.getClass() == DroneEntity.class && !xeno.isOnForagingTrip()
+                    && (xeno.isHungry() || !xeno.getUUID().equals(hive.heir())
                             && (hive.needsHosts || hive.needsFood))
                     && hive.canSendForager(level.getGameTime());
             if (!(forage || target != null && target.getY() >= entrance.getY() - 1) || !(xeno.getY() < entrance.getY()

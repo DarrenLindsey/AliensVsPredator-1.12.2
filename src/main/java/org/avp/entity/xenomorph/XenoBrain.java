@@ -311,6 +311,63 @@ public final class XenoBrain
 
     // ------------------------------------------------------------------ retreating, danger
 
+    /** Weavers back away from an immediate attacker and resume work once clear. */
+    static final class EvadeAttackerGoal extends Goal
+    {
+        private final DroneEntity weaver;
+        private net.minecraft.world.level.pathfinder.Path route;
+        private int retryAt;
+        private int stopAt;
+
+        EvadeAttackerGoal(DroneEntity weaver)
+        {
+            this.weaver = weaver;
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            LivingEntity attacker = weaver.getLastHurtByMob();
+            if (weaver.isBonded() || attacker == null || !attacker.isAlive()
+                    || weaver.tickCount < retryAt || weaver.tickCount - weaver.getLastHurtByMobTimestamp() > 100
+                    || weaver.distanceToSqr(attacker) > 12 * 12)
+            {
+                return false;
+            }
+            retryAt = weaver.tickCount + 20;
+            Vec3 away = DefaultRandomPos.getPosAway(weaver, 10, 4, attacker.position());
+            if (away == null || away.distanceToSqr(attacker.position()) <= weaver.distanceToSqr(attacker))
+            {
+                return false;
+            }
+            route = weaver.getNavigation().createPath(BlockPos.containing(away), 0);
+            return route != null && route.canReach();
+        }
+
+        @Override
+        public void start()
+        {
+            stopAt = weaver.tickCount + 60;
+            weaver.getNavigation().moveTo(route, 1.30);
+            weaver.setState("RETREATING");
+        }
+
+        @Override
+        public boolean canContinueToUse()
+        {
+            return !weaver.isBonded() && weaver.tickCount < stopAt && !weaver.getNavigation().isDone();
+        }
+
+        @Override
+        public void stop()
+        {
+            route = null;
+            weaver.stopJobNavigation();
+            weaver.setState("LURKING");
+        }
+    }
+
     /** Badly hurt or burning: break off and pull back somewhere dark. */
     public static class RetreatGoal extends Goal
     {

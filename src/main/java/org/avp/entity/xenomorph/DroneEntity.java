@@ -1,5 +1,7 @@
 package org.avp.entity.xenomorph;
 
+import javax.annotation.Nullable;
+
 import org.avp.AliensVsPredator;
 import org.avp.config.AvpConfig;
 import org.avp.registry.ModSounds;
@@ -16,6 +18,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.monster.Monster;
@@ -65,13 +69,28 @@ public class DroneEntity extends XenomorphEntity
     protected void registerGoals()
     {
         super.registerGoals();
-        addHunterGoals(1.0);
-        goalSelector.addGoal(1, new HiveGoals.CarryHostGoal(this));
+        if (isWeaver())
+        {
+            goalSelector.addGoal(0, new FloatGoal(this));
+            goalSelector.addGoal(1, new XenoBrain.EvadeAttackerGoal(this));
+            if (AvpConfig.server(AvpConfig.SERVER.smartXenomorphs))
+            {
+                goalSelector.addGoal(1, new XenoBrain.AvoidTurretGoal(this));
+            }
+            goalSelector.addGoal(4, new HiveGoals.FeedFromLarderGoal(this));
+            goalSelector.addGoal(5, new HiveGoals.ReturnToHiveGoal(this));
+            goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        }
+        else
+        {
+            addHunterGoals(1.0);
+        }
+        goalSelector.addGoal(isWeaver() ? 2 : 1, new HiveGoals.CarryHostGoal(this));
         goalSelector.addGoal(5, new HiveGoals.BurrowGoal(this));
         goalSelector.addGoal(4, new HiveGoals.AssignedWorkGoal(this));
         if (this instanceof BuilderDroneEntity)
         {
-            goalSelector.addGoal(1, new HiveGoals.SealLeakGoal(this));
+            goalSelector.addGoal(2, new HiveGoals.SealLeakGoal(this));
         }
     }
 
@@ -288,6 +307,27 @@ public class DroneEntity extends XenomorphEntity
         return this instanceof CoaterDroneEntity && hive() != null;
     }
 
+    /** The two specialized maintenance castes, even before they join a hive. */
+    boolean isWeaver()
+    {
+        return this instanceof BuilderDroneEntity || this instanceof CoaterDroneEntity;
+    }
+
+    @Override
+    public boolean wantsToHunt(LivingEntity target)
+    {
+        return !isWeaver() && super.wantsToHunt(target);
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target)
+    {
+        if (target == null || !isWeaver() || isBonded())
+        {
+            super.setTarget(target);
+        }
+    }
+
     @Override
     public boolean isRoyalLine()
     {
@@ -305,7 +345,7 @@ public class DroneEntity extends XenomorphEntity
     boolean canCapture(LivingEntity prey)
     {
         org.avp.world.hive.Hive hive = hive();
-        if (!isPrey(prey) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
+        if (isWeaver() || !isPrey(prey) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
                 || hunger() < 20 || isVehicle() || prey.isVehicle() || prey.isPassenger()
                 || prey.getBbWidth() > 1.5F || prey.getBbHeight() > 2.3F)
         {

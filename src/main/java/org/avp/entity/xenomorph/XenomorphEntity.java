@@ -425,7 +425,10 @@ public abstract class XenomorphEntity extends Monster
                 mate.fromPack = true;
                 mate.setTarget(target);
                 mate.fromPack = false;
-                mate.setState("JOINING PACK HUNT");
+                if (mate.getTarget() == target)
+                {
+                    mate.setState("JOINING PACK HUNT");
+                }
             }
         }
     }

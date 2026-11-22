@@ -240,8 +240,9 @@ public final class HiveBlueprint
 
     AABB bounds(BlockPos floor)
     {
-        return new AABB(floor.offset(-shaft.getX(), 0, -shaft.getZ()),
-                floor.offset(width - shaft.getX(), MIGRATION_HEIGHT, cells.length() / width - shaft.getZ()));
+        int left = floor.getX() - shaft.getX();
+        int front = floor.getZ() - shaft.getZ();
+        return new AABB(left, floor.getY(), front, left + width, floor.getY() + MIGRATION_HEIGHT, front + cells.length() / width);
     }
 
     private Stream<BlockPos> excavation(BlockPos floor)

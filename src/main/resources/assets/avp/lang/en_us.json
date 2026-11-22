@@ -839,6 +839,8 @@
   "avp.configuration.hiveLarder.tooltip": "Drones bring back prey that can't host as food; hungry members feed on it instead of hunting.",
   "avp.configuration.hiveMaxDugBlocks": "Hive Max Dug Blocks",
   "avp.configuration.hiveMaxDugBlocks.tooltip": "Most blocks one hive may dig out for its rooms and galleries.",
+  "avp.configuration.hiveBlueprintMaxBlocks": "Blueprint Excavation Limit",
+  "avp.configuration.hiveBlueprintMaxBlocks.tooltip": "Maximum blocks in a designed hive and its shaft. Construction still shares the founding tick budget.",
   "avp.configuration.foundingDigSpeed": "Founding Dig Speed",
   "avp.configuration.foundingDigSpeed.tooltip": "How much faster a Drone digs its founding tunnel (it won't hunt or hunger until the hive is made).",
   "block.avp.hivestone": "Hivestone",

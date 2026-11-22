@@ -73,6 +73,12 @@ public class OvamorphEntity extends XenomorphEntity
         // an egg doesn't do anything on purpose
     }
 
+    @Override
+    protected boolean usesHunger()
+    {
+        return false;
+    }
+
     /** -21 (shut) .. 21 (wide open), drives the lobe animation. */
     public int openProgress()
     {
@@ -276,6 +282,13 @@ public class OvamorphEntity extends XenomorphEntity
     public void readAdditionalSaveData(CompoundTag tag)
     {
         super.readAdditionalSaveData(tag);
+        var name = getCustomName();
+        if (name != null && !name.getSiblings().isEmpty() && name.getSiblings().getFirst().equals(getType().getDescription())
+                && name.getString().contains(" | hunger "))
+        {
+            setCustomName(null); // Legacy debug text was persisted as a custom name.
+            setCustomNameVisible(false);
+        }
         full = !tag.contains("ContainsFacehugger") || tag.getBoolean("ContainsFacehugger");
         entityData.set(OPEN, tag.contains("OpenProgress") ? tag.getInt("OpenProgress") : -MAX_OPEN);
         if (tag.contains("HatchTimer"))

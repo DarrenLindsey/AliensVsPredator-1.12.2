@@ -1387,35 +1387,39 @@ public final class HiveGoals
                 return false;
             }
             Hive hive = drone.hive();
-            if (hive == null || hive.queen() == null || !hive.hasQueen(level.getGameTime())
-                    || !(level.getEntity(hive.queen()) instanceof AdultXenomorphEntity queen) || drone.distanceTo(queen) > 32)
+            if (hive == null || hive.state() != Hive.State.ACTIVE)
             {
                 return false;
             }
-            Vec3 rear = queen.eggSacRear();
-            egg = level.getEntitiesOfClass(OvamorphEntity.class, new net.minecraft.world.phys.AABB(rear, rear).inflate(2.5),
-                    e -> e.isFull() && !e.isPaired() && !e.isPassenger() && e.openProgress() <= -20
-                            && hive.work().subjectAvailable(drone.getUUID(), e.getUUID(), level.getGameTime())).stream().findFirst().orElse(null);
+            Vec3 rear = hive.queen() != null && level.getEntity(hive.queen()) instanceof AdultXenomorphEntity queen
+                    && queen.isAlive() && queen.isQueen() && hive.id().equals(queen.hiveId()) ? queen.eggSacRear() : null;
+            var brood = hive.work().brood(level, hive);
+            egg = brood.eggs().stream().filter(
+                    e -> e.isAlive() && e.isFull() && !e.isPaired() && !e.isPassenger() && e.openProgress() <= -20
+                            && hive.work().subjectAvailable(drone.getUUID(), e.getUUID(), level.getGameTime()))
+                    .min(java.util.Comparator.comparingDouble(drone::distanceToSqr)).orElse(null);
             if (egg == null)
             {
                 return false;
             }
             captive = null;
-            destination = destination(level, hive, rear);
+            destination = destination(level, hive, brood.hosts(), rear);
             return reserve(hive, HiveWork.Kind.EGG, captive != null ? captive.blockPosition() : destination, egg.getUUID());
         }
 
         /** Next to a cocooned host with no egg yet; else somewhere in the Queen's chamber, away from the sac. */
         @Nullable
-        private BlockPos destination(ServerLevel level, Hive hive, Vec3 rear)
+        private BlockPos destination(ServerLevel level, Hive hive, java.util.List<net.minecraft.world.entity.LivingEntity> hosts,
+                @Nullable Vec3 rear)
         {
-            net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(hive.core())
-                    .inflate(hive.buildRadius(level.getGameTime(), HiveData.maxRadius()) + 2);
-            for (net.minecraft.world.entity.LivingEntity host : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
-                    e -> e.hasData(ModAttachments.COCOONED) && org.avp.entity.parasite.FacehuggerEntity.isValidHost(e)
-                            && hive.work().available(drone.getUUID(), HiveWork.Kind.EGG, e.blockPosition(), level.getGameTime())
-                            && level.getEntitiesOfClass(OvamorphEntity.class, e.getBoundingBox().inflate(2.5), egg -> egg.isPairedWith(e)).isEmpty()))
+            for (net.minecraft.world.entity.LivingEntity host : hosts)
             {
+                if (!host.hasData(ModAttachments.COCOONED) || !org.avp.entity.parasite.FacehuggerEntity.isValidHost(host)
+                        || !hive.work().available(drone.getUUID(), HiveWork.Kind.EGG, host.blockPosition(), level.getGameTime())
+                        || !level.getEntitiesOfClass(OvamorphEntity.class, host.getBoundingBox().inflate(2.5), e -> e.isPairedWith(host)).isEmpty())
+                {
+                    continue;
+                }
                 Direction front = Direction.fromYRot(host.yBodyRot);
                 for (Direction d : java.util.List.of(front, front.getClockWise(), front.getCounterClockWise(), front.getOpposite()))
                 {
@@ -1428,6 +1432,18 @@ public final class HiveGoals
                         return p;
                     }
                 }
+            }
+            if (rear == null)
+            {
+                return null;
+            }
+            egg = hive.work().brood(level, hive).eggs().stream().filter(e -> e.distanceToSqr(rear) <= 2.5 * 2.5
+                    && e.isAlive() && e.isFull() && !e.isPaired() && !e.isPassenger() && e.openProgress() <= -20
+                    && hive.work().subjectAvailable(drone.getUUID(), e.getUUID(), level.getGameTime()))
+                    .min(java.util.Comparator.comparingDouble(drone::distanceToSqr)).orElse(null);
+            if (egg == null)
+            {
+                return null;
             }
             org.avp.world.hive.Room room = hive.rooms(org.avp.world.hive.Room.Type.QUEEN).stream().findFirst()
                     .or(() -> hive.rooms(org.avp.world.hive.Room.Type.HATCHERY).stream().filter(org.avp.world.hive.Room::done).findFirst()).orElse(null);
@@ -1471,6 +1487,7 @@ public final class HiveGoals
                 // go and pick it up
                 if (drone.distanceToSqr(egg) < 2.5 * 2.5 && egg.startRiding(drone, true))
                 {
+                    egg.setHiveId(drone.hiveId());
                     drone.navigateTo(destination.getX() + 0.5, destination.getY(), destination.getZ() + 0.5, 0.8);
                 }
                 else if (ticks % 20 == 0)
@@ -1482,6 +1499,11 @@ public final class HiveGoals
             if (egg.getVehicle() != drone)
             {
                 egg = null;
+                return;
+            }
+            if (!drone.level().isEmptyBlock(destination) || !drone.level().getBlockState(destination.below()).isSolid())
+            {
+                destination = null;
                 return;
             }
             if (drone.blockPosition().distSqr(destination) > 4)

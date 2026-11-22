@@ -370,6 +370,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
         OvamorphEntity egg = ModEntities.OVAMORPH.get().create(level());
         if (egg != null)
         {
+            egg.setHiveId(hiveId());
             egg.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360F, 0);
             level().addFreshEntity(egg);
             setHunger(hunger() - 15);

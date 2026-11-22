@@ -9,9 +9,14 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import org.avp.entity.xenomorph.AdultXenomorphEntity;
+import org.avp.entity.xenomorph.OvamorphEntity;
+import org.avp.entity.parasite.FacehuggerEntity;
+import org.avp.registry.ModAttachments;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
 
 /** The Core assigns work for its hive. Reservations are short-lived and rebuilt after a reload. */
 public final class HiveWork
@@ -20,7 +25,7 @@ public final class HiveWork
 
     public enum Directive
     {
-        CORE("Hive Core — stabilize and expand", List.of(Kind.BUILD, Kind.DIG, Kind.COAT)),
+        CORE("Hive Core — stabilize and expand", List.of(Kind.EGG, Kind.BUILD, Kind.DIG, Kind.COAT)),
         BROOD("Queen — brood and expansion", List.of(Kind.EGG, Kind.DIG, Kind.BUILD, Kind.COAT)),
         DEFEND("Queen — repair and defend", List.of(Kind.BUILD, Kind.COAT, Kind.EGG, Kind.DIG));
 
@@ -71,6 +76,31 @@ public final class HiveWork
     @Nullable
     private UUID directiveQueen;
     private Directive directive = Directive.CORE;
+    private long nextBroodScan;
+    private Brood brood = new Brood(List.of(), List.of());
+
+    public record Brood(List<OvamorphEntity> eggs, List<LivingEntity> hosts) {}
+
+    /** Reuse nearby egg and captive lookups across workers. Reservations are still checked per job. */
+    public Brood brood(ServerLevel level, Hive hive)
+    {
+        long now = level.getGameTime();
+        if (now >= nextBroodScan)
+        {
+            nextBroodScan = now + 30;
+            boolean planned = hive.blueprint() != null;
+            int radius = planned ? 48 : hive.buildRadius(now, HiveData.maxRadius()) + 2;
+            AABB area = new AABB(hive.core()).inflate(radius, planned ? 10 : radius, radius);
+            List<OvamorphEntity> eggs = level.getEntitiesOfClass(OvamorphEntity.class, area,
+                    e -> e.isAlive() && e.isFull() && (e.hiveId() == null || hive.id().equals(e.hiveId()))
+                            && (!planned || hive.containsPatrolArea(e.blockPosition())));
+            List<LivingEntity> hosts = level.getEntitiesOfClass(LivingEntity.class, area,
+                    e -> e.hasData(ModAttachments.COCOONED) && FacehuggerEntity.isValidHost(e)
+                            && (!planned || hive.containsPatrolArea(e.blockPosition())));
+            brood = new Brood(eggs, hosts);
+        }
+        return brood;
+    }
 
     public Directive directive(ServerLevel level, Hive hive)
     {

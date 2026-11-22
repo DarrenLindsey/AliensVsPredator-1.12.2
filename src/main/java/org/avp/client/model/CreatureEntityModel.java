@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.avp.client.model.geometry.WarriorModel;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -30,12 +32,17 @@ public class CreatureEntityModel<T extends Mob> extends AvpEntityModel<T, Genera
     }
 
     private final List<Animated> animated = new ArrayList<>();
+    private final ModelPart[][] warriorTail;
     /** 0..255: drawn see-through (a cloaked Yautja). 255 = solid. */
     public int alpha = 255;
 
     public CreatureEntityModel(GeneratedModel model)
     {
         super(model);
+        warriorTail = model instanceof WarriorModel warrior
+                ? new ModelPart[][] { { warrior.tail1, warrior.tail2, warrior.tail3, warrior.tail4, warrior.tail5, warrior.stabber },
+                        { warrior.tailSpikes1, warrior.tailSpikes2, warrior.tailSpikes3, warrior.tailSpikes4, warrior.tailSpikes5 } }
+                : null;
         int tail = 0;
         for (Map.Entry<String, ModelPart> e : model.parts().entrySet())
         {
@@ -98,6 +105,7 @@ public class CreatureEntityModel<T extends Mob> extends AvpEntityModel<T, Genera
         float walkOpposite = -walk;
         float attack = entity.getAttackAnim(age - entity.tickCount);
         float flap = Mth.sin(age * 0.6F) * 0.7F;
+        alignWarriorTail();
         swingTail(Mth.sin(age * 0.08F) * 0.12F * (1F + swingAmount));
         for (Animated a : animated)
         {
@@ -123,6 +131,23 @@ public class CreatureEntityModel<T extends Mob> extends AvpEntityModel<T, Genera
                 case RIGHT_WING -> p.zRot -= flap;
                 default -> {
                 }
+            }
+        }
+    }
+
+    /** The legacy Warrior's render code assembled these joints before drawing the tail. */
+    private void alignWarriorTail()
+    {
+        if (warriorTail == null)
+        {
+            return;
+        }
+        float rootZ = warriorTail[0][0].z;
+        for (ModelPart[] parts : warriorTail)
+        {
+            for (int i = 1; i < parts.length; i++)
+            {
+                parts[i].z = rootZ + i * 10;
             }
         }
     }

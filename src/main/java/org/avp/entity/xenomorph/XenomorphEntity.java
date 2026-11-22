@@ -715,7 +715,7 @@ public abstract class XenomorphEntity extends Monster
                 // the kind of Xenomorph first (the name is translated on each player's side)
                 setCustomName(net.minecraft.network.chat.Component.empty().append(getType().getDescription()).append(": ")
                         .append(net.minecraft.network.chat.Component.literal(now + (isCrawling() ? " (crawling)" : "")
-                        + " | hunger " + hunger + (isHungry() ? " HUNGRY" : "")
+                        + (usesHunger() ? " | hunger " + hunger + (isHungry() ? " HUNGRY" : "") : "")
                         + (pack > 1 ? " | pack " + pack + (isPackLeader() ? " LEADER" : "") : "") + role)));
                 setCustomNameVisible(true);
                 debugNamed = true;
@@ -804,7 +804,12 @@ public abstract class XenomorphEntity extends Monster
 
     public boolean isHungry()
     {
-        return hunger < org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungryBelow);
+        return usesHunger() && hunger < org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungryBelow);
+    }
+
+    protected boolean usesHunger()
+    {
+        return true;
     }
 
     /** Would it go after this creature right now? (Players: see "Xenos Always Hunt Players".) */
@@ -947,11 +952,12 @@ public abstract class XenomorphEntity extends Monster
             }
         }
         // hunger: drains slowly; a full Xenomorph stops chasing animals (but still fights back)
-        if (age % org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungerDrainTicks) == 0 && hunger > 0 && !founding)
+        if (usesHunger() && age % org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenoHungerDrainTicks) == 0
+                && hunger > 0 && !founding)
         {
             hunger--;
         }
-        if (hunger <= 0 && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosStarve) && tickCount % 200 == 0)
+        if (usesHunger() && hunger <= 0 && org.avp.config.AvpConfig.server(org.avp.config.AvpConfig.SERVER.xenosStarve) && tickCount % 200 == 0)
         {
             hurt(damageSources().starve(), 1.0F);
         }
@@ -1161,7 +1167,10 @@ public abstract class XenomorphEntity extends Monster
         super.addAdditionalSaveData(tag);
         tag.putInt("Jelly", jelly);
         tag.putInt("XenoAge", age);
-        tag.putInt("Hunger", hunger);
+        if (usesHunger())
+        {
+            tag.putInt("Hunger", hunger);
+        }
         if (hiveId != null)
         {
             tag.putUUID("Hive", hiveId);
@@ -1182,7 +1191,7 @@ public abstract class XenomorphEntity extends Monster
         super.readAdditionalSaveData(tag);
         jelly = tag.getInt("Jelly");
         age = tag.getInt("XenoAge");
-        if (tag.contains("Hunger"))
+        if (usesHunger() && tag.contains("Hunger"))
         {
             hunger = tag.getInt("Hunger");
         }

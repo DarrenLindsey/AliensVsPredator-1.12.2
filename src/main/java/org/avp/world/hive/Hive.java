@@ -352,6 +352,13 @@ public class Hive
         return rooms.isEmpty() && core.distSqr(pos) <= 16;
     }
 
+    /** Living-hive searches can reach every designed wing, even before a Queen is present. */
+    public net.minecraft.world.phys.AABB broodArea(long now)
+    {
+        return blueprint == null ? new net.minecraft.world.phys.AABB(core).inflate(buildRadius(now, HiveData.maxRadius()) + 2)
+                : blueprint.bounds(shaftFloor());
+    }
+
     public void beginShaft()
     {
         verticalShaft = true;

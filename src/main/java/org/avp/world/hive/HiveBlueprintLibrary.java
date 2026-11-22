@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 @EventBusSubscriber(modid = AliensVsPredator.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class HiveBlueprintLibrary
 {
-    private static final List<String> DEFAULTS = List.of("sample", "split-nursery", "crescent");
+    private static final List<String> DEFAULTS = List.of("sample", "split-nursery", "crescent", "citadel");
     private static final int MAX_CUSTOM_PLANS = 64;
     private static final Map<MinecraftServer, List<Entry>> LIBRARIES = new WeakHashMap<>();
 

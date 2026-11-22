@@ -77,7 +77,7 @@ public final class HiveBlueprintCommands
                 draw(player, mouth, tiles);
                 source.sendSuccess(() -> Component.literal("Projected over the surface for 20 seconds. Shaft at " + mouth.toShortString()
                         + "; floor Y " + mouth.below(depth).getY() + "; Core at " + plan.core(mouth.below(depth)).toShortString()
-                        + ". Blue shaft, red Core, purple Queen, green hatchery, brown larder, white passage."), false);
+                        + ". Blue shaft, red Core, purple Queen, green hatchery, brown larder, gold guard post, teal midden, white passage."), false);
             }
             else
             {
@@ -85,7 +85,7 @@ public final class HiveBlueprintCommands
                 {
                     throw new IllegalArgumentException("Enable hives before founding a blueprint.");
                 }
-                plan.checkSite(level, mouth, depth);
+                plan.checkSiteBasics(level, mouth, depth);
                 HiveData data = HiveData.get(level);
                 if (data.nearest(mouth.below(depth), HiveData.spacing()).isPresent())
                 {
@@ -105,7 +105,7 @@ public final class HiveBlueprintCommands
                 drone.setHiveId(hive.id());
                 data.changed();
                 PREVIEWS.remove(player);
-                source.sendSuccess(() -> Component.literal("Drone assigned to build " + name + " at " + mouth.toShortString() + "."), true);
+                source.sendSuccess(() -> Component.literal("Drone assigned to survey and build " + name + " at " + mouth.toShortString() + "."), true);
             }
             return 1;
         }

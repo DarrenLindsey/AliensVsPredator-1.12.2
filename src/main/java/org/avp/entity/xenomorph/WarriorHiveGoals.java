@@ -33,7 +33,24 @@ final class WarriorHiveGoals
         }
         boolean aggressor = target instanceof Player || target instanceof Enemy || target == warrior.getLastHurtByMob()
                 || target instanceof Mob mob && mob.getTarget() instanceof XenomorphEntity member && hive.id().equals(member.hiveId());
-        return aggressor && hive.containsPatrolArea(target.blockPosition()) && !PreyCapture.blocksAttack(warrior, target);
+        return aggressor && (warrior.isQueen() ? inRoyalChamber(hive, target.blockPosition())
+                : hive.containsPatrolArea(target.blockPosition())) && !PreyCapture.blocksAttack(warrior, target);
+    }
+
+    static boolean inRoyalChamber(Hive hive, BlockPos pos)
+    {
+        if (hive.state() != Hive.State.ACTIVE)
+        {
+            return false;
+        }
+        for (Room room : hive.rooms())
+        {
+            if (room.type() == Room.Type.QUEEN && room.contains(pos))
+            {
+                return true;
+            }
+        }
+        return pos.distSqr(hive.core()) <= 16;
     }
 
     /** Scan locally at staggered intervals. The current target is checked separately as it moves. */

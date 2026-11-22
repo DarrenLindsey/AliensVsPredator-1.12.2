@@ -200,6 +200,7 @@ public final class AvpConfig
         public final ModConfigSpec.IntValue hiveRadius;
         public final ModConfigSpec.DoubleValue resinBuildSpeed;
         public final ModConfigSpec.IntValue hiveMaxDugBlocks;
+        public final ModConfigSpec.IntValue hiveBlueprintMaxBlocks;
         public final ModConfigSpec.DoubleValue resinCreepRate;
         public final ModConfigSpec.IntValue hiveBuilders;
         public final ModConfigSpec.IntValue hiveCoaters;
@@ -486,6 +487,9 @@ public final class AvpConfig
             hiveMaxDugBlocks = b
                     .comment("Most blocks one hive may dig out for its rooms and galleries (the founding tunnel and chamber don't count).")
                     .defineInRange("hiveMaxDugBlocks", 6_000, 0, 1_000_000);
+            hiveBlueprintMaxBlocks = b
+                    .comment("Maximum blocks surveyed and carved for a designed hive and its shaft. Founding still shares a per-tick budget.")
+                    .defineInRange("hiveBlueprintMaxBlocks", 32_000, 0, 150_000);
             foundingDigSpeed = b
                     .comment("Speed multiplier for initial shaft, rim and chamber construction. Founding jobs share a capped budget per server tick.")
                     .defineInRange("foundingDigSpeed", 3.0, 0.1, 50.0);

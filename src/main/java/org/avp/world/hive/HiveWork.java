@@ -89,8 +89,7 @@ public final class HiveWork
         {
             nextBroodScan = now + 30;
             boolean planned = hive.blueprint() != null;
-            int radius = planned ? 48 : hive.buildRadius(now, HiveData.maxRadius()) + 2;
-            AABB area = new AABB(hive.core()).inflate(radius, planned ? 10 : radius, radius);
+            AABB area = hive.broodArea(now);
             List<OvamorphEntity> eggs = level.getEntitiesOfClass(OvamorphEntity.class, area,
                     e -> e.isAlive() && e.isFull() && (e.hiveId() == null || hive.id().equals(e.hiveId()))
                             && (!planned || hive.containsPatrolArea(e.blockPosition())));

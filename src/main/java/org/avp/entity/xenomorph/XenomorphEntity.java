@@ -202,7 +202,7 @@ public abstract class XenomorphEntity extends Monster
             org.avp.world.hive.HivePlanner.plan(level, hive);
             // foraging: is the hive short of hosts (for the eggs) or food (for the larder)?
             java.util.List<net.minecraft.world.entity.LivingEntity> held = level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
-                    new net.minecraft.world.phys.AABB(hive.core()).inflate(hive.buildRadius(now, org.avp.world.hive.HiveData.maxRadius()) + 2),
+                    hive.broodArea(now),
                     e -> e.hasData(org.avp.registry.ModAttachments.COCOONED));
             long hosts = held.stream().filter(org.avp.entity.parasite.FacehuggerEntity::isValidHost).count();
             hive.needsHosts = hive.state() == org.avp.world.hive.Hive.State.ACTIVE && hosts < 4

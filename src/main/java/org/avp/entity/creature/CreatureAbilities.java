@@ -6,11 +6,13 @@ import org.avp.config.AvpConfig;
 import org.avp.entity.parasite.Embryo;
 import org.avp.entity.parasite.EmbryoKinds;
 import org.avp.entity.parasite.FacehuggerEntity;
+import org.avp.entity.xenomorph.AdultXenomorphEntity;
 import org.avp.registry.ModAttachments;
 import org.avp.registry.ModDamageTypes;
 import org.avp.registry.ModSounds;
 import org.avp.registry.ModTags;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -230,6 +232,15 @@ public final class CreatureAbilities
                 mob.getLookControl().setLookAt(target, 30F, 30F); // winding up
                 return;
             }
+            if (mob instanceof AdultXenomorphEntity defender && defender.has(Ability.DEFEND_HIVE) && !defender.isBonded())
+            {
+                var home = defender.hive();
+                if (home == null || !home.containsPatrolArea(BlockPos.containing(mob.position().add(direction.scale(0.85)))))
+                {
+                    ticks = 40;
+                    return;
+                }
+            }
             mob.setYRot((float) (Math.atan2(direction.z, direction.x) * 180 / Math.PI) - 90F);
             mob.yBodyRot = mob.getYRot();
             Vec3 v = mob.getDeltaMovement();
@@ -257,6 +268,10 @@ public final class CreatureAbilities
         @Override
         public void stop()
         {
+            if (ticks >= 10)
+            {
+                mob.setDeltaMovement(0, mob.getDeltaMovement().y, 0);
+            }
             cooldown = 100 + mob.getRandom().nextInt(60);
         }
     }

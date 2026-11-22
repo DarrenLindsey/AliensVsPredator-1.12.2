@@ -40,7 +40,7 @@ public final class Creatures
                 .can(QUEEN, BOSS).look("MatriarchModel", "matriarch.png", 1.75F).sounds("queen")
                 .egg(0x0d0d0d, 0x6b1b1b).lore("The Queen. Lays eggs while well fed; every Xenomorph nearby comes when she calls."));
         add(CreatureSpec.of("crusher", XENOMORPH).stats(90, 9, 0.3, 16).size(1.4F, 2.4F).xp(300)
-                .can(CHARGE).look("CrusherQuadModel", "crusher_quad.png", 1.6F)
+                .can(CHARGE, DEFEND_HIVE).look("CrusherQuadModel", "crusher_quad.png", 1.6F)
                 .egg(0x202020, 0x7a6a50).lore("Armoured head-plate, bred from the Runner line. Charges and bowls its prey over."));
         add(CreatureSpec.of("spitter", XENOMORPH).stats(30, 5, 0.31, 4).size(1.0F, 2.6F).xp(275)
                 .can(SPIT_ACID, CLIMB, CRAWL).look("SpitterModel", "spitter.png", 1.0F)

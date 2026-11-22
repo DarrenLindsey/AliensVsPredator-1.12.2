@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.avp.AliensVsPredator;
 import org.avp.config.AvpConfig;
 import org.avp.entity.xenomorph.DroneEntity;
 
@@ -33,7 +34,7 @@ public final class HiveFounding
         private int remaining;
     }
 
-    private enum Phase { CHECK_LAYER, CUT_LAYER, RIM, CHECK_BLUEPRINT, CHAMBER, FINISH }
+    private enum Phase { SURVEY, CHECK_LAYER, CUT_LAYER, RIM, CHECK_BLUEPRINT, CHAMBER, FINISH }
 
     private final Hive hive;
     private Phase phase = Phase.CHECK_LAYER;
@@ -49,6 +50,11 @@ public final class HiveFounding
     public HiveFounding(Hive hive)
     {
         this.hive = hive;
+        if (hive.blueprint() != null && hive.entrance().equals(hive.digPos()))
+        {
+            phase = Phase.SURVEY;
+            sites = hive.blueprint().survey(hive.entrance(), hive.entrance().getY() - hive.core().getY());
+        }
     }
 
     public void tick(ServerLevel level, DroneEntity drone)
@@ -95,6 +101,7 @@ public final class HiveFounding
     {
         switch (phase)
         {
+            case SURVEY -> { return surveyBlock(level, drone); }
             case CHECK_LAYER, CUT_LAYER -> { return workLayer(level, drone); }
             case RIM -> {
                 if (sites.hasNext())
@@ -110,6 +117,41 @@ public final class HiveFounding
             case CHAMBER -> { return carveBlock(level); }
             case FINISH -> finish(level, drone);
         }
+        return true;
+    }
+
+    private boolean surveyBlock(ServerLevel level, DroneEntity drone)
+    {
+        if (pending == null && !sites.hasNext())
+        {
+            phase = Phase.CHECK_LAYER;
+            return true;
+        }
+        if (pending == null)
+        {
+            pending = sites.next();
+        }
+        if (!level.isLoaded(pending))
+        {
+            return false;
+        }
+        for (Direction direction : Direction.values())
+        {
+            if (!level.isLoaded(pending.relative(direction)))
+            {
+                return false;
+            }
+        }
+        if (!HiveBlueprint.canCarve(level, pending))
+        {
+            AliensVsPredator.LOGGER.info("Hive blueprint survey stopped at protected or flooded terrain: {}", pending.toShortString());
+            hive.setDig(null, Direction.NORTH);
+            HiveData.get(level).remove(hive);
+            drone.setHiveId(null);
+            drone.setState("BLUEPRINT SITE BLOCKED");
+            return false;
+        }
+        pending = null;
         return true;
     }
 

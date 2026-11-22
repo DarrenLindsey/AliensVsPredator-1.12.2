@@ -95,7 +95,16 @@ public class AdultXenomorphEntity extends XenomorphEntity
     protected void registerGoals()
     {
         super.registerGoals();
-        if (has(Ability.GUARD_QUEEN))
+        if (has(Ability.QUEEN))
+        {
+            goalSelector.addGoal(0, new FloatGoal(this));
+            goalSelector.addGoal(3, new MeleeAttackGoal(this, 0.95, true));
+            goalSelector.addGoal(3, new HiveGoals.FeedFromLarderGoal(this));
+            goalSelector.addGoal(4, new HiveGoals.ReturnToHiveGoal(this));
+            goalSelector.addGoal(7, new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal(this));
+            targetSelector.addGoal(1, new WarriorHiveGoals.DefendHiveGoal(this));
+        }
+        else if (has(Ability.GUARD_QUEEN))
         {
             goalSelector.addGoal(0, new FloatGoal(this));
             goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, true));
@@ -158,7 +167,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
 
     private boolean hasDefenseDuty()
     {
-        return !isBonded() && (has(Ability.DEFEND_HIVE) || has(Ability.GUARD_QUEEN));
+        return !isBonded() && (isQueen() || has(Ability.DEFEND_HIVE) || has(Ability.GUARD_QUEEN));
     }
 
     private boolean canDefendAgainst(LivingEntity target)
@@ -337,7 +346,10 @@ public class AdultXenomorphEntity extends XenomorphEntity
         {
             bossBar.setProgress(getHealth() / getMaxHealth());
         }
-        if (isNoAi() || getTarget() != null || hunger() < 40 || ++eggTimer < AvpConfig.server(AvpConfig.SERVER.queenEggTicks)) // a contained Queen lays into her cell
+        var home = hive();
+        if (isNoAi() || getTarget() != null || hunger() < 40 || home == null
+                || !WarriorHiveGoals.inRoyalChamber(home, blockPosition())
+                || ++eggTimer < AvpConfig.server(AvpConfig.SERVER.queenEggTicks)) // a contained Queen lays into her cell
         {
             return;
         }
@@ -389,10 +401,12 @@ public class AdultXenomorphEntity extends XenomorphEntity
     {
         boolean hurt = super.hurt(source, amount);
         // the Queen calls the hive to her
-        if (hurt && has(Ability.QUEEN) && !level().isClientSide && source.getEntity() instanceof LivingEntity attacker
-                && !attacker.getType().is(org.avp.registry.ModTags.XENOMORPHS))
+        var home = hurt && isQueen() && !level().isClientSide ? hive() : null;
+        if (home != null && source.getEntity() instanceof LivingEntity attacker && canDefendAgainst(attacker))
         {
-            for (XenomorphEntity xeno : level().getEntitiesOfClass(XenomorphEntity.class, getBoundingBox().inflate(64), x -> x != this))
+            setTarget(attacker);
+            for (XenomorphEntity xeno : level().getEntitiesOfClass(XenomorphEntity.class,
+                    getBoundingBox().inflate(32), x -> x != this && home.id().equals(x.hiveId())))
             {
                 xeno.setTarget(attacker);
             }

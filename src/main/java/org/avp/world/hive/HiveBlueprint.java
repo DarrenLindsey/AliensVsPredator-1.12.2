@@ -16,15 +16,18 @@ import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 
+import org.avp.config.AvpConfig;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.AABB;
 
 /** Top-down, one-block-per-pixel floor plan, anchored by its shaft pixel. */
 public final class HiveBlueprint
 {
-    private static final int MAX_SIDE = 48;
+    private static final int MAX_SIDE = 96;
     private static final int ROOM_HEIGHT = 5;
     private static final int MIGRATION_HEIGHT = 8;
     private final int width;
@@ -32,6 +35,7 @@ public final class HiveBlueprint
     private final BlockPos shaft;
     private final BlockPos core;
     private final List<Tile> tiles;
+    private final int excavationSize;
 
     private HiveBlueprint(int width, String cells)
     {
@@ -41,6 +45,7 @@ public final class HiveBlueprint
         core = at(cells.indexOf('C'));
         tiles = IntStream.range(0, cells.length()).filter(i -> cells.charAt(i) != '.')
                 .mapToObj(i -> new Tile(at(i).subtract(shaft), cells.charAt(i))).toList();
+        excavationSize = tiles.stream().mapToInt(tile -> height(tile.kind())).sum();
     }
 
     public static HiveBlueprint read(InputStream png) throws IOException
@@ -56,7 +61,7 @@ public final class HiveBlueprint
                 int h = reader.getHeight(0);
                 if (w < 5 || h < 5 || w > MAX_SIDE || h > MAX_SIDE)
                 {
-                    throw new IllegalArgumentException("Blueprint PNGs must be 5–48 pixels on each side.");
+                    throw new IllegalArgumentException("Blueprint PNGs must be 5–96 pixels on each side.");
                 }
                 var pixels = reader.read(0);
                 StringBuilder mask = new StringBuilder(w * h);
@@ -72,6 +77,8 @@ public final class HiveBlueprint
                             case 0xff800080 -> 'Q';
                             case 0xff008000 -> 'H';
                             case 0xff804000 -> 'L';
+                            case 0xffcc8000 -> 'G';
+                            case 0xff008080 -> 'M';
                             case 0xffff0000 -> 'C';
                             case 0xff0000ff -> 'S';
                             default -> throw new IllegalArgumentException("Unknown or transparent color at pixel " + x + ", " + z + ".");
@@ -214,6 +221,8 @@ public final class HiveBlueprint
                 case 'Q' -> 0xbb55dd;
                 case 'H' -> 0x33cc66;
                 case 'L' -> 0xb87838;
+                case 'G' -> 0xffbb44;
+                case 'M' -> 0x55b8af;
                 default -> 0xffffff;
             };
         }
@@ -229,6 +238,12 @@ public final class HiveBlueprint
         return tiles;
     }
 
+    AABB bounds(BlockPos floor)
+    {
+        return new AABB(floor.offset(-shaft.getX(), 0, -shaft.getZ()),
+                floor.offset(width - shaft.getX(), MIGRATION_HEIGHT, cells.length() / width - shaft.getZ()));
+    }
+
     private Stream<BlockPos> excavation(BlockPos floor)
     {
         return tiles.stream().flatMap(tile -> {
@@ -242,10 +257,16 @@ public final class HiveBlueprint
         return excavation(floor).iterator();
     }
 
+    Iterator<BlockPos> survey(BlockPos mouth, int depth)
+    {
+        return Stream.concat(excavation(mouth.below(depth)),
+                IntStream.rangeClosed(1, depth).boxed().flatMap(i -> HiveShaft.layer(mouth.below(i)).stream())).iterator();
+    }
+
     boolean withinBudget(int depth)
     {
         int shaftBlocks = depth * 25;
-        return shaftBlocks + tiles.stream().mapToInt(tile -> height(tile.kind())).sum() <= HivePlanner.maxDug();
+        return shaftBlocks + excavationSize <= AvpConfig.server(AvpConfig.SERVER.hiveBlueprintMaxBlocks);
     }
 
     static boolean canCarve(ServerLevel level, BlockPos pos)
@@ -262,24 +283,21 @@ public final class HiveBlueprint
 
     public void checkSite(ServerLevel level, BlockPos mouth, int depth)
     {
+        checkSiteBasics(level, mouth, depth);
+        for (Iterator<BlockPos> cut = survey(mouth, depth); cut.hasNext();)
+        {
+            verifyCarvable(level, cut.next());
+        }
+    }
+
+    public void checkSiteBasics(ServerLevel level, BlockPos mouth, int depth)
+    {
         checkDepth(level, mouth, depth);
-        BlockPos floor = mouth.below(depth);
         if (!withinBudget(depth))
         {
             throw new IllegalArgumentException("The plan plus shaft exceeds the hive excavation limit.");
         }
-        for (Iterator<BlockPos> cut = blocksAt(floor); cut.hasNext();)
-        {
-            verifyCarvable(level, cut.next());
-        }
-        for (int y = 1; y <= depth; y++)
-        {
-            for (BlockPos pos : HiveShaft.layer(mouth.below(y)))
-            {
-                verifyCarvable(level, pos);
-            }
-        }
-        if (!hasCoreFloor(level, floor))
+        if (!hasCoreFloor(level, mouth.below(depth)))
         {
             throw new IllegalArgumentException("The Core needs solid terrain below its marked floor.");
         }
@@ -314,7 +332,7 @@ public final class HiveBlueprint
     List<Room> rooms(BlockPos floor)
     {
         List<Room> rooms = new ArrayList<>();
-        for (char kind : new char[] { 'Q', 'H', 'L' })
+        for (char kind : new char[] { 'Q', 'H', 'L', 'G', 'M' })
         {
             Set<BlockPos> columns = new HashSet<>();
             for (Tile tile : tiles())
@@ -324,14 +342,43 @@ public final class HiveBlueprint
                     columns.add(floor.offset(tile.offset()));
                 }
             }
-            if (!columns.isEmpty())
+            for (Tile tile : tiles)
             {
-                double x = columns.stream().mapToInt(BlockPos::getX).average().orElseThrow();
-                double z = columns.stream().mapToInt(BlockPos::getZ).average().orElseThrow();
-                BlockPos centre = kind == 'Q' ? core(floor) : columns.stream().min(java.util.Comparator.comparingDouble(
-                        p -> p.distToCenterSqr(x + 0.5, floor.getY() + 0.5, z + 0.5))).orElseThrow();
-                Room.Type type = kind == 'Q' ? Room.Type.QUEEN : kind == 'H' ? Room.Type.HATCHERY : Room.Type.LARDER;
-                rooms.add(Room.blueprint(type, centre, height(kind), columns));
+                BlockPos first = floor.offset(tile.offset());
+                if (!columns.remove(first))
+                {
+                    continue;
+                }
+                var pending = new ArrayDeque<BlockPos>();
+                var component = new HashSet<BlockPos>();
+                pending.add(first);
+                while (!pending.isEmpty())
+                {
+                    BlockPos at = pending.removeFirst();
+                    component.add(at);
+                    for (Direction direction : Direction.Plane.HORIZONTAL)
+                    {
+                        BlockPos next = at.relative(direction);
+                        if (columns.remove(next))
+                        {
+                            pending.addLast(next);
+                        }
+                    }
+                }
+                double x = component.stream().mapToInt(BlockPos::getX).average().orElseThrow();
+                double z = component.stream().mapToInt(BlockPos::getZ).average().orElseThrow();
+                BlockPos centre = component.contains(core(floor)) ? core(floor) : component.stream()
+                        .min(java.util.Comparator.<BlockPos>comparingDouble(p -> p.distToCenterSqr(x + 0.5, floor.getY() + 0.5, z + 0.5))
+                                .thenComparingLong(BlockPos::asLong)).orElseThrow();
+                Room.Type type = switch (kind)
+                {
+                    case 'Q' -> Room.Type.QUEEN;
+                    case 'H' -> Room.Type.HATCHERY;
+                    case 'L' -> Room.Type.LARDER;
+                    case 'G' -> Room.Type.GUARD_POST;
+                    default -> Room.Type.MIDDEN;
+                };
+                rooms.add(Room.blueprint(type, centre, height(kind), component));
             }
         }
         return rooms;

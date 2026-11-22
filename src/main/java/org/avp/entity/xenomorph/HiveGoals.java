@@ -66,6 +66,10 @@ public final class HiveGoals
                 return false;
             }
             boolean heir = xeno.getUUID().equals(hive.heir());
+            if (xeno instanceof DroneEntity && !heir && hive.blueprint() != null && hive.containsPatrolArea(xeno.blockPosition()))
+            {
+                return false; // Workers can stay in the wing where they are needed.
+            }
             int range = xeno.isQueen() || heir ? 4 : hive.buildRadius(level.getGameTime(), HiveData.maxRadius()) + 8;
             home = hive.core();
             // Warriors and the like gather at the guard post
@@ -685,11 +689,14 @@ public final class HiveGoals
                 return;
             }
             boolean isHost = org.avp.entity.parasite.FacehuggerEntity.isValidHost(host) || host instanceof net.minecraft.world.entity.player.Player;
-            // hosts go where the eggs are: the Queen's chamber when she's alive (she lays where she is), else the hatchery
-            org.avp.world.hive.Room.Type roomType = !isHost ? org.avp.world.hive.Room.Type.LARDER
-                    : hive.hasQueen(drone.level().getGameTime()) ? org.avp.world.hive.Room.Type.QUEEN : org.avp.world.hive.Room.Type.HATCHERY;
-            org.avp.world.hive.Room room = hive.rooms(roomType).stream().filter(org.avp.world.hive.Room::done).findFirst()
-                    .or(() -> hive.rooms(org.avp.world.hive.Room.Type.HATCHERY).stream().filter(org.avp.world.hive.Room::done).findFirst())
+            boolean feedQueen = !isHost && hive.queen() != null && drone.level() instanceof ServerLevel server
+                    && server.getEntity(hive.queen()) instanceof AdultXenomorphEntity queen && queen.isAlive() && queen.isHungry();
+            org.avp.world.hive.Room.Type roomType = isHost ? org.avp.world.hive.Room.Type.HATCHERY
+                    : feedQueen ? org.avp.world.hive.Room.Type.QUEEN : org.avp.world.hive.Room.Type.LARDER;
+            org.avp.world.hive.Room room = hive.rooms(roomType).stream().filter(org.avp.world.hive.Room::done)
+                    .min(java.util.Comparator.comparingDouble(r -> r.centre().distSqr(drone.blockPosition())))
+                    .or(() -> hive.rooms(isHost ? org.avp.world.hive.Room.Type.QUEEN : org.avp.world.hive.Room.Type.LARDER)
+                            .stream().filter(org.avp.world.hive.Room::done).findFirst())
                     .orElse(null);
             BlockPos core = room != null ? room.centre() : hive.core();
             if (site == null && drone.blockPosition().distSqr(core) > (room != null ? Math.max(9, room.radius() * room.radius()) : 36))
@@ -1756,7 +1763,9 @@ public final class HiveGoals
             {
                 return false;
             }
-            food = xeno.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, xeno.getBoundingBox().inflate(24), FeedFromLarderGoal::isFood)
+            Hive hive = xeno.hive();
+            food = xeno.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, xeno.getBoundingBox().inflate(24),
+                    e -> isFood(e) && (!xeno.isQueen() || hive != null && WarriorHiveGoals.inRoyalChamber(hive, e.blockPosition())))
                     .stream().min(java.util.Comparator.comparingDouble(xeno::distanceToSqr)).orElse(null);
             return food != null;
         }

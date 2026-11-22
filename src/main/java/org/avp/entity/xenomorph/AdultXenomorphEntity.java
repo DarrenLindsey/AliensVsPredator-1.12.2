@@ -1,7 +1,5 @@
 package org.avp.entity.xenomorph;
 
-import java.util.EnumSet;
-
 import javax.annotation.Nullable;
 
 import org.avp.AliensVsPredator;
@@ -31,7 +29,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
@@ -98,7 +95,15 @@ public class AdultXenomorphEntity extends XenomorphEntity
     protected void registerGoals()
     {
         super.registerGoals();
-        if (has(Ability.DEFEND_HIVE))
+        if (has(Ability.GUARD_QUEEN))
+        {
+            goalSelector.addGoal(0, new FloatGoal(this));
+            goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, true));
+            goalSelector.addGoal(4, new PraetorianGoals.EscortQueenGoal(this));
+            goalSelector.addGoal(5, new HiveGoals.FeedFromLarderGoal(this));
+            targetSelector.addGoal(1, new PraetorianGoals.ProtectQueenGoal(this));
+        }
+        else if (has(Ability.DEFEND_HIVE))
         {
             goalSelector.addGoal(0, new FloatGoal(this));
             if (AvpConfig.server(AvpConfig.SERVER.smartXenomorphs))
@@ -143,10 +148,6 @@ public class AdultXenomorphEntity extends XenomorphEntity
         {
             goalSelector.addGoal(2, new CreatureAbilities.ChargeGoal(this));
         }
-        if (has(Ability.GUARD_QUEEN))
-        {
-            goalSelector.addGoal(5, new GuardQueenGoal(this));
-        }
     }
 
     @Override
@@ -155,21 +156,28 @@ public class AdultXenomorphEntity extends XenomorphEntity
         return has(Ability.QUEEN);
     }
 
-    private boolean defendsHive()
+    private boolean hasDefenseDuty()
     {
-        return has(Ability.DEFEND_HIVE) && !isBonded();
+        return !isBonded() && (has(Ability.DEFEND_HIVE) || has(Ability.GUARD_QUEEN));
+    }
+
+    private boolean canDefendAgainst(LivingEntity target)
+    {
+        var home = hive();
+        return has(Ability.GUARD_QUEEN) ? PraetorianGoals.canFight(this, target, home)
+                : WarriorHiveGoals.canFight(this, target, home);
     }
 
     @Override
     public boolean wantsToHunt(LivingEntity target)
     {
-        return defendsHive() ? WarriorHiveGoals.canFight(this, target, hive()) : super.wantsToHunt(target);
+        return hasDefenseDuty() ? canDefendAgainst(target) : super.wantsToHunt(target);
     }
 
     @Override
     public void setTarget(@Nullable LivingEntity target)
     {
-        if (target == null || !defendsHive() || WarriorHiveGoals.canFight(this, target, hive()))
+        if (target == null || !hasDefenseDuty() || canDefendAgainst(target))
         {
             super.setTarget(target);
         }
@@ -231,8 +239,7 @@ public class AdultXenomorphEntity extends XenomorphEntity
     public void aiStep()
     {
         LivingEntity intruder = getTarget();
-        if (!level().isClientSide && intruder != null && defendsHive()
-                && !WarriorHiveGoals.canFight(this, intruder, hive()))
+        if (!level().isClientSide && intruder != null && hasDefenseDuty() && !canDefendAgainst(intruder))
         {
             setTarget(null);
             stopJobNavigation();
@@ -544,46 +551,5 @@ public class AdultXenomorphEntity extends XenomorphEntity
     public int getAmbientSoundInterval()
     {
         return 200;
-    }
-
-    /** Praetorian: stays near its Queen. */
-    static class GuardQueenGoal extends Goal
-    {
-        private final AdultXenomorphEntity guard;
-        @Nullable
-        private AdultXenomorphEntity queen;
-
-        GuardQueenGoal(AdultXenomorphEntity guard)
-        {
-            this.guard = guard;
-            setFlags(EnumSet.of(Flag.MOVE));
-        }
-
-        @Override
-        public boolean canUse()
-        {
-            if (guard.getTarget() != null || guard.tickCount % 20 >= 2)
-            {
-                return false;
-            }
-            queen = guard.level().getEntitiesOfClass(AdultXenomorphEntity.class, guard.getBoundingBox().inflate(48), x -> x.has(Ability.QUEEN))
-                    .stream().findFirst().orElse(null);
-            return queen != null && guard.distanceTo(queen) > 10;
-        }
-
-        @Override
-        public boolean canContinueToUse()
-        {
-            return queen != null && queen.isAlive() && guard.getTarget() == null && guard.distanceTo(queen) > 5;
-        }
-
-        @Override
-        public void tick()
-        {
-            if (guard.tickCount % 10 < 2)
-            {
-                guard.navigateTo(queen, 1.0);
-            }
-        }
     }
 }

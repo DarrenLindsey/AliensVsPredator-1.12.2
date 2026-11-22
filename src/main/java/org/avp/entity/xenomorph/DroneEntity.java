@@ -245,13 +245,17 @@ public class DroneEntity extends XenomorphEntity
     {
         org.avp.world.hive.Hive hive = hive();
         if (getClass() != DroneEntity.class || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
-                || getUUID().equals(hive.heir()) || getTarget() != null || isVehicle())
+                || getUUID().equals(hive.heir()) || getTarget() != null || isVehicle() || isOnForagingTrip())
         {
             return;
         }
         java.util.List<DroneEntity> castes = level.getEntitiesOfClass(DroneEntity.class,
                 new net.minecraft.world.phys.AABB(hive.core()).inflate(org.avp.world.hive.HiveData.maxRadius() + 32),
-                d -> d.isAlive() && hive.id().equals(d.hiveId()) && d.getClass() != DroneEntity.class);
+                d -> d.isAlive() && hive.id().equals(d.hiveId()));
+        if (castes.stream().noneMatch(d -> d != this && d.getClass() == DroneEntity.class && !d.getUUID().equals(hive.heir())))
+        {
+            return; // Keep a dedicated hunter, even when the hive is short on Weavers.
+        }
         long builders = castes.stream().filter(d -> d instanceof BuilderDroneEntity).count();
         long coaters = castes.stream().filter(d -> d instanceof CoaterDroneEntity).count();
         net.minecraft.world.entity.EntityType<? extends DroneEntity> next =
@@ -340,13 +344,13 @@ public class DroneEntity extends XenomorphEntity
     /**
      * A Drone from a hive doesn't kill prey it has worn down: it subdues it and carries it home -
      * hosts to be cocooned for the eggs, and (with the larder on) other prey as food. Players too,
-     * with "Cocoon Players". A starving Drone just kills and eats.
+     * with "Cocoon Players". Hunger can turn other prey into a meal, but live hosts stay reserved.
      */
     boolean canCapture(LivingEntity prey)
     {
         org.avp.world.hive.Hive hive = hive();
         if (isWeaver() || !isPrey(prey) || hive == null || hive.state() != org.avp.world.hive.Hive.State.ACTIVE
-                || hunger() < 20 || isVehicle() || prey.isVehicle() || prey.isPassenger()
+                || isVehicle() || prey.isVehicle() || prey.isPassenger()
                 || prey.getBbWidth() > 1.5F || prey.getBbHeight() > 2.3F)
         {
             return false;
@@ -357,7 +361,8 @@ public class DroneEntity extends XenomorphEntity
             return AvpConfig.server(AvpConfig.SERVER.xenosCocoonPlayers);
         }
         return prey instanceof net.minecraft.world.entity.Mob && !prey.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD)
-                && (host ? AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts) : AvpConfig.server(AvpConfig.SERVER.hiveLarder));
+                && (host ? AvpConfig.server(AvpConfig.SERVER.xenosCocoonHosts)
+                        : hunger() >= 20 && AvpConfig.server(AvpConfig.SERVER.hiveLarder));
     }
 
     private boolean trySubdue(LivingEntity prey)

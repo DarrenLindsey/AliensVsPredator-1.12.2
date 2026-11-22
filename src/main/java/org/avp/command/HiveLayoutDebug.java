@@ -27,7 +27,7 @@ final class HiveLayoutDebug
             if (hive.hasVerticalShaft())
             {
                 BlockPos entrance = hive.entrance();
-                BlockPos bottom = hive.digPos() == null ? blueprintFloor(hive) : hive.digPos();
+                BlockPos bottom = hive.digPos() == null ? hive.shaftFloor() : hive.digPos();
                 int y = Mth.clamp(at.getY(), bottom.getY(), entrance.getY());
                 candidate = Math.min(candidate, new BlockPos(entrance.getX(), y, entrance.getZ()).distSqr(at));
             }
@@ -46,7 +46,7 @@ final class HiveLayoutDebug
     private static void draw(ServerPlayer player, Hive hive, BlockPos viewer)
     {
         BlockPos entrance = hive.entrance();
-        BlockPos floor = blueprintFloor(hive);
+        BlockPos floor = hive.shaftFloor();
         boolean atSurface = hive.hasVerticalShaft() && Math.abs(viewer.getY() - entrance.getY()) <= 8
                 && entrance.getY() - floor.getY() > 8;
         if (hive.hasVerticalShaft())
@@ -96,17 +96,6 @@ final class HiveLayoutDebug
             }
             HiveBlueprintCommands.dust(player, centre, color, 2F);
         }
-    }
-
-    static BlockPos blueprintFloor(Hive hive)
-    {
-        BlockPos core = hive.core();
-        BlockPos entrance = hive.entrance();
-        if (hive.blueprint() == null || hive.state() == Hive.State.FOUNDING)
-        {
-            return new BlockPos(entrance.getX(), core.getY(), entrance.getZ());
-        }
-        return core.subtract(hive.blueprint().core(BlockPos.ZERO));
     }
 
     private static BlockPos onPlane(BlockPos pos, int y)

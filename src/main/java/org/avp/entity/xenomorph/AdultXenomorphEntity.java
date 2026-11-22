@@ -32,6 +32,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -96,7 +98,38 @@ public class AdultXenomorphEntity extends XenomorphEntity
     protected void registerGoals()
     {
         super.registerGoals();
-        addHunterGoals(1.0);
+        if (has(Ability.DEFEND_HIVE))
+        {
+            goalSelector.addGoal(0, new FloatGoal(this));
+            if (AvpConfig.server(AvpConfig.SERVER.smartXenomorphs))
+            {
+                goalSelector.addGoal(1, new XenoBrain.RetreatGoal(this));
+                goalSelector.addGoal(1, new XenoBrain.AvoidTurretGoal(this));
+            }
+            goalSelector.addGoal(2, new HiveGoals.ExitShaftGoal(this));
+            goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.15, true));
+            goalSelector.addGoal(4, new HiveGoals.FeedFromLarderGoal(this));
+            goalSelector.addGoal(5, new WarriorHiveGoals.PatrolHiveGoal(this));
+            goalSelector.addGoal(6, new HiveGoals.ReturnToHiveGoal(this));
+            goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.8)
+            {
+                @Override
+                public boolean canUse()
+                {
+                    return hiveId() == null && super.canUse();
+                }
+                @Override
+                public boolean canContinueToUse()
+                {
+                    return hiveId() == null && super.canContinueToUse();
+                }
+            });
+            targetSelector.addGoal(1, new WarriorHiveGoals.DefendHiveGoal(this));
+        }
+        else
+        {
+            addHunterGoals(1.0);
+        }
         if (has(Ability.AQUATIC) || has(Ability.FLY))
         {
             goalSelector.removeAllGoals(g -> g instanceof FloatGoal); // swimmers dive and fliers don't need it
@@ -120,6 +153,26 @@ public class AdultXenomorphEntity extends XenomorphEntity
     public boolean isQueen()
     {
         return has(Ability.QUEEN);
+    }
+
+    private boolean defendsHive()
+    {
+        return has(Ability.DEFEND_HIVE) && !isBonded();
+    }
+
+    @Override
+    public boolean wantsToHunt(LivingEntity target)
+    {
+        return defendsHive() ? WarriorHiveGoals.canFight(this, target, hive()) : super.wantsToHunt(target);
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target)
+    {
+        if (target == null || !defendsHive() || WarriorHiveGoals.canFight(this, target, hive()))
+        {
+            super.setTarget(target);
+        }
     }
 
     /** Warriors and Praetorians are in line for the throne (their growth leads to a Queen). */
@@ -177,6 +230,13 @@ public class AdultXenomorphEntity extends XenomorphEntity
     @Override
     public void aiStep()
     {
+        LivingEntity intruder = getTarget();
+        if (!level().isClientSide && intruder != null && defendsHive()
+                && !WarriorHiveGoals.canFight(this, intruder, hive()))
+        {
+            setTarget(null);
+            stopJobNavigation();
+        }
         super.aiStep();
         LivingEntity target = getTarget();
         if (has(Ability.AQUATIC) && isInWater() && target != null)

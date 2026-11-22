@@ -315,6 +315,43 @@ public class Hive
         return verticalShaft;
     }
 
+    /** The shaft's footprint anchor, recovered from the red Core pixel once a blueprint is built. */
+    public BlockPos shaftFloor()
+    {
+        if (blueprint != null && state != State.FOUNDING)
+        {
+            return core.subtract(blueprint.core(BlockPos.ZERO));
+        }
+        return entrance.atY(core.getY() - (verticalShaft && state == State.ACTIVE ? 1 : 0));
+    }
+
+    /** Rooms, passages, and the entrance shaft of this hive. */
+    public boolean containsPatrolArea(BlockPos pos)
+    {
+        if (state != State.ACTIVE)
+        {
+            return false;
+        }
+        BlockPos floor = shaftFloor();
+        if (verticalShaft && pos.getY() >= floor.getY() && pos.getY() <= entrance.getY() + 2
+                && Math.abs(pos.getX() - entrance.getX()) <= 3 && Math.abs(pos.getZ() - entrance.getZ()) <= 3)
+        {
+            return true;
+        }
+        if (blueprint != null)
+        {
+            return blueprint.contains(pos, floor);
+        }
+        for (Room room : rooms)
+        {
+            if (room.done() && (room.contains(pos) || HivePlanner.digSet(room).contains(pos)))
+            {
+                return true;
+            }
+        }
+        return rooms.isEmpty() && core.distSqr(pos) <= 16;
+    }
+
     public void beginShaft()
     {
         verticalShaft = true;

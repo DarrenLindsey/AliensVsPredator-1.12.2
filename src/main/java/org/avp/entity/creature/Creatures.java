@@ -31,7 +31,7 @@ public final class Creatures
     {
         // ---------------------------------------------------------------- the hive
         add(CreatureSpec.of("warrior", XENOMORPH).stats(50, 7, 0.285, 6).size(1.0F, 2.5F).xp(175)
-                .can(CLIMB, CRAWL, LEAP).matures("praetorian").look("WarriorModel", "warrior.png", 1.0F)
+                .can(CLIMB, CRAWL, LEAP, DEFEND_HIVE).matures("praetorian").look("WarriorModel", "warrior.png", 1.0F)
                 .egg(0x1a1a1f, 0x3d4250).lore("The hive's soldier. Grown from a Drone that fed well."));
         add(CreatureSpec.of("praetorian", XENOMORPH).stats(100, 9, 0.27, 10).size(1.2F, 3.0F).xp(300)
                 .can(GUARD_QUEEN, LEAP).matures("matriarch").look("PraetorianModel", "praetorian.png", 1.4F).sounds("praetorian")

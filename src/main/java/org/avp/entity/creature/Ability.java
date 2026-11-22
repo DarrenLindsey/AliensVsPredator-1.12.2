@@ -23,6 +23,8 @@ public enum Ability
     QUEEN,
     /** Stays close to a Queen and guards her (Praetorian). */
     GUARD_QUEEN,
+    /** Patrols and defends its own hive (Warrior). */
+    DEFEND_HIVE,
     /** Leaps at prey from a distance. */
     LEAP,
     /** Fast: a Runner. */

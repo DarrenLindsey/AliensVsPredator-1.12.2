@@ -196,6 +196,13 @@ public final class HiveBlueprint
         return toWorld(core, shaftFloor);
     }
 
+    boolean contains(BlockPos worldPos, BlockPos shaftFloor)
+    {
+        BlockPos column = worldPos.subtract(shaftFloor).offset(shaft);
+        char kind = cell(column);
+        return kind != '.' && column.getY() >= 0 && column.getY() < height(kind);
+    }
+
     public record Tile(BlockPos offset, char kind)
     {
         public int color()
